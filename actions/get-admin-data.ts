@@ -49,6 +49,7 @@ export async function getAdminData(adminId: string) {
             select: {
               id: true,
               userId: true,
+              adminId: true,
               courseId: true,
               tutorId: true,
               courseworkId: true,

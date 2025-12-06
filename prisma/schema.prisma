@@ -3,50 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql" 
+  url      = env("DATABASE_URL") 
 }
 
 model School {
   id      String    @id @default(uuid())
   name    String    @unique
-  admins  Admin[]
-  payroll Payroll[]
-}
-
-model Payroll {
-  id            String         @id @default(uuid())
-  userId        String
-  title         String
-  partyId       String?
-  position      Int?
-  isPublished   Boolean        @default(false)
-  schoolId      String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  adminPayrolls AdminPayroll[]
-  attachments   Attachment[]
-  school        School?        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, schoolId])
-  @@index([schoolId])
-}
-
-model AdminPayroll {
-  id          String       @id @default(uuid())
-  userId      String
-  title       String
-  payrollId   String?
-  position    Int?
-  isPaid      Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  adminId     String?
-  payroll     Payroll?     @relation(fields: [payrollId], references: [id], onDelete: Cascade)
-  attachments Attachment[]
-
-  @@unique([userId, payrollId, adminId])
-  @@index([payrollId, adminId, userId])
+  admins  Admin[] 
 }
 
 model Tuition {
@@ -55,6 +19,7 @@ model Tuition {
   partyId        String?
   username       String?
   courseId       String?
+  course         Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
   amount         String?
   isActive       Boolean      @default(true)
   isPaid         Boolean      @default(false)
@@ -66,10 +31,39 @@ model Tuition {
   enrolleeUserId String?
   attachments    Attachment[]
   enrollment     Enrollment?  @relation("TuitionToEnrollment")
-  course         Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
+  payrolls        Payroll[]    @relation("TuitionToPayroll")
+  
   @@unique([userId, courseId])
   @@index([courseId])
+}
+model Payroll {
+  id               String   @id @default(uuid()) 
+  tuitionId        String   @unique
+  userId           String
+  courseId         String
+  adminId          String
+  
+  grossAmount      String   
+  platformFee      String   
+  transactionFee   String   
+  netPayout        String
+ 
+  momoReferenceId  String?  @unique
+  momoStatus       String   @default("PENDING") 
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  paidAt           DateTime?
+ 
+  tuition          Tuition  @relation("TuitionToPayroll", fields: [tuitionId], references: [id], onDelete: Cascade)
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) 
+  
+  @@index([tuitionId])
+  @@index([courseId])
+  @@index([adminId])
+  @@index([momoStatus])
+  @@index([paidAt])
+  @@index([createdAt])
 }
 
 model Content {
@@ -135,6 +129,7 @@ model Admin {
   attachments  Attachment[]
   courses      Course[]
   noticeboards Noticeboard[]
+  userProgress       UserProgress[]  
 
   @@index([schoolId])
 }
@@ -161,6 +156,7 @@ model Course {
   tuitions           Tuition[]
   tutors             Tutor[]
   userProgress       UserProgress[]
+  payrolls          Payroll[]
 
   @@index([adminId])
 }
@@ -251,13 +247,11 @@ model Attachment {
   adminId             String?
   adminPayrollId      String?
   admin               Admin?             @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminPayroll        AdminPayroll?      @relation(fields: [adminPayrollId], references: [id], onDelete: Cascade)
   assignment          Assignment?        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   course              Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseNoticeboard   CourseNoticeboard? @relation(fields: [courseNoticeboardId], references: [id], onDelete: Cascade)
   coursework          Coursework?        @relation(fields: [courseworkId], references: [id], onDelete: Cascade)
   noticeboard         Noticeboard?       @relation(fields: [noticeboardId], references: [id], onDelete: Cascade)
-  payrolls            Payroll?           @relation(fields: [payrollId], references: [id], onDelete: Cascade)
   tuition             Tuition?           @relation(fields: [tuitionId], references: [id], onDelete: Cascade)
   tutor               Tutor?             @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
@@ -274,9 +268,11 @@ model UserProgress {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   courseId     String?
+  courses      Course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  adminId     String?
+  admins      Admin?     @relation(fields: [adminId], references: [id], onDelete: Cascade)
   isEnrolled   Boolean     @default(false)
   assignments  Assignment? @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  courses      Course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseworks  Coursework? @relation(fields: [courseworkId], references: [id], onDelete: Cascade)
   tutors       Tutor?      @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
@@ -284,7 +280,8 @@ model UserProgress {
   @@unique([userId, courseworkId])
   @@unique([userId, courseId])
   @@unique([userId, assignmentId])
-  @@index([courseId, courseworkId, tutorId, assignmentId])
+  @@index([userId, adminId])
+  @@index([adminId, courseId, courseworkId, tutorId, assignmentId])
 }
 
 model Noticeboard {

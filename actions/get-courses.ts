@@ -75,6 +75,7 @@ export const getCourses = async ({
             createdAt: true,
             updatedAt: true,
             courseId: true,
+            adminId: true,
             tutorId: true,
             courseworkId: true,
             assignmentId: true,

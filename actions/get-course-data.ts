@@ -57,6 +57,7 @@ export async function getCourseData(
           tutorId: true,
           courseworkId: true,
           assignmentId: true,
+          adminId: true,
           isEnrolled: true,
           isCompleted: true,
           createdAt: true,

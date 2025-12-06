@@ -4,11 +4,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ToastProvider } from "@/components/ui/toast";
 import Footer from "@/components/footer";
 
-
-
 export const metadata: Metadata = {
   title: "InstaSkul",
-  description: "A modern and fully secure learning management system built with Next.js & Clerk. ",
+  description: "Modern and fully secure learning management system.",
   keywords: [
     "IT",
     "Consulting",
@@ -21,6 +19,7 @@ export const metadata: Metadata = {
     "learning management system",
     "LMS",
     "e-learning",
+    "free"
   ],
 };
 

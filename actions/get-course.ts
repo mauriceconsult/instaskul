@@ -19,7 +19,7 @@ export const getCourse = async ({
       },
     });
     if (!adminId || !course) {
-      throw new Error("Faculty or Course not found");
+      throw new Error("Admin or Course not found");
     }
     let attachments: Attachment[] = [];
     let nextCourse: Course | null = null;

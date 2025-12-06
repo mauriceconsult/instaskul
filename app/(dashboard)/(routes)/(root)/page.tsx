@@ -1,18 +1,17 @@
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-import { headers } from "next/headers"; // ✅ add this import
-import { getDashboardCourses } from "@/actions/get-dashboard-courses";
+import { headers } from "next/headers";
 import { Clock, CheckCircle } from "lucide-react";
 import InfoCard from "./_components/info-card";
+import { getDashboardData } from "@/actions/get-dashboard-data";
 
 export default async function Dashboard() {
-  // ✅ Explicitly await headers() to prevent Next.js from throwing implicit sync access errors
   await headers();
 
   try {
     console.log("Fetching dashboard data...");
-    const { coursesInProgress, completedCourses } = await getDashboardCourses();
+    const { adminsInProgress, adminsCompleted, coursesInProgress, completedCourses } = await getDashboardData();
     console.log("Dashboard data:", { coursesInProgress, completedCourses });
 
     return (
@@ -20,12 +19,12 @@ export default async function Dashboard() {
         <InfoCard
           icon={Clock}
           label="In progress"
-          numberOfItems={coursesInProgress ? coursesInProgress.length : 0}
+          numberOfItems={adminsInProgress ? (coursesInProgress ? coursesInProgress.length : 0) : 0}
         />
         <InfoCard
           icon={CheckCircle}
           label="Completed"
-          numberOfItems={completedCourses ? completedCourses.length : 0}
+          numberOfItems={adminsCompleted ? (completedCourses ? completedCourses.length : 0) : 0}
         />
       </div>
     );

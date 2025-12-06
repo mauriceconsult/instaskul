@@ -1,156 +1,107 @@
-import { config } from "dotenv";
-config({ path: "./.env.local" });
-
+// lib/momo.ts
+import "dotenv/config";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
+// CORRECT IMPORT — default export from mtn-momo
+import momoLib from "mtn-momo";
+
 const momo = {
+  // === COLLECTIONS (unchanged) ===
   collections: {
     async getAccessToken() {
-      const {
-        MOMO_TARGET_ENVIRONMENT,
-        MOMO_PRIMARY_KEY,
-        MOMOUSER_ID,
-        MOMOUSER_SECRET,
-      } = process.env;
-      if (
-        !MOMO_TARGET_ENVIRONMENT ||
-        !MOMO_PRIMARY_KEY ||
-        !MOMOUSER_ID ||
-        !MOMOUSER_SECRET
-      ) {
-        throw new Error("Missing MTN MoMo environment variables");
+      const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY, MOMOUSER_ID, MOMOUSER_SECRET } = process.env;
+      if (!MOMO_TARGET_ENVIRONMENT || !MOMO_PRIMARY_KEY || !MOMOUSER_ID || !MOMOUSER_SECRET) {
+        throw new Error("Missing Collections env vars");
       }
-
-      const authToken = Buffer.from(
-        `${MOMOUSER_ID}:${MOMOUSER_SECRET}`
-      ).toString("base64");
-      try {
-        const response = await axios.post(
-          `${MOMO_TARGET_ENVIRONMENT}/collection/token/`,
-          {},
-          {
-            headers: {
-              "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
-              Authorization: `Basic ${authToken}`,
-            },
-          }
-        );
-        console.log("Token Response:", response.data);
-        return response.data.access_token;
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error("Token Error:", {
-            status: error.response?.status,
-            data: error.response?.data,
-            headers: error.response?.headers,
-          });
-          throw new Error(
-            `Token Request failed: ${error.message} - ${JSON.stringify(
-              error.response?.data
-            )}`
-          );
-        }
-        throw new Error("Token Request failed: Unknown error");
-      }
-    },
-
-    async requestToPay(payload: {
-      amount: string;
-      currency: string;
-      externalId: string;
-      payer: { partyIdType: string; partyId: string };
-      payerMessage: string;
-      payeeNote: string;
-    }) {
-      const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY } = process.env;
-      if (!MOMO_TARGET_ENVIRONMENT || !MOMO_PRIMARY_KEY) {
-        throw new Error("Missing MTN MoMo environment variables");
-      }
-
-      const accessToken = await this.getAccessToken();
-      const referenceId = uuidv4(); // Generate unique X-Reference-Id
-      console.log("Access Token:", accessToken);
-      console.log("Generated X-Reference-Id:", referenceId);
-      console.log(
-        "Request URL:",
-        `${MOMO_TARGET_ENVIRONMENT}/collection/v1_0/requesttopay`
-      );
-      console.log("Headers:", {
-        "X-Reference-Id": referenceId,
-        "X-Target-Environment": "sandbox",
-        "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
-        Authorization: `Bearer ${accessToken}`,
+      const authToken = Buffer.from(`${MOMOUSER_ID}:${MOMOUSER_SECRET}`).toString("base64");
+      const response = await axios.post(`${MOMO_TARGET_ENVIRONMENT}/collection/token/`, {}, {
+        headers: { "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY, Authorization: `Basic ${authToken}` }
       });
-      console.log("Payload:", payload);
-
-      try {
-        const response = await axios.post(
-          `${MOMO_TARGET_ENVIRONMENT}/collection/v1_0/requesttopay`,
-          payload,
-          {
-            headers: {
-              "X-Reference-Id": referenceId,
-              "X-Target-Environment": "sandbox",
-              "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        console.log("Full Response:", response);
-        return referenceId; // Return the generated X-Reference-Id
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error("Error Response:", {
-            status: error.response?.status,
-            data: error.response?.data,
-            headers: error.response?.headers,
-          });
-          throw new Error(
-            `Request to Pay failed: ${error.message} - ${JSON.stringify(
-              error.response?.data
-            )}`
-          );
-        }
-        throw new Error("Request to Pay failed: Unknown error");
-      }
+      return response.data.access_token;
     },
-
+    async requestToPay(payload: any) {
+      const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY } = process.env;
+      const accessToken = await this.getAccessToken();
+      const referenceId = uuidv4();
+      await axios.post(`${MOMO_TARGET_ENVIRONMENT}/collection/v1_0/requesttopay`, payload, {
+        headers: {
+          "X-Reference-Id": referenceId,
+          "X-Target-Environment": "sandbox",
+          "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return referenceId;
+    },
     async checkTransactionStatus(referenceId: string) {
       const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY } = process.env;
-      if (!MOMO_TARGET_ENVIRONMENT || !MOMO_PRIMARY_KEY) {
-        throw new Error("Missing MTN MoMo environment variables");
-      }
-
       const accessToken = await this.getAccessToken();
+      const response = await axios.get(`${MOMO_TARGET_ENVIRONMENT}/collection/v1_0/requesttopay/${referenceId}`, {
+        headers: {
+          "X-Target-Environment": "sandbox",
+          "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data;
+    },
+  },
+
+  // === DISBURSEMENTS ===
+  disbursements: {
+    // Initialize MoMo library
+    momoInstance: momoLib.create({
+      callbackHost: process.env.CALLBACK_HOST || "https://www.instaskul.com",
+    }),
+
+    // Get Disbursements client
+    client: momoLib.Disbursements({
+      userSecret: process.env.MOMO_DISBURSE_USER_SECRET!,
+      userId: process.env.MOMO_DISBURSE_USER_ID!,
+      primaryKey: process.env.MOMO_DISBURSE_PRIMARY_KEY!,
+    }),
+
+    async selfServicePayout(adminId: string, amount: string, phoneNumber: string) {
+      const payload = {
+        amount,
+        currency: "EUR",
+        externalId: `payout_${adminId}_${Date.now()}`,
+        payee: {
+          partyIdType: "MSISDN",
+          partyId: phoneNumber,
+        },
+        payerMessage: "Instaskul Self-Service Payout",
+        payeeNote: "Your earnings are here!",
+      };
+
       try {
-        const response = await axios.get(
-          `${MOMO_TARGET_ENVIRONMENT}/collection/v1_0/requesttopay/${referenceId}`,
-          {
-            headers: {
-              "X-Target-Environment": "sandbox",
-              "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        console.log("Transaction Status Response:", response.data);
-        return response.data;
+        console.log("Initiating self-service payout:", payload);
+        const transactionId = await this.client.transfer(payload);
+        console.log("Transaction ID:", transactionId);
+
+        // Optional: Check status after 5s
+        setTimeout(async () => {
+          const status = await this.client.getTransaction(transactionId);
+          console.log("Payout status:", status);
+        }, 5000);
+
+        return transactionId;
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error("Error Response:", {
-            status: error.response?.status,
-            data: error.response?.data,
-            headers: error.response?.headers,
-          });
-          throw new Error(
-            `Check Transaction Status failed: ${
-              error.message
-            } - ${JSON.stringify(error.response?.data)}`
-          );
-        }
-        throw new Error("Check Transaction Status failed: Unknown error");
+        console.error("Self-service payout failed:", error);
+        throw error;
+      }
+    },
+
+    async getBalance(adminId: string) {
+      try {
+        const balance = await this.client.getBalance();
+        console.log(`Balance for ${adminId}:`, balance);
+        return balance;
+      } catch (error) {
+        console.error("Balance check failed:", error);
+        throw error;
       }
     },
   },
