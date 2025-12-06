@@ -1,6 +1,6 @@
 // test-momo-disburse.ts
 import "dotenv/config";
-import { momo } from "./lib/momo.ts";
+import { momo } from "./lib/momo";
 
 // Test payload (sandbox-friendly)
 const payload = {

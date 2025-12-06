@@ -70,26 +70,28 @@ export async function getAdminData(adminId: string) {
     throw new Error("Admin not found");
   }
 
-  const courses: CourseWithProgressWithAdmin[] = admin.courses.map((course) => {
+  const courses: CourseWithProgressWithAdmin[] = admin.courses.map((course: any) => {
     const totalTutors: number = course.tutors.length;
     const completedTutors: number = course.userProgress.filter(
-      (progress) => progress.isCompleted
+      (progress: { isCompleted: any; }) => progress.isCompleted
     ).length;
     const progress: number =
       totalTutors > 0 ? (completedTutors / totalTutors) * 100 : 0;
+
+    const tuition =
+      course.tuitions.find(
+        (t: { userId: string; enrolleeUserId: string; }) => t.userId === user.id || t.enrolleeUserId === user.id
+      ) || null;
 
     return {
       ...course,
       admin: course.admin,
       tutors: course.tutors,
       progress,
-      tuition:
-        course.tuitions.find(
-          (t) => t.userId === user.id || t.enrolleeUserId === user.id
-        ) || null,
+      tuition,
       userProgress: course.userProgress,
       tuitions: course.tuitions,
-    };
+    } as CourseWithProgressWithAdmin;
   });
 
   console.log(`[getAdminData] Admin response:`, { adminId, courses });

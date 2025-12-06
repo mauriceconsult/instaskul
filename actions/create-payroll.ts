@@ -1,4 +1,3 @@
-// actions/create-payroll.ts
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 
