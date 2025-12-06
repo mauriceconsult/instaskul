@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "check:deps": "npm outdated",
     "db:migrate": "npx prisma migrate dev",
     "db:wake": "npx prisma db pull --force || true && npx prisma migrate dev",
     "test:assignments": "ts-node test-assignments.ts",
