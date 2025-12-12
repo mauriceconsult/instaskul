@@ -9,7 +9,7 @@ export default function SignInPage() {
         routing="path"
         path="/sign-in"
         signUpUrl="/signup"
-        redirectUrl="/admin"
+        redirectUrl="/admin/admins"
         appearance={{
           elements: {
             formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
