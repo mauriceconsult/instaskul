@@ -51,18 +51,22 @@ export default async function Dashboard() {
           />
 
           {/* Admins / School Setup */}
-          <InfoCard
-            icon={Clock}
-            label="Admin Setup In Progress"
-            numberOfItems={adminsInProgress}
-            variant="default"
-          />
-          <InfoCard
-            icon={CheckCircle}
-            label="Admin Live"
-            numberOfItems={completedAdmins}
-            variant="success"
-          />
+<InfoCard
+  icon={Clock}
+  label="Admin Setup In Progress"
+  numberOfItems={adminsInProgress}
+  variant="default"
+  singular="admin"
+  plural="admins"
+/>
+<InfoCard
+  icon={CheckCircle}
+  label="Admin Live"
+  numberOfItems={completedAdmins}
+  variant="success"
+  singular="admin"
+  plural="admins"
+/>
         </div>
       </div>
     );

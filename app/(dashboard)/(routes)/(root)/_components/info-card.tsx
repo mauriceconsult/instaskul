@@ -6,21 +6,27 @@ interface InfoCardProps {
   variant?: "default" | "success";
   label: string;
   icon: LucideIcon;
+  singular?: string;  // e.g. "course" or "admin"
+  plural?: string;    // e.g. "courses" or "admins"
 }
 
 const InfoCard = ({
-  variant,
+  variant = "default",
   icon: Icon,
   label,
   numberOfItems,
+  singular = "item",   // fallback
+  plural = "items",
 }: InfoCardProps) => {
+  const itemText = numberOfItems === 1 ? singular : plural;
+
   return (
     <div className="border rounded-md flex items-center gap-x-2 p-3">
       <IconBadge variant={variant} icon={Icon} />
       <div>
         <p className="font-medium">{label}</p>
         <p className="text-gray-500 text-sm">
-          {numberOfItems} {numberOfItems === 1 ? "Course" : "Courses"}
+          {numberOfItems} {itemText}
         </p>
       </div>
     </div>
