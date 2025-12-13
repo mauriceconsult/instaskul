@@ -25,18 +25,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <ClerkProvider>
-      <html lang="en" className="min-h-full">
-        <body className="flex flex-col min-h-full bg-gray-50">
+    <html lang="en" className="min-h-full">
+      <body className="flex flex-col min-h-full bg-gray-50">
+        <ClerkProvider>
           <ToastProvider />
           <main className="flex-grow">{children}</main>
           <Footer />
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
