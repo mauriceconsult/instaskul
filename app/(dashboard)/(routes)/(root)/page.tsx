@@ -7,7 +7,7 @@ import InfoCard from "./_components/info-card";
 import { getDashboardData } from "@/actions/get-dashboard-data";
 
 export default async function Dashboard() {
-  headers();
+  headers(); // Trigger dynamic rendering
 
   try {
     const data = await getDashboardData();
@@ -19,6 +19,9 @@ export default async function Dashboard() {
       completedAdmins = 0,
     } = data || {};
 
+    const courses = Array.isArray(coursesInProgress) ? coursesInProgress : [];
+    const completed = Array.isArray(completedCourses) ? completedCourses : [];
+
     return (
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
@@ -28,45 +31,37 @@ export default async function Dashboard() {
           <InfoCard
             icon={Clock}
             label="Courses In Progress"
-            numberOfItems={
-              Array.isArray(coursesInProgress)
-                ? coursesInProgress.length
-                : typeof coursesInProgress === "number"
-                ? coursesInProgress
-                : 0
-            }
+            numberOfItems={courses.length}
             variant="default"
+            singular="course"
+            plural="courses"
           />
           <InfoCard
             icon={CheckCircle}
             label="Completed Courses"
-            numberOfItems={
-              Array.isArray(completedCourses)
-                ? completedCourses.length
-                : typeof completedCourses === "number"
-                ? completedCourses
-                : 0
-            }
+            numberOfItems={completed.length}
             variant="success"
+            singular="course"
+            plural="courses"
           />
 
           {/* Admins / School Setup */}
-<InfoCard
-  icon={Clock}
-  label="Admin Setup In Progress"
-  numberOfItems={adminsInProgress}
-  variant="default"
-  singular="admin"
-  plural="admins"
-/>
-<InfoCard
-  icon={CheckCircle}
-  label="Admin Live"
-  numberOfItems={completedAdmins}
-  variant="success"
-  singular="admin"
-  plural="admins"
-/>
+          <InfoCard
+            icon={Clock}
+            label="Admin Setup In Progress"
+            numberOfItems={adminsInProgress}
+            variant="default"
+            singular="admin"
+            plural="admins"
+          />
+          <InfoCard
+            icon={CheckCircle}
+            label="Admin Live"
+            numberOfItems={completedAdmins}
+            variant="success"
+            singular="admin"
+            plural="admins"
+          />
         </div>
       </div>
     );
