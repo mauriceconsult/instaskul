@@ -12,7 +12,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const { userId } = await auth();
-  if (!userId) redirect("/");
+  if (!userId) redirect("/sign-in");
 
   // Get current pathname to detect if we're on the admin homepage
   const pathname = headers().get("x-pathname") || "";

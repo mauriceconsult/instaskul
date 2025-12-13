@@ -1,6 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Metadata } from "next";
 import { InstaSkulLogo } from "@/components/instaskul-logo";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "About InstaSkul - Our Mission and Privacy Policy",
@@ -19,41 +22,51 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
-  return (
+ return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-4xl mx-auto px-6 py-12">
-        <div className="flex justify-center mb-6">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
           <InstaSkulLogo size="md" />
+
+          {/* Exit button */}
+          <Link href="/">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Exit
+            </Button>
+          </Link>
         </div>
+
         <h1 className="text-4xl font-bold text-slate-900 mb-6 text-center">
           About InstaSkul
         </h1>
         <p className="text-slate-600 mb-8 text-center">
           Learning Management Platform. Version 1.0 | October 2025.
         </p>
-
-        <h2 className="text-2xl font-semibold text-slate-800 mb-4">
-          Our Mission
-        </h2>
+        <Image
+          src="/adminImage.png"
+          alt="InstaSkul Admin"
+          width={800}
+          height={400}
+        />
+       
         <p className="text-slate-600 mb-8">
           InstaSkul is dedicated to transforming education by connecting educators
           and learners through structured, impactful online courses. We believe:
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
-            Knowledge and skills are both a means and an end, empowering
+            Knowledge and skills as means and an ends for empowered
             individuals and communities.
-          </li>
-          <li>
-            Much of the world’s knowledge is unstructured and ineffective for
-            professional transmission—InstaSkul changes that with curated content.
-          </li>
+          </li>         
           <li>
             Global-spanning classrooms expand the reach of teachers
             and resources worldwide.
           </li>
           <li>
-            Learners deserve access to a wide selection of structured content from
+            Access to a wide selection of structured content from
             the best global educators.
           </li>
           <li>
@@ -81,8 +94,8 @@ export default function AboutPage() {
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>Your account is secured by Clerk at sign-in.</li>
           <li>Tuition fee payments and admin payroll are powered by MTN MoMo.</li>
-          <li>Tutorial video uploads are powered by Mux Video.</li>
-          <li>Image uploads are powered by Uploadthing.</li>
+          <li>Tutorial videos powered by Mux Video.</li>
+          <li>Images powered by Uploadthing.</li>
         </ul>
 
         <h2 className="text-2xl font-semibold text-slate-800 mb-4">
@@ -92,8 +105,8 @@ export default function AboutPage() {
           Admin and Course Creation
         </h3>
         <p className="text-slate-600 mb-4">
-          InstaSkul’s Admins undergo a rigorous course-creation-based vetting
-          process to build transformative educational brands and courses.
+          InstaSkul’s Admins undergo a rigorous course-creation-based screening
+          process for building transformative courses.
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
@@ -144,13 +157,13 @@ export default function AboutPage() {
         </h2>
         <p className="text-slate-600 mb-8">
           Join our community on{" "}
-          <Link
+          {/* <Link
             href="https://x.com/instaskul"
             className="text-blue-600 hover:underline"
           >
             X
-          </Link>
-          ,{" "}
+          </Link> */}
+          {/* ,{" "}
           <Link
             href="https://linkedin.com/company/instaskul"
             className="text-blue-600 hover:underline"
@@ -178,7 +191,7 @@ export default function AboutPage() {
           >
             Facebook
           </Link>
-          . Contact us at{" "}
+          . Contact us at{" "} */}
           <Link
             href="mailto:support@instaskul.com"
             className="text-blue-600 hover:underline"
