@@ -9,7 +9,7 @@
     "test:assignments": "ts-node test-assignments.ts",
     "dev": "next dev",
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && prisma generate && next build",
-    "vercel-build": "set NODE_OPTIONS=--max-old-space-size=8192 && prisma generate && next build",
+    "vercel-build": "prisma generate && NODE_OPTIONS='--max-old-space-size=8192' next build",
     "start": "next start",
     "postinstall": "node -e \"try { require('child_process').execSync('npx prisma generate', { stdio: 'inherit' }); } catch (e) { console.error('Prisma generate failed:', e.message); }\""
   },
