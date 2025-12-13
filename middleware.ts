@@ -12,18 +12,18 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Allow public routes
+  const { userId } = await auth();
+
+  // Public routes
   if (isPublicRoute(req)) {
     return NextResponse.next();
   }
 
-  const { userId } = await auth();
-
-  // If not signed in, redirect to sign-in
+  // Protect everything else
   if (!userId) {
-    const signInUrl = new URL("/sign-in", req.url);
-    signInUrl.searchParams.set("redirect_url", req.url);
-    return NextResponse.redirect(signInUrl);
+    return NextResponse.redirect(
+      new URL("/sign-in", req.url)
+    );
   }
 
   return NextResponse.next();
@@ -31,6 +31,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
+    // Skip static files
     "/((?!_next|.*\\..*).*)",
   ],
 };

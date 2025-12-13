@@ -1,4 +1,5 @@
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -11,18 +12,20 @@ export default function HomePage() {
         Your comprehensive knowledge management solution for schools and tutors.
       </p>    
 <div className="flex gap-6 mt-8">
-  <SignInButton mode="modal">
-    <button className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition">
-      Sign In
-    </button>
-  </SignInButton>
-
-  <SignUpButton mode="modal">
-    <button className="px-8 py-4 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition">
-      Get Started
-    </button>
-  </SignUpButton>
+<Link
+  href="/sign-in"
+  className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition"
+>
+  Sign In
+</Link>
+<Link
+  href="/sign-up"
+  className="px-8 py-4 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition"
+>
+  Get Started
+</Link>
 </div>
     </main>
+    
   );
 }
