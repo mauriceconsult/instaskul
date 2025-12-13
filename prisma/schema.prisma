@@ -58,6 +58,7 @@ model Payroll {
   tuition          Tuition  @relation("TuitionToPayroll", fields: [tuitionId], references: [id], onDelete: Cascade)
   course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) 
   
+  @@index([adminId, momoStatus])
   @@index([tuitionId])
   @@index([courseId])
   @@index([adminId])

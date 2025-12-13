@@ -7,7 +7,7 @@ import InfoCard from "./_components/info-card";
 import { getDashboardData } from "@/actions/get-dashboard-data";
 
 export default async function Dashboard() {
-  await headers();
+  headers();
 
   try {
     const data = await getDashboardData();
