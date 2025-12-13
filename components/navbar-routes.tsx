@@ -4,7 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LogOut, LogIn } from "lucide-react";
 import Link from "next/link";
-import { CourseSearchInput } from "@/app/(dashboard)/(routes)/admin/create-admin/[adminId]/course/[courseId]/search/_components/course-search-input";
+import { CourseSearchInput } from "./course-search-input";
+
 
 interface NavbarRoutesProps {
   className?: string;
