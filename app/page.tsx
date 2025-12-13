@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 
 export default function HomePage() {
   return (
@@ -11,21 +11,20 @@ export default function HomePage() {
         Your comprehensive knowledge management solution for schools and tutors.
       </p>
 
-      <div className="flex gap-6 mt-8">
-        {/* Sign In */}
-        <Link href="/sign-in">
-          <button className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition">
-            Sign In
-          </button>
-        </Link>
+     // app/page.tsx (landing page)
+<div className="flex gap-6 mt-8">
+  <SignInButton mode="modal">
+    <button className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition">
+      Sign In
+    </button>
+  </SignInButton>
 
-        {/* Sign Up */}
-        <Link href="/sign-up">
-          <button className="px-8 py-4 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition">
-            Get Started
-          </button>
-        </Link>
-      </div>
+  <SignUpButton mode="modal">
+    <button className="px-8 py-4 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition">
+      Get Started
+    </button>
+  </SignUpButton>
+</div>
     </main>
   );
 }
