@@ -19,7 +19,10 @@ export const metadata: Metadata = {
     "learning management system",
     "LMS",
     "e-learning",
-    "free"
+    "free",
+    "human resources",
+    "corporate training",
+    "skill development",
   ],
 };
 
