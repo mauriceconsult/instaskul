@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import qs from "query-string";
 import { useDebounce } from "@/hooks/use-debounce.js";
 import { usePathname, useRouter } from "next/navigation.js";
-import { Input } from "./ui/input.jsx";
+import { Input } from "@/components/ui/input";
 
 interface CourseSearchInputProps {
   adminId?: string;
