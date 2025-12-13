@@ -3,8 +3,9 @@ export const runtime = "nodejs";
 
 import { headers } from "next/headers";
 import { Clock, CheckCircle } from "lucide-react";
-import InfoCard from "./_components/info-card";
+// import InfoCard from "./_components/info-card";
 import { getDashboardData } from "@/actions/get-dashboard-data";
+import InfoCard from "./_components/_components/info-card";
 
 export default async function Dashboard() {
   headers(); // Trigger dynamic rendering
