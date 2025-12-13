@@ -9,9 +9,7 @@ export default function HomePage() {
 
       <p className="text-xl text-gray-600 max-w-2xl text-center">
         Your comprehensive knowledge management solution for schools and tutors.
-      </p>
-
-     // app/page.tsx (landing page)
+      </p>    
 <div className="flex gap-6 mt-8">
   <SignInButton mode="modal">
     <button className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition">
