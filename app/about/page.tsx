@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { InstaSkulLogo } from "@/components/instaskul-logo";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { RootAuthControls } from "@/components/auth/root-auth-controls";
 
 export const metadata: Metadata = {
   title: "About InstaSkul - Our Mission and Privacy Policy",
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
- return (
+  return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-4xl mx-auto px-6 py-12">
 
@@ -200,6 +201,10 @@ export default function AboutPage() {
           </Link>
           .
         </p>
+      </div>
+
+      <div className="fixed top-4 right-4">
+        <RootAuthControls />
       </div>
     </div>
   );
