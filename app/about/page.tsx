@@ -49,7 +49,7 @@ export default function AboutPage() {
             professional transmission—InstaSkul changes that with curated content.
           </li>
           <li>
-            Global-spanning classrooms expand the reach of underutilized teachers
+            Global-spanning classrooms expand the reach of teachers
             and resources worldwide.
           </li>
           <li>
