@@ -1,14 +1,12 @@
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
-
 import { headers } from "next/headers";
-import { Clock, CheckCircle } from "lucide-react";
 // import InfoCard from "./_components/info-card";
 import { getDashboardData } from "@/actions/get-dashboard-data";
-import InfoCard from "./_components/_components/info-card";
+import InfoCard from "./_components/info-card";
+
+export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  headers(); // Trigger dynamic rendering
+  headers();
 
   try {
     const data = await getDashboardData();
@@ -20,35 +18,29 @@ export default async function Dashboard() {
       completedAdmins = 0,
     } = data || {};
 
-    const courses = Array.isArray(coursesInProgress) ? coursesInProgress : [];
-    const completed = Array.isArray(completedCourses) ? completedCourses : [];
-
     return (
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+      <div className="p-6 space-y-8">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Courses */}
           <InfoCard
-            icon={Clock}
+            iconName="Clock"
             label="Courses In Progress"
-            numberOfItems={courses.length}
+            numberOfItems={Array.isArray(coursesInProgress) ? coursesInProgress.length : 0}
             variant="default"
             singular="course"
             plural="courses"
           />
           <InfoCard
-            icon={CheckCircle}
+            iconName="CheckCircle"
             label="Completed Courses"
-            numberOfItems={completed.length}
+            numberOfItems={Array.isArray(completedCourses) ? completedCourses.length : 0}
             variant="success"
             singular="course"
             plural="courses"
           />
-
-          {/* Admins / School Setup */}
           <InfoCard
-            icon={Clock}
+            iconName="Clock"
             label="Admin Setup In Progress"
             numberOfItems={adminsInProgress}
             variant="default"
@@ -56,7 +48,7 @@ export default async function Dashboard() {
             plural="admins"
           />
           <InfoCard
-            icon={CheckCircle}
+            iconName="CheckCircle"
             label="Admin Live"
             numberOfItems={completedAdmins}
             variant="success"
@@ -70,7 +62,10 @@ export default async function Dashboard() {
     console.error("Dashboard error:", error);
     return (
       <div className="p-6">
-        <p className="text-red-600">Error loading dashboard. Please refresh.</p>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-red-600 font-medium">Error loading dashboard</p>
+          <p className="text-red-500 text-sm mt-1">Please refresh the page to try again.</p>
+        </div>
       </div>
     );
   }

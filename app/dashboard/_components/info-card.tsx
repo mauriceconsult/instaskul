@@ -1,26 +1,29 @@
 'use client'
 
 import { IconBadge } from "@/components/icon-badge";
-import { LucideIcon } from "lucide-react";
+import * as Icons from "lucide-react";
 
 interface InfoCardProps {
   numberOfItems: number;
   variant?: "default" | "success";
   label: string;
-  icon: LucideIcon;
-  singular?: string;  // e.g. "course" or "admin"
-  plural?: string;    // e.g. "courses" or "admins"
+  iconName: string;  // Changed from LucideIcon to string
+  singular?: string;
+  plural?: string;
 }
 
 const InfoCard = ({
   variant = "default",
-  icon: Icon,
+  iconName,
   label,
   numberOfItems,
-  singular = "item",   // fallback
+  singular = "item",
   plural = "items",
 }: InfoCardProps) => {
   const itemText = numberOfItems === 1 ? singular : plural;
+  
+  // Get the icon component from the icon name
+  const Icon = (Icons as any)[iconName] as Icons.LucideIcon;
 
   return (
     <div className="border rounded-md flex items-center gap-x-2 p-3">
