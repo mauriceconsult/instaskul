@@ -1,13 +1,11 @@
-"use client";
+'use client'
+
 import { SignIn } from "@clerk/nextjs";
 
-export default function SignInPage() {
+export default function Page() {
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <SignIn 
-        afterSignInUrl="/dashboard"
-        signUpUrl="/sign-up"
-      />
+      <SignIn />
     </div>
   );
 }
