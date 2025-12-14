@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import InfoCard from "../_components/info-card";
+import InfoCard from "../../(admin)/_components/info-card";
 import { getDashboardData } from "@/actions/get-dashboard-data";
 
 export const dynamic = "force-dynamic";
