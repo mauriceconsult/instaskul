@@ -1,13 +1,13 @@
+import { Sidebar } from "lucide-react";
 import { headers } from "next/headers";
-import { Navbar } from "./_components/navbar";
-import { Sidebar } from "./_components/sidebar";
+import { Navbar } from "../_components/navbar";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   // ✅ Await headers here to satisfy Next.js dynamic API requirements
-  await headers();
+  headers();
 
   return (
     <div className="h-full">
