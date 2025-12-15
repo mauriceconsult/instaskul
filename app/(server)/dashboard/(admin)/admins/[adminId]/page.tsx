@@ -45,7 +45,7 @@ const AdminIdPage = async ({ params }: AdminIdPageProps) => {
   });
 
   if (!admin) {
-    return redirect("/");
+    return redirect("/dashboard");
   }
 
   return (
@@ -56,7 +56,7 @@ const AdminIdPage = async ({ params }: AdminIdPageProps) => {
         <div className="prose prose-sm max-w-none text-gray-700">
           <Preview value={admin.description || "No description available."} />
         </div>
-        <Link href={`/admin/admins/${adminId}/noticeboards`}>
+        <Link href={`/dashboard/admin/admins/${adminId}/noticeboards`}>
           <Button variant="outline" className="mt-6 w-full sm:w-auto border-gray-300 hover:bg-gray-50">
             View Noticeboards
           </Button>
@@ -78,7 +78,7 @@ const AdminIdPage = async ({ params }: AdminIdPageProps) => {
                 key={course.id}
                 id={course.id}
                 title={course.title}
-                imageUrl={course.imageUrl ?? "/placeholder.jpg"}
+                imageUrl={course.imageUrl ?? "/JsxLogo.png"}
                 tutorialsLength={course.tutors.length}
                 description={course.description ?? ""}
                 progress={null} // TODO: Implement progress if needed

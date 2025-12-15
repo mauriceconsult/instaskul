@@ -36,8 +36,8 @@ const AdminCreatePage = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const response = await axios.post("/api/admins/create", values);
-        router.push(`/admin/admins/${response.data.id}`);
-        toast.success("Admin created.")
+        router.push(`/dashboard/admin/admins/${response.data.id}`);
+        toast.success("Admin successfully created.")
     } catch {
       toast.error("Something went wrong.");
     }
@@ -47,7 +47,7 @@ const AdminCreatePage = () => {
       <div>
         <h1 className="text-2xl">Name your Admin</h1>
         <p className="text-sm text-slate-600">
-          Admins help you manage your Courses and Tutorials.
+          Admin helps you manage your Courses and Tutorials.
         </p>
         <Form {...form}>
           <form

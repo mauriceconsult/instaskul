@@ -1,24 +1,32 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Metadata } from "next";
 import { InstaSkulLogo } from "@/components/instaskul-logo";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { RootAuthControls } from "@/components/auth/root-auth-controls";
 
 export const metadata: Metadata = {
-  title: "About InstaSkul - Our Mission and Privacy Policy",
+  title: "Mission and Privacy Policy",
   description:
-    "Learn about InstaSkul's mission to transform education and our commitment to user privacy.",
+    "Transformative knowledge management platform connecting learners and educators globally. Learn about our mission, privacy policy, and trusted partners.",
   keywords: [
     "InstaSkul",
     "Learning Management System",
     "online education",
     "digital education",
     "knowledge sharing",
+    "online courses",
+    "course creation",
+    "admin tools",
+    "teacher resources",
+    "free education",
+    "global learning",
+    "online learning platform",
+    "teaching online",
+    "teaching careers",
+    "employment",
     "e-learning",
     "education",
-    "privacy policy",
+    "privacy policy",   
+
   ],
 };
 
@@ -29,15 +37,7 @@ export default function AboutPage() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <InstaSkulLogo size="md" />
-
-          {/* Exit button */}
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Exit
-            </Button>
-          </Link>
+          <InstaSkulLogo size="md" />         
         </div>
 
         <h1 className="text-4xl font-bold text-slate-900 mb-6 text-center">
@@ -45,34 +45,23 @@ export default function AboutPage() {
         </h1>
         <p className="text-slate-600 mb-8 text-center">
           Learning Management Platform. Version 1.0 | October 2025.
-        </p>
-        <Image
-          src="/adminImage.png"
-          alt="InstaSkul Admin"
-          width={800}
-          height={400}
-        />
+        </p>  
        
         <p className="text-slate-600 mb-8">
-          InstaSkul is dedicated to transforming education by connecting educators
-          and learners through structured, impactful online courses. We believe:
+          InstaSkul connects knowledge to learners through structured open sourced, online courses.
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
-            Knowledge and skills as means and an ends for empowered
-            individuals and communities.
+            For empowered individuals and communities.
           </li>         
           <li>
-            Global-spanning classrooms expand the reach of teachers
-            and resources worldwide.
+            Global reach and resources.
           </li>
           <li>
-            Access to a wide selection of structured content from
-            the best global educators.
+            Market driven.
           </li>
           <li>
-            Education must be practical, transformative, and able to withstand
-            public scrutiny in a dynamic global knowledge landscape.
+            Public access in a safe environment for all including children.
           </li>
         </ul>
 
@@ -80,10 +69,9 @@ export default function AboutPage() {
           Privacy Policy
         </h2>
         <p className="text-slate-600 mb-8">
-          At InstaSkul, we prioritize your privacy. We neither store personal data
-          beyond what’s necessary nor conduct solicitation outside our ecosystem.
-          Our core system is designed for productive knowledge sharing with
-          minimal privacy intrusion—only your username is required.
+          We do not store personal data or solicit outside our ecosystem.
+          Our core system is designed for knowledge sharing without
+          privacy intrusion.
         </p>
         <h3 className="text-xl font-medium text-slate-800 mb-2">
           Our Trusted Partners
@@ -106,22 +94,19 @@ export default function AboutPage() {
           Admin and Course Creation
         </h3>
         <p className="text-slate-600 mb-4">
-          InstaSkul’s Admins undergo a rigorous course-creation-based screening
-          process for building transformative courses.
+          Admins publish their Course.
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
-            Admin Noticeboard: Enables direct communication with course
-            producer(s) as needed.
+            Admin Noticeboard: Enables inline adhoc communication within the Admin.
           </li>
           <li>
-            Course Noticeboard: Facilitates direct communication between course
-            producers and students when necessary.
+            Course Noticeboard: Enables inline adhoc communication with students.
           </li>
           <li>
             Admin Analytics: Provides a detailed dashboard view of relevant data,
-            including courses produced, enrollment rates, and tuition fees
-            received.
+            including courses produced, enrollment rates, tuition fees
+            received and payroll.
           </li>
         </ul>
 
@@ -129,77 +114,26 @@ export default function AboutPage() {
           Transparent Pricing and Payroll
         </h3>
         <p className="text-slate-600 mb-4">
-          InstaSkul ensures transparency in all financial transactions:
+          Streamlined financial transactions:
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
-            Admin payroll dispatches payments based on available balances via MTN
-            MoMo after statutory deductions (Value Added Tax) and a 10% platform
-            fee.
+            Prompt payroll dispatches immediately upon Tuition payment.
           </li>
-          <li>No hidden fees for users.</li>
-          <li>
-            Admins can upgrade to install their own fee receipt, payroll, and
-            academic certification systems within InstaSkul upon meeting statutory
-            and commercial requirements.
-          </li>
+          <li>Platform fees at only ten percent.</li>          
         </ul>
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
-          Continuous Improvement
-        </h3>
-        <p className="text-slate-600 mb-8">
-          InstaSkul maintains and updates the learning system at no extra cost,
-          ensuring a reliable and cutting-edge platform for all users.
-        </p>
-
-        <h2 className="text-2xl font-semibold text-slate-800 mb-4">
           Contact and Support
-        </h2>
+        </h3>     
         <p className="text-slate-600 mb-8">
-          Join our community on{" "}
-          {/* <Link
-            href="https://x.com/instaskul"
-            className="text-blue-600 hover:underline"
-          >
-            X
-          </Link> */}
-          {/* ,{" "}
-          <Link
-            href="https://linkedin.com/company/instaskul"
-            className="text-blue-600 hover:underline"
-          >
-            LinkedIn
-          </Link>
-          ,{" "}
-          <Link
-            href="https://discord.gg/instaskul"
-            className="text-blue-600 hover:underline"
-          >
-            Discord
-          </Link>
-          ,{" "}
-          <Link
-            href="https://whatsapp.com/channel/instaskul"
-            className="text-blue-600 hover:underline"
-          >
-            WhatsApp
-          </Link>
-          , or{" "}
-          <Link
-            href="https://facebook.com/instaskul"
-            className="text-blue-600 hover:underline"
-          >
-            Facebook
-          </Link>
-          . Contact us at{" "} */}
+          {/* Join our community on{" "} */}        
           <Link
             href="mailto:support@instaskul.com"
             className="text-blue-600 hover:underline"
           >
             support@instaskul.com
-          </Link>
-          .
+          </Link>          
         </p>
       </div>
 

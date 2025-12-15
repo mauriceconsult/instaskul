@@ -25,7 +25,7 @@ export default async function Dashboard() {
           
           {/* Admin Link Button - Slate Gray */}
           <Link
-            href="/admin/admins"
+            href="/dashboard/admins"
             className="px-6 py-3 bg-slate-600 text-white font-medium rounded-lg hover:bg-slate-700 transition"
           >
             Admin Panel
@@ -36,7 +36,7 @@ export default async function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <InfoCard 
             iconName="Clock" 
-            label="Admin Setup In Progress" 
+            label="Admins In Progress" 
             numberOfItems={adminsInProgress} 
             variant="default" 
             singular="admin" 
