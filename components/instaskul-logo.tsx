@@ -29,14 +29,14 @@ export const InstaSkulLogo: React.FC<InstaSkulLogoProps> = ({
         >
           instaSkul
         </span>
-        <span
+        {/* <span
           className={cn(
             "text-slate-900 relative -top-1",
             sizeStyles[size].trademark
           )}
         >
           ®
-        </span>
+        </span> */}
       </div>
       <span
         className={cn(
@@ -44,7 +44,7 @@ export const InstaSkulLogo: React.FC<InstaSkulLogoProps> = ({
           sizeStyles[size].tagline
         )}
       >
-        Learning management
+        Knowledge Management Simplified
       </span>
     </Link>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { InstaSkulLogo } from "@/components/instaskul-logo";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -13,11 +14,14 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-8 bg-gradient-to-b from-blue-50 to-white">
       <h1 className="text-5xl font-bold text-gray-900">
-        Welcome to Instaskul
+        <span>
+          <InstaSkulLogo/>
+        </span>
+         Knowledge Management Simplified        
       </h1>
 
       <p className="text-xl text-gray-600 max-w-2xl text-center">
-        Your comprehensive knowledge management solution for schools and tutors.
+        knowledge managers, schools and freelance tutors.
       </p>
 
       <div className="flex gap-6 mt-8">

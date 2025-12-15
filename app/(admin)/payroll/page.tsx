@@ -1,4 +1,3 @@
-// app/(admin)/payroll/page.tsx
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -12,7 +11,7 @@ export default async function PayrollPage() {
     where: { userId },
   });
 
-  if (!admin) redirect("/");
+  if (!admin) redirect("/dashboard");
 
   // Fetch PAID payrolls and sum netPayout manually
   const paidPayrolls = await prisma.payroll.findMany({

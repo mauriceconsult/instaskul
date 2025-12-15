@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 const guestRoutes = [
     {
         icon: Layout,
-        label: "Dashboard",
+        label: "Home",
         href: "/"
     },
     {
@@ -20,17 +20,17 @@ const adminRoutes = [
   {
     icon: List,
     label: "Admins",
-    href: "/admin/admins",
+    href: "/dashboard/admins",
   },
   {
     icon: BarChart,
     label: "Analytics",
-    href: "/admin/analytics",
+    href: "/dashboard/analytics",
   },
 ];
 export const SidebarRoutes = () => {
     const pathname = usePathname();
-    const isAdminPage = pathname?.includes("/admin");
+    const isAdminPage = pathname?.includes("/dashboard");
     const routes = isAdminPage ? adminRoutes : guestRoutes;
     
     return ( 

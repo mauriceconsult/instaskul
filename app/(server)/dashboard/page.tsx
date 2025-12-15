@@ -1,12 +1,12 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import InfoCard from "../../(admin)/_components/info-card";
 import { getDashboardData } from "@/actions/get-dashboard-data";
+import InfoCard from "@/app/(admin)/_components/info-card";
 
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  await headers();
+  headers();
 
   try {
     const data = await getDashboardData();
@@ -36,22 +36,6 @@ export default async function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <InfoCard 
             iconName="Clock" 
-            label="Courses In Progress" 
-            numberOfItems={Array.isArray(coursesInProgress) ? coursesInProgress.length : 0} 
-            variant="default" 
-            singular="course" 
-            plural="courses" 
-          />
-          <InfoCard 
-            iconName="CheckCircle" 
-            label="Completed Courses" 
-            numberOfItems={Array.isArray(completedCourses) ? completedCourses.length : 0} 
-            variant="success" 
-            singular="course" 
-            plural="courses" 
-          />
-          <InfoCard 
-            iconName="Clock" 
             label="Admin Setup In Progress" 
             numberOfItems={adminsInProgress} 
             variant="default" 
@@ -60,11 +44,27 @@ export default async function Dashboard() {
           />
           <InfoCard 
             iconName="CheckCircle" 
-            label="Admin Live" 
+            label="Live Admins" 
             numberOfItems={completedAdmins} 
             variant="success" 
             singular="admin" 
             plural="admins" 
+          />
+          <InfoCard 
+            iconName="Clock" 
+            label="Courses In Progress" 
+            numberOfItems={Array.isArray(coursesInProgress) ? coursesInProgress.length : 0} 
+            variant="default" 
+            singular="course" 
+            plural="courses" 
+          />
+          <InfoCard 
+            iconName="CheckCircle" 
+            label="Live Courses" 
+            numberOfItems={Array.isArray(completedCourses) ? completedCourses.length : 0} 
+            variant="success" 
+            singular="course" 
+            plural="courses" 
           />
         </div>
       </div>

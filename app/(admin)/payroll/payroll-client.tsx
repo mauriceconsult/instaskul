@@ -1,4 +1,3 @@
-// app/(admin)/payroll/PayrollClient.tsx
 "use client";
 
 import { useState } from "react";
