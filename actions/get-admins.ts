@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { Admin, School, Course } from "@prisma/client";
-import { getProgress } from "./get-progress";
+import { getCourseProgress } from "./get-course-progress";
 
 export type AdminsWithSchool = Admin & {
   school: School | null;
@@ -55,7 +55,7 @@ export const getAdmins = async ({
             progress: null,
           };
         }
-        const progress = await getProgress(userId, admin.id);
+        const progress = await getCourseProgress(userId, admin.id);
         return {
           ...admin,
           progress,

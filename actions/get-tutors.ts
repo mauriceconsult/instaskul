@@ -1,43 +1,55 @@
 import { prisma } from "@/lib/db";
-import { Tutor, Course } from "@prisma/client";
+import { Tutor, Course, Attachment } from "@prisma/client";
 
-export type TutorialWithCourse = Tutor & {
+export type TutorWithProgressWithCourse = Tutor & {
   course: Course | null;
-  attachmentIds: { id: string }[];
+  attachments: Attachment[];
+  assignmentsCount: number; // Number of assignments
+  progress: number; // 0 or 100
 };
 
-export type GetTutors = {
+export type GetTutorsParams = {
   userId: string;
   title?: string;
   courseId?: string;
 };
 
 export const getTutors = async ({
+  userId,
   title,
   courseId,
-}: GetTutors): Promise<TutorialWithCourse[]> => {
+}: GetTutorsParams): Promise<TutorWithProgressWithCourse[]> => {
   try {
-    const tutorials = await prisma.tutor.findMany({
+    const tutors = await prisma.tutor.findMany({
       where: {
         isPublished: true,
-        title: title ? { contains: title } : undefined,
+        title: title
+          ? { contains: title, mode: "insensitive" }
+          : undefined,
         courseId,
       },
       include: {
         course: true,
         attachments: true,
+        assignments: {
+          where: { isPublished: true },
+          select: { id: true },
+        },
+        userProgress: {
+          where: { userId },
+          select: { isCompleted: true },
+        },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { position: "asc" },
     });
-    const tutorialsWithCourse: TutorialWithCourse[] = tutorials.map((tutorial) => ({
-      ...tutorial,
-      attachmentIds: tutorial.attachments.map((a) => ({ id: a.id })),
+
+    return tutors.map((tutor) => ({
+      ...tutor,
+      assignmentsCount: tutor.assignments.length,
+      progress: tutor.userProgress.some((up) => up.isCompleted) ? 100 : 0,
     }));
-    return tutorialsWithCourse;
   } catch (error) {
-    console.log("[GET_TUTORIALS]", error);
+    console.error("[GET_TUTORS]", error);
     return [];
   }
 };

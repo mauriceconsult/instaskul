@@ -1,19 +1,19 @@
 "use server";
 
-import { Admin, Course, Tuition, UserProgress, Tutor } from "@prisma/client";
-import { getProgress } from "./get-progress";
 import { prisma } from "@/lib/db";
+import { Admin, Course, Tuition, UserProgress, Tutor } from "@prisma/client";
+import { getCourseProgress } from "./get-course-progress";
 
 export interface CourseWithProgressWithAdmin extends Course {
   admin: Admin | null;
   tutors: Pick<Tutor, "id" | "title" | "isFree" | "position" | "playbackId">[];
   progress: number | null;
   tuition: Tuition | null;
-  userProgress: UserProgress[];
   tuitions: Tuition[];
+  userProgress: UserProgress[];
 }
 
-export type GetCourses = {
+export type GetCoursesParams = {
   userId: string;
   title?: string;
   adminId?: string;
@@ -23,23 +23,20 @@ export const getCourses = async ({
   userId,
   title,
   adminId,
-}: GetCourses): Promise<CourseWithProgressWithAdmin[]> => {
+}: GetCoursesParams): Promise<CourseWithProgressWithAdmin[]> => {
   try {
     const courses = await prisma.course.findMany({
       where: {
         isPublished: true,
-        title: {
-          contains: title,
-          mode: "insensitive",
-        },
+        title: title
+          ? { contains: title, mode: "insensitive" }
+          : undefined,
         adminId,
       },
       include: {
         admin: true,
         tutors: {
-          where: {
-            isPublished: true,
-          },
+          where: { isPublished: true },
           select: {
             id: true,
             title: true,
@@ -47,70 +44,37 @@ export const getCourses = async ({
             position: true,
             playbackId: true,
           },
+          orderBy: { position: "asc" },
         },
         tuitions: {
-          where: { userId },
-          select: {
-            id: true,
-            userId: true,
-            enrolleeUserId: true,
-            courseId: true,
-            amount: true,
-            status: true,
-            partyId: true,
-            username: true,
-            transactionId: true,
-            isActive: true,
-            isPaid: true,
-            transId: true,
-            createdAt: true,
-            updatedAt: true,
+          where: {
+            OR: [{ userId }, { enrolleeUserId: userId }],
           },
         },
         userProgress: {
           where: { userId },
-          select: {
-            id: true,
-            userId: true,
-            createdAt: true,
-            updatedAt: true,
-            courseId: true,
-            adminId: true,
-            tutorId: true,
-            courseworkId: true,
-            assignmentId: true,
-            isEnrolled: true,
-            isCompleted: true,
-          },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    const coursesWithProgress: CourseWithProgressWithAdmin[] =
-      await Promise.all(
-        courses.map(async (course) => {
-          const progress: number = await getProgress(userId, course.id);
-          return {
-            ...course,
-            admin: course.admin,
-            tutors: course.tutors,
-            progress,
-            tuition:
-              course.tuitions.find(
-                (t) => t.userId === userId || t.enrolleeUserId === userId
-              ) || null,
-            userProgress: course.userProgress,
-            tuitions: course.tuitions,
-          };
-        })
-      );
+    const coursesWithProgress = await Promise.all(
+      courses.map(async (course) => {
+        const progress = await getCourseProgress(userId, course.id);
+
+        const tuition = course.tuitions[0] || null; // First matching tuition
+
+        return {
+          ...course,
+          progress,
+          tuition,
+        };
+      })
+    );
 
     return coursesWithProgress;
   } catch (error) {
-    console.log("[GET_COURSES]", error);
+    console.error("[GET_COURSES]", error);
     return [];
   }
 };

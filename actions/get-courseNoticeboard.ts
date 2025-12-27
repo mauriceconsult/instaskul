@@ -1,69 +1,68 @@
 import { prisma } from "@/lib/db";
-import { Attachment, CourseNoticeboard } from "@prisma/client";
+import { Attachment, Course, CourseNoticeboard } from "@prisma/client";
 
-interface GetCourseNoticeboardProps {
+export type CourseNoticeboardDetail = {
+  courseNoticeboard: CourseNoticeboard | null;
+  course: Course | null;
+  attachments: Attachment[];
+  nextCourseNoticeboard: CourseNoticeboard | null;
+};
+
+interface GetCourseNoticeboardParams {
   userId: string;
   courseId: string;
   courseNoticeboardId: string;
 }
+
 export const getCourseNoticeboard = async ({
   userId,
   courseId,
   courseNoticeboardId,
-}: GetCourseNoticeboardProps) => {
-  try {   
-    const course = await prisma.course.findUnique({
-      where: {
-        isPublished: true,
-        id: courseId,
-      },   
-    });
-    const courseNoticeboard = await prisma.courseNoticeboard.findUnique({
-      where: {
-        id: courseNoticeboardId,
-        isPublished: true,
-      },
-    });
+}: GetCourseNoticeboardParams): Promise<CourseNoticeboardDetail> => {
+  try {
+    const [course, courseNoticeboard] = await Promise.all([
+      prisma.course.findUnique({
+        where: { id: courseId, isPublished: true },
+      }),
+      prisma.courseNoticeboard.findUnique({
+        where: { id: courseNoticeboardId, isPublished: true },
+      }),
+    ]);
+
     if (!course || !courseNoticeboard) {
       throw new Error("Course or Course Noticeboard not found");
     }
-    let attachments: Attachment[] = [];
-    let nextCourseNoticeboard: CourseNoticeboard | null = null;
-    if (userId) {
-      attachments = await prisma.attachment.findMany({
+
+    const [attachments, nextCourseNoticeboard] = await Promise.all([
+      userId
+        ? prisma.attachment.findMany({
+            where: { courseId },
+            orderBy: { createdAt: "desc" },
+          })
+        : [],
+      prisma.courseNoticeboard.findFirst({
         where: {
-          courseId: courseId,
-        },
-      });
-    }
-    if (courseNoticeboard.userId || userId) {    
-      nextCourseNoticeboard = await prisma.courseNoticeboard.findFirst({
-        where: {
-          courseId: courseId,
+          courseId,
           isPublished: true,
-          position: {
-            gt: courseNoticeboard?.position ?? 0,
-          },
+          position: { gt: courseNoticeboard.position ?? 0 },
         },
-        orderBy: {
-          position: "asc",
-        },
-      });
-    }
+        orderBy: { position: "asc" },
+      }),
+    ]);
 
     return {
       courseNoticeboard,
-      course,      
+      course,
       attachments,
-      nextCourseNoticeboard,  
+      nextCourseNoticeboard,
     };
   } catch (error) {
-    console.log("[GET_TUTOR_ERROR]", error);
+    console.error("[GET_COURSE_NOTICEBOARD]", error);
     return {
       courseNoticeboard: null,
-      course: null,      
+      course: null,
       attachments: [],
-      nextCourseNoticeboard: null,          
+      nextCourseNoticeboard: null,
     };
   }
 };

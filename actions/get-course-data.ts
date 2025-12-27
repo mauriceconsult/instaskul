@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
 import { CourseWithProgressWithAdmin } from "./get-courses";
-import { getProgress } from "./get-progress";
+import { getCourseProgress } from "./get-course-progress";
 
 export async function getCourseData(
   courseId: string
@@ -72,7 +72,7 @@ export async function getCourseData(
     return null;
   }
 
-  const progress: number = await getProgress(user.id, courseId);
+  const progress: number = await getCourseProgress(user.id, courseId);
   const courseWithProgress: CourseWithProgressWithAdmin = {
     ...course,
     admin: course.admin,

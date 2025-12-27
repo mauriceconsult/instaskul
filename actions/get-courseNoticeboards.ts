@@ -1,39 +1,48 @@
+// actions/get-course-noticeboards.ts
 import { prisma } from "@/lib/db";
+import { CourseNoticeboard, Course } from "@prisma/client";
 
-interface GetCourseNoticeboardsParams {
+export type CourseNoticeboardWithCourse = CourseNoticeboard & {
+  course: (Course & {
+    courseNoticeboards: CourseNoticeboard[];
+  }) | null;  // ← Allow null
+};
+
+export type GetCourseNoticeboardsParams = {
   title?: string;
-  courseCourseCourseNoticeboardId?: string;
+  courseNoticeboardId?: string;
   courseId?: string;
   adminId?: string;
-  userId?: string; // Add userId
-}
+  userId?: string;
+};
 
 export const getCourseNoticeboards = async (
   params: GetCourseNoticeboardsParams
-) => {
+): Promise<CourseNoticeboardWithCourse[]> => {
   try {
     const {
       title,
-      courseCourseCourseNoticeboardId,
+      courseNoticeboardId,
       courseId,
       adminId,
-      userId,
     } = params;
 
     const courseNoticeboards = await prisma.courseNoticeboard.findMany({
       where: {
+        isPublished: true,
+        title: title
+          ? { contains: title, mode: "insensitive" }
+          : undefined,
+        id: courseNoticeboardId,
         courseId,
-        userId, // Add userId filter
-        course: { adminId },
-        ...(title && { title: { contains: title, mode: "insensitive" } }),
-        ...(courseCourseCourseNoticeboardId && {
-          id: courseCourseCourseNoticeboardId,
-        }),
+        course: adminId ? { adminId } : undefined,
       },
       include: {
         course: {
           include: {
-            courseNoticeboards: true, // For courseNoticeboardsLength
+            courseNoticeboards: {
+              where: { isPublished: true },
+            },
           },
         },
       },
@@ -44,10 +53,7 @@ export const getCourseNoticeboards = async (
 
     return courseNoticeboards;
   } catch (error) {
-    console.error(
-      `[${new Date().toISOString()} getCourseNoticeboards] Error:`,
-      error
-    );
+    console.error("[GET_COURSE_NOTICEBOARDS]", error);
     return [];
   }
 };

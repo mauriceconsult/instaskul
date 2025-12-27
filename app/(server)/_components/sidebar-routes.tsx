@@ -7,15 +7,16 @@ import { usePathname } from "next/navigation";
 const guestRoutes = [
     {
         icon: Layout,
-        label: "Home",
-        href: "/"
+        label: "Dashboard",
+        href: "/dashboard"
     },
     {
         icon: Compass,
         label: "Browse",
-        href: "/search"
+        href: "/dashboard/search"
     }
 ];
+
 const adminRoutes = [
   {
     icon: List,
@@ -28,10 +29,14 @@ const adminRoutes = [
     href: "/dashboard/analytics",
   },
 ];
+
 export const SidebarRoutes = () => {
     const pathname = usePathname();
-    const isAdminPage = pathname?.includes("/dashboard");
-    const routes = isAdminPage ? adminRoutes : guestRoutes;
+    
+    // Show admin routes when in admin section
+    const isAdminSection = pathname?.includes("/dashboard/admins") || pathname?.includes("/dashboard/analytics");
+    
+    const routes = isAdminSection ? adminRoutes : guestRoutes;
     
     return ( 
         <div className="flex flex-col w-full">
@@ -44,6 +49,5 @@ export const SidebarRoutes = () => {
                 />
             ))}
         </div>
-     );
+    );
 }
- 

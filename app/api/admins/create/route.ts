@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(admin);
   } catch (error) {
-    console.log("[CREATE]", error);
+    console.log("[CREATE_ADMIN]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

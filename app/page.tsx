@@ -12,16 +12,13 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-8 bg-gradient-to-b from-blue-50 to-white">
-      <h1 className="text-5xl font-bold text-gray-900">
+    <main className="min-h-screen flex flex-col items-center justify-center gap-8 bg-gradient-to-b from-blue-50 to-white">    
         <span>
           <InstaSkulLogo/>
-        </span>
-         Knowledge Management Simplified        
-      </h1>
+        </span>     
 
       <p className="text-xl text-gray-600 max-w-2xl text-center">
-        knowledge managers, schools and freelance tutors.
+        Home for knowledge managers, schools and freelance tutors.
       </p>
 
       <div className="flex gap-6 mt-8">

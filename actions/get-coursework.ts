@@ -1,62 +1,47 @@
 import { prisma } from "@/lib/db";
-import { Attachment, Coursework } from "@prisma/client";
+import { Coursework, Attachment, Course } from "@prisma/client";
 
-interface GetCourseworkProps {
+
+export type CourseworkWithRelations = Coursework & {
+  course: Course | null;
+  attachments: Attachment[];
+  getCourseworkProgress?: number;
+};
+
+export type GetCourseworksParams = {
   userId: string;
-  courseId: string;
-  courseworkId: string;
-}
-export const getCoursework = async ({
-  userId,
-  courseId,
-  courseworkId,
-}: GetCourseworkProps) => {
-  try {
-    const course = await prisma.course.findUnique({
-      where: { id: courseId, isPublished: true },
-    });
-    const coursework = await prisma.coursework.findUnique({
-      where: { id: courseworkId, isPublished: true },
-    });
-    if (!course || !coursework)
-      throw new Error("Faculty or Coursework not found");
+  title?: string;
+  courseId?: string;
+};
 
-    let attachments: Attachment[] = [];
-    let nextCoursework: Coursework | null = null;
-    if (userId) {
-      attachments = await prisma.attachment.findMany({
-        where: { courseId: courseId },
-      });
-    }
-    if (coursework.userId || userId) {
-      nextCoursework = await prisma.coursework.findFirst({
-        where: {
-          courseId: courseId,
-          isPublished: true,
-          position: { gt: coursework?.position ?? 0 },
+export const getCourseworks = async ({
+  userId,
+  title,
+  courseId,
+}: GetCourseworksParams): Promise<CourseworkWithRelations[]> => {
+  try {
+    const courseworks = await prisma.coursework.findMany({
+      where: {
+        isPublished: true,
+        title: title
+          ? { contains: title, mode: "insensitive" }
+          : undefined,
+        courseId,
+      },
+      include: {
+        course: true,
+        attachments: {
+          orderBy: { createdAt: "desc" },
         },
-        orderBy: { position: "asc" },
-      });
-    }
-    const userProgress = await prisma.userProgress.findUnique({
-      where: { userId_courseworkId: { userId, courseworkId } },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
-    return {
-      coursework,
-      courseId,
-      attachments,
-      nextCoursework,
-      userProgress,
-    };
+
+    return courseworks;
   } catch (error) {
-    console.log("[GET_COURSEWORK_ERROR]", error);
-    return {
-      coursework: null,
-      faculty: null,
-      course: null,
-      attachments: [],
-      nextCoursework: null,
-      userProgress: null,
-    };
+    console.error("[GET_COURSEWORKS]", error);
+    return [];
   }
 };

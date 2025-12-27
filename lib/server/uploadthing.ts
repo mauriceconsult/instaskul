@@ -1,4 +1,3 @@
-// lib/server/uploadthing.ts
 import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, FileRouter } from "uploadthing/next";
 

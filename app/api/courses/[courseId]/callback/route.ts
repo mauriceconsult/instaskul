@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest, context: any) {
   try {
-    const { courseId } = context.params as { courseId: string };
+    const { courseId } = (await context.params) as { courseId: string };
     const body = await req.json();
     const { userId, transactionId, status, amount } = body;
 
