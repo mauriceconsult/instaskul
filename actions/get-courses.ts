@@ -6,15 +6,16 @@ import { getCourseProgress } from "./get-course-progress";
 
 export interface CourseWithProgressWithAdmin extends Course {
   admin: Admin | null;
-  tutors: {
-    id: string;
-    title: string;
-    isFree: boolean;
-    position: number;
-    muxData?: {
-      playbackId: string | null;
-    } | null;
-  }[];
+tutors: {
+  id: string;
+  title: string;
+  position: number;
+  isFree: boolean;
+  muxData: {
+    playbackId: string | null;
+  } | null;
+}[];
+
   progress: number | null;
   tuition: Tuition | null;
   tuitions: Tuition[];

@@ -81,7 +81,13 @@ export async function getCourseData(
   const courseWithProgressWithAdmin: CourseWithProgressWithAdmin = {
     ...course,
     admin: course.admin,
-    tutors: course.tutors,
+    tutors: course.tutors.map((tutor) => ({
+  id: tutor.id,
+  title: tutor.title,
+  position: tutor.position,
+  isFree: tutor.isFree ?? false, // 🔑 normalize null → boolean
+  muxData: tutor.muxData,
+})),
     progress,
     tuition:
       course.tuitions.find(
