@@ -18,21 +18,21 @@ export async function getAdminData(adminId: string) {
         include: {
           admin: true,
 
-          tutors: {
-            where: { isPublished: true },
-            orderBy: { position: "asc" },
-            select: {
-              id: true,
-              title: true,
-              isFree: true,
-              position: true,
-              muxData: {
-                select: {
-                  playbackId: true,
-                },
-              },
-            },
-          },
+     tutors: {
+  where: { isPublished: true },
+  select: {
+    id: true,
+    title: true,
+    isFree: true,
+    position: true,
+    muxData: {
+      select: {
+        playbackId: true,
+      },
+    },
+  },
+},
+
 
           tuitions: {
             where: {
