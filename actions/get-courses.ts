@@ -22,7 +22,6 @@ tutors: {
   userProgress: UserProgress[];
 }
 
-
 export type GetCoursesParams = {
   userId: string;
   title?: string;
