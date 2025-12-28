@@ -1,58 +1,23 @@
-"use client";
-
-import { Course, Tutor, UserProgress } from "@prisma/client";
-import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tutor, Course } from "@prisma/client";
 import { Menu } from "lucide-react";
-import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { CourseSidebar } from "./course-sidebar";
+import CourseSidebar from "./course-sidebar";
 
 interface CourseMobileSidebarProps {
-  course: Course & {
-    tutors: (Tutor & {
-      userProgress: UserProgress[] | null;
-    })[];
-  };
-  progressCount: number;
-  isEnrolled: boolean;
+    course: Course & {
+            tutors: (Tutor)[]
+        }
 }
-
-export const CourseMobileSidebar = ({
-  course,
-  progressCount,
-  isEnrolled,
-}: CourseMobileSidebarProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  console.log(
-    "[CourseMobileSidebar] Course:",
-    course.id,
-    "Progress:",
-    progressCount,
-    "Enrolled:",
-    isEnrolled
-  );
-
-  return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
-        console.log("[CourseMobileSidebar] Sheet toggled:", open);
-        setIsOpen(open);
-      }}
-    >
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-6 w-6" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-80">
-        <CourseSidebar
-          course={course}
-          progressCount={progressCount}
-          isEnrolled={isEnrolled}
-        />
-      </SheetContent>
-    </Sheet>
-  );
-};
+export const CourseMobileSidebar = ({course}: CourseMobileSidebarProps) => {
+    return (
+      <Sheet>
+        <SheetTrigger className="md:hidden pr-4 hover:opacity-75 transition">
+          <SheetTitle><Menu/></SheetTitle>
+        </SheetTrigger>
+        <SheetContent side={"left"} className="p-0 bg-white w-72">
+          <CourseSidebar course={course} progressCount={0} />
+        </SheetContent>
+      </Sheet>
+    );
+}
+ 

@@ -16,7 +16,6 @@ export const AdminSidebarItem = ({
   id,
   label,
   isCompleted,
-  adminId,
   isLocked,
 }: AdminSidebarItemProps) => {
   const pathname = usePathname();
@@ -26,7 +25,7 @@ export const AdminSidebarItem = ({
 
   const onClick = () => {
     if (!isLocked) {
-      router.push(`/admins/${adminId}/tutorials/${id}`);
+      router.push(`/admins/${id}/courses/${id}/tutors/${id}`);
     }
   };
 

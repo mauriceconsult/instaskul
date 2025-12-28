@@ -3,49 +3,46 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { AdminNavbar } from "./_components/admin-navbar";
 import { AdminSidebar } from "./_components/admin-sidebar";
-import { headers } from "next/headers";
 
-export default async function AdminLayout({
+export default async function AdminIdLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ adminId: string }>;
 }) {
   const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  // Get current pathname to detect if we're on the admin homepage
-  const pathname = headers().get("x-pathname") || "";
-  const isAdminHomepage = pathname === "dashboard/admins";
-
-  // Only enforce admin existence on pages OTHER than the homepage
-  if (!isAdminHomepage) {
-    const admin = await prisma.admin.findFirst({
-      where: { userId },
-    });
-
-    if (!admin) {
-      // Send to homepage to create/setup admin
-      redirect("/dashboard/admins");
-    }
+  
+  if (!userId) {
+    return redirect("/sign-in");
   }
 
-  // Fetch admin for navbar/sidebar (safe — null if on homepage)
-  const admin = await prisma.admin.findFirst({
-    where: { userId },
+  const { adminId } = await params;
+
+  const admin = await prisma.admin.findUnique({
+    where: {
+      id: adminId,
+      userId, // Ensure user owns this admin
+    },
   });
+
+  if (!admin) {
+    return redirect("/admins");
+  }
 
   return (
     <div className="h-full">
-      <div className="fixed inset-x-0 top-0 z-50 h-[80px] border-b bg-white">
-        {admin && <AdminNavbar admin={admin} />}
+      {/* Admin Navbar */}
+      <div className="fixed inset-x-0 top-0 z-50 h-[80px] border-b bg-white md:pl-80">
+        <AdminNavbar admin={admin} />
       </div>
 
+      {/* Admin Sidebar */}
       <div className="hidden md:flex fixed inset-y-0 z-40 w-80 pt-[80px]">
-        {admin && <AdminSidebar admin={admin} />}
+        <AdminSidebar admin={admin} />
       </div>
 
-      {admin && <AdminNavbar admin={admin} />}
-
+      {/* Main Content */}
       <main className="md:pl-80 pt-[80px] h-full bg-gray-50">
         {children}
       </main>

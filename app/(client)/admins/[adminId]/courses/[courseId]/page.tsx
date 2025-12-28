@@ -3,11 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 
 interface PageProps {
-  params: Promise<{ courseId: string }>;
+  params: Promise<{ adminId: string; courseId: string }>;
 }
 
 export default async function StudentCoursePage({ params }: PageProps) {
-  const { courseId } = await params;
+  const { adminId, courseId } = await params;
   const { userId: currentUserId } = await auth();
 
   if (!currentUserId) {
@@ -70,7 +70,7 @@ export default async function StudentCoursePage({ params }: PageProps) {
                             </span>
                           ) : (
                             <Link
-                              href={`/courses/${courseId}/tutorials/${tutorial.id}/assignments/${assignment.id}`}
+                              href={`dashboard/admins/${adminId}/courses/${courseId}/tutors/${tutorial.id}/assignments/${assignment.id}`}
                               className="text-blue-600 hover:underline font-medium text-sm"
                             >
                               Submit Now

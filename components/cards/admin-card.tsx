@@ -17,9 +17,10 @@ export const AdminCard: FC<AdminCardProps> = ({
   title,
   imageUrl,  
   school,
+  description
 }) => {
   return (
-    <Link href={`/admins/${id}`}>
+    <Link href={`/admins/${id}/courses/${id}`}>
       <div className="group hover:shadow-md transition overflow-hidden border rounded-lg p-3 h-full">
         <div className="relative w-full aspect-video rounded-md overflow-hidden">
           <Image fill className="object-cover" alt={title} src={imageUrl} />
@@ -30,7 +31,10 @@ export const AdminCard: FC<AdminCardProps> = ({
           </div>
           <p className="text-xs text-muted-foreground">
             {school || "No school"}
-          </p>         
+          </p>
+          <span>
+            {description}
+          </span>
         </div>
       </div>
     </Link>

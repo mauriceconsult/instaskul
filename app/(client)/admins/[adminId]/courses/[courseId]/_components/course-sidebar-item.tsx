@@ -1,55 +1,55 @@
+// app/(client)/admins/[adminId]/courses/[courseId]/_components/course-sidebar-item.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CheckCircle, Lock } from "lucide-react";
+import { CircleArrowRight } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 interface CourseSidebarItemProps {
-  id: string;
   label: string;
-  isCompleted: boolean;
+  id: string;
   courseId: string;
-  isLocked: boolean;
+  adminId?: string;
 }
 
-export const CourseSidebarItem = ({
-  id,
-  label,
-  isCompleted,
-  courseId,
-  isLocked,
-}: CourseSidebarItemProps) => {
+const CourseSidebarItem = ({ label, id, courseId, adminId }: CourseSidebarItemProps) => {
   const pathname = usePathname();
   const router = useRouter();
-
+  const Icon = CircleArrowRight;
+  
   const isActive = pathname?.includes(id);
-
+  
   const onClick = () => {
-    if (!isLocked) {
-      router.push(`/courses/${courseId}/tutorials/${id}`);
-    }
+    // Extract adminId from current path if not provided
+    const pathAdminId = adminId || pathname?.split('/')[2];
+    router.push(`/admins/${pathAdminId}/courses/${courseId}/tutors/${id}`);
   };
 
   return (
     <button
       onClick={onClick}
       type="button"
-      disabled={isLocked}
       className={cn(
         "flex items-center gap-x-2 text-slate-500 text-sm font-[500] pl-6 transition-all hover:text-slate-600 hover:bg-slate-300/20",
-        isActive && "text-slate-700 bg-slate-200/20",
-        isCompleted && "text-emerald-700",
-        isLocked && "opacity-50 cursor-not-allowed"
+        isActive &&
+          "text-slate-700 bg-slate-200/20 hover:bg-slate-200/20 hover:text-slate-700"
       )}
     >
       <div className="flex items-center gap-x-2 py-4">
-        {isCompleted ? (
-          <CheckCircle className="h-5 w-5" />
-        ) : (
-          <Lock className="h-5 w-5" />
-        )}
-        <span>{label}</span>
+        <Icon
+          size={22}
+          className={cn("text-slate-500", isActive && "text-slate-700")}
+        />
+        {label}
       </div>
+      <div
+        className={cn(
+          "ml-auto opacity-0 border-2 border-slate-700 h-full transition-all",
+          isActive && "opacity-100"
+        )}
+      />
     </button>
   );
 };
+
+export default CourseSidebarItem;
