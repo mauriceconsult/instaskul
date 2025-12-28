@@ -10,13 +10,20 @@ export async function uploadVideo({ tutorId }: { tutorId: string }) {
     throw new Error("Unauthorized");
   }
 
-  // Simulate uploading to Mux
-  const playbackId = `mux_${uuidv4()}`; // Replace with actual Mux API call
+  // Simulate upload to Mux
+  const playbackId = `mux_${uuidv4()}`;
 
-  // Update tutor with playbackId
-  await prisma.tutor.update({
-    where: { id: tutorId },
-    data: { playbackId },
+  // Upsert muxData for tutor
+  await prisma.muxData.upsert({
+    where: { tutorId },
+    update: {
+      playbackId,
+    },
+    create: {
+      tutorId,
+      assetId: `asset_${uuidv4()}`, // replace with real Mux assetId
+      playbackId,
+    },
   });
 
   return playbackId;

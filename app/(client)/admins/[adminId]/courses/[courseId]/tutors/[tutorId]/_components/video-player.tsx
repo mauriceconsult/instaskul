@@ -1,17 +1,15 @@
 "use client";
 
-import axios from "axios";
 import MuxPlayer from "@mux/mux-player-react";
-import React from "react";
-import { useState } from "react";
-
-import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import axios from "axios";
 import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
-  playbackId: string;
+  playbackId: string | null;
   courseId: string;
   tutorialId: string;
   nextTutorialId?: string;
@@ -19,6 +17,7 @@ interface VideoPlayerProps {
   completeOnEnd: boolean;
   title: string;
 }
+
 export const VideoPlayer = ({
   playbackId,
   courseId,
@@ -30,48 +29,71 @@ export const VideoPlayer = ({
 }: VideoPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
   const router = useRouter();
+
   const onEnd = async () => {
+    if (!completeOnEnd) return;
+
     try {
-      if (completeOnEnd) {
-        await axios.put(`/api/courses/${courseId}/tutorials/${tutorialId}/progress`, {
-          isCompleted: true,
-        });
-        if (!nextTutorialId) {
-          toast.success("Progress updated");
-          router.refresh();
-          if (nextTutorialId) {
-            router.push(`/courses/${courseId}/tutorials/${nextTutorialId}`)
-          }
-        }
+      await axios.put(`/api/courses/${courseId}/tutorials/${tutorialId}/progress`, {
+        isCompleted: true,
+      });
+
+      toast.success("Tutorial completed!");
+      router.refresh();
+
+      if (nextTutorialId) {
+        router.push(`/courses/${courseId}/tutorials/${nextTutorialId}`);
       }
     } catch {
-      toast.error("Something went wrong.")
+      toast.error("Failed to mark as complete");
     }
+  };
+
+  // Locked state
+  if (isLocked) {
+    return (
+      <div className="relative aspect-video bg-slate-800 rounded-lg flex items-center justify-center flex-col gap-y-4 text-white">
+        <Lock className="h-12 w-12" />
+        <p className="text-xl font-medium">This tutorial is locked</p>
+        <p className="text-sm text-center px-8">
+          Complete previous tutorials to unlock this one.
+        </p>
+      </div>
+    );
   }
+
+  // Processing state (no playbackId yet)
+  if (!playbackId) {
+    return (
+      <div className="relative aspect-video bg-slate-100 rounded-lg flex items-center justify-center flex-col gap-y-4">
+        <Loader2 className="h-12 w-12 animate-spin text-slate-500" />
+        <div className="text-center">
+          <p className="text-lg font-medium text-slate-700">Processing video...</p>
+          <p className="text-sm text-slate-500 mt-2">
+            This may take a few minutes. Refresh to check status.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Ready to play
   return (
     <div className="relative aspect-video">
-      {!isReady && !isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
-          <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-800 rounded-lg">
+          <Loader2 className="h-10 w-10 animate-spin text-white" />
         </div>
       )}
-      {isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-800 flex-col gap-y-2 text-secondary">
-          <Lock className="h-8 w-8" />
-          <p className=" text-sm">This Tutorial is locked.</p>
-        </div>
-      )}
-      {!isLocked && (
-        <MuxPlayer
-          title={title}
-          className={cn(!isReady && "hidden")}
-          onCanPlay={() => setIsReady(true)}
-          onEnded={onEnd}
-          autoPlay
-          playbackId={playbackId}
-        />
-      )}
+      <MuxPlayer
+        title={title}
+        playbackId={playbackId}
+        onCanPlay={() => setIsReady(true)}
+        onEnded={onEnd}
+        autoPlay={false}
+        className={cn("rounded-lg", !isReady && "hidden")}
+        style={{ width: "100%", height: "100%" }}
+      />
     </div>
   );
-
 };

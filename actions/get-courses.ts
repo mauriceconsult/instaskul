@@ -6,12 +6,21 @@ import { getCourseProgress } from "./get-course-progress";
 
 export interface CourseWithProgressWithAdmin extends Course {
   admin: Admin | null;
-  tutors: Pick<Tutor, "id" | "title" | "isFree" | "position" | "playbackId">[];
+  tutors: {
+    id: string;
+    title: string;
+    isFree: boolean;
+    position: number;
+    muxData?: {
+      playbackId: string | null;
+    } | null;
+  }[];
   progress: number | null;
   tuition: Tuition | null;
   tuitions: Tuition[];
   userProgress: UserProgress[];
 }
+
 
 export type GetCoursesParams = {
   userId: string;
@@ -37,13 +46,18 @@ export const getCourses = async ({
         admin: true,
         tutors: {
           where: { isPublished: true },
-          select: {
-            id: true,
-            title: true,
-            isFree: true,
-            position: true,
-            playbackId: true,
-          },
+        select: {
+  id: true,
+  title: true,
+  isFree: true,
+  position: true,
+  muxData: {
+    select: {
+      playbackId: true,
+    },
+  },
+},
+
           orderBy: { position: "asc" },
         },
         tuitions: {

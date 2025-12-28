@@ -18,17 +18,22 @@ export async function getCourseData(
     where: { id: courseId },
     include: {
       admin: true,
-      tutors: {
-        where: { isPublished: true },
-        select: {
-          id: true,
-          title: true,
-          isPublished: true,
-          isFree: true,
-          position: true,
-          playbackId: true,
-        },
+   tutors: {
+  where: { isPublished: true },
+  select: {
+    id: true,
+    title: true,
+    isPublished: true,
+    isFree: true,
+    position: true,
+    muxData: {
+      select: {
+        playbackId: true,
       },
+    },
+  },
+},
+
       tuitions: {
         where: { userId: user.id },
         select: {
@@ -73,7 +78,7 @@ export async function getCourseData(
   }
 
   const progress: number = await getCourseProgress(user.id, courseId);
-  const courseWithProgress: CourseWithProgressWithAdmin = {
+  const courseWithProgressWithAdmin: CourseWithProgressWithAdmin = {
     ...course,
     admin: course.admin,
     tutors: course.tutors,
@@ -88,7 +93,7 @@ export async function getCourseData(
 
   console.log(`[getCourseData] Course response:`, {
     courseId,
-    course: courseWithProgress,
+    course: courseWithProgressWithAdmin,
   });
-  return courseWithProgress;
+  return courseWithProgressWithAdmin;
 }

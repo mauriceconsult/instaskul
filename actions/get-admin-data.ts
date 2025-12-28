@@ -7,7 +7,6 @@ import { CourseWithProgressWithAdmin } from "./get-courses";
 export async function getAdminData(adminId: string) {
   const user = await currentUser();
   if (!user) {
-    console.error("[GET_ADMIN_DATA_ERROR] User not authenticated");
     throw new Error("User not authenticated");
   }
 
@@ -15,49 +14,39 @@ export async function getAdminData(adminId: string) {
     where: { id: adminId },
     include: {
       courses: {
+        where: { isPublished: true },
         include: {
           admin: true,
+
           tutors: {
+            where: { isPublished: true },
+            orderBy: { position: "asc" },
             select: {
               id: true,
               title: true,
-              isPublished: true,
               isFree: true,
               position: true,
-              playbackId: true,
+              muxData: {
+                select: {
+                  playbackId: true,
+                },
+              },
             },
           },
+
           tuitions: {
-            select: {
-              id: true,
-              userId: true,
-              enrolleeUserId: true,
-              courseId: true,
-              amount: true,
-              status: true,
-              partyId: true,
-              username: true,
-              transactionId: true,
-              isActive: true,
-              isPaid: true,
-              transId: true,
-              createdAt: true,
-              updatedAt: true,
+            where: {
+              OR: [
+                { userId: user.id },
+                { enrolleeUserId: user.id },
+              ],
             },
           },
+
           userProgress: {
+            where: { userId: user.id },
             select: {
-              id: true,
-              userId: true,
-              adminId: true,
-              courseId: true,
-              tutorId: true,
-              courseworkId: true,
-              assignmentId: true,
-              isEnrolled: true,
               isCompleted: true,
-              createdAt: true,
-              updatedAt: true,
             },
           },
         },
@@ -65,35 +54,29 @@ export async function getAdminData(adminId: string) {
     },
   });
 
-  if (!admin) {
-    console.error("[GET_ADMIN_DATA_ERROR] Admin not found");
-    throw new Error("Admin not found");
+  if (!admin || !admin.courses) {
+    throw new Error("Admin or courses not found");
   }
 
-  const courses: CourseWithProgressWithAdmin[] = admin.courses.map((course: any) => {
-    const totalTutors: number = course.tutors.length;
-    const completedTutors: number = course.userProgress.filter(
-      (progress: { isCompleted: any; }) => progress.isCompleted
+  const courses: CourseWithProgressWithAdmin[] = admin.courses.map((course) => {
+    const totalTutors = course.tutors.length;
+    const completedTutors = course.userProgress.filter(
+      (p) => p.isCompleted
     ).length;
-    const progress: number =
-      totalTutors > 0 ? (completedTutors / totalTutors) * 100 : 0;
 
-    const tuition =
-      course.tuitions.find(
-        (t: { userId: string; enrolleeUserId: string; }) => t.userId === user.id || t.enrolleeUserId === user.id
-      ) || null;
+    const progress =
+      totalTutors > 0
+        ? Math.round((completedTutors / totalTutors) * 100)
+        : 0;
+
+    const tuition = course.tuitions[0] ?? null;
 
     return {
       ...course,
-      admin: course.admin,
-      tutors: course.tutors,
       progress,
       tuition,
-      userProgress: course.userProgress,
-      tuitions: course.tuitions,
     } as CourseWithProgressWithAdmin;
   });
 
-  console.log(`[getAdminData] Admin response:`, { adminId, courses });
   return { adminId, courses };
 }
