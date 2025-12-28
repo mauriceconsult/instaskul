@@ -40,7 +40,7 @@ const TutorIdPage = async ({
 
   if (!tutor) {
     console.error(`Tutor not found: ${tutorId}`);
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const courses = await prisma.course.findMany({
