@@ -13,6 +13,7 @@ import { TutorVideoForm } from "./_components/tutor-video-form";
 import { TutorAssignmentsForm } from "./_components/tutor-assignment-form";
 import { TutorAttachmentsForm } from "./_components/tutor-attachments-form";
 import { TutorAccessForm } from "./_components/tutor-access-form";
+import { TutorObjectiveForm } from "./_components/tutor-objective-form";
 
 const TutorIdPage = async ({
   params,
@@ -33,6 +34,7 @@ const TutorIdPage = async ({
     include: {
       attachments: { orderBy: { createdAt: "desc" } },
       assignments: { orderBy: { position: "asc" } },
+      muxData: true,
     },
   });
 
@@ -49,6 +51,7 @@ const TutorIdPage = async ({
   const requiredFields = [
     tutor.title,
     tutor.description,
+    tutor.objective,
     tutor.videoUrl,
     tutor.courseId,
   ];
@@ -63,7 +66,7 @@ const TutorIdPage = async ({
       {!tutor.isPublished && (
         <Banner
           variant="warning"
-          label="This tutorial is unpublished. Complete all required fields to publish."
+          label="This tutorial is unpublished. Complete the required* fields to publish."
         />
       )}
       <div className="p-6">
@@ -114,6 +117,12 @@ const TutorIdPage = async ({
                 label: course.title,
                 value: course.id,
               }))}
+            />
+            <TutorObjectiveForm
+              initialData={tutor}
+              adminId={adminId}
+              courseId={courseId}
+              tutorId={tutorId}
             />
             <TutorDescriptionForm
               initialData={tutor}

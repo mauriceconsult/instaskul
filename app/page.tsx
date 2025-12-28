@@ -4,9 +4,8 @@ import { redirect } from "next/navigation";
 import { InstaSkulLogo } from "@/components/instaskul-logo";
 
 export default async function HomePage() {
-  const { userId } = await auth();
-  
-  // If user is already signed in, redirect to dashboard
+  const { userId } = await auth();  
+
   if (userId) {
     redirect("/dashboard");
   }
@@ -26,7 +25,7 @@ export default async function HomePage() {
           href="/sign-in"
           className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition"
         >
-          Sign In
+          Log In
         </Link>
         <Link
           href="/sign-up"

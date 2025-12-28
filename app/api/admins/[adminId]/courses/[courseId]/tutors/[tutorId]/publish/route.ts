@@ -1,4 +1,3 @@
-// app/api/admins/[adminId]/courses/[courseId]/tutors/[tutorId]/publish/route.ts
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";

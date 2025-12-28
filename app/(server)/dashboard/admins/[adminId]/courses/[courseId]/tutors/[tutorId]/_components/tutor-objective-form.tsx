@@ -19,38 +19,38 @@ import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Tutor } from '@prisma/client';
 
-interface TutorDescriptionFormProps {
+interface TutorObjectiveFormProps {
   initialData: Tutor;
   adminId: string;
   courseId: string;
   tutorId: string;
 }
 const formSchema = z.object({
-  description: z.string().min(1, {
-    message: "Tutor description is required.",
+  objective: z.string().min(1, {
+    message: "Objective is required.",
   }),
 });
 
-export const TutorDescriptionForm = ({
+export const TutorObjectiveForm = ({
   initialData,
   adminId,
   courseId,
   tutorId,
-}: TutorDescriptionFormProps) => {
+}: TutorObjectiveFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: initialData?.description || "",
+      objective: initialData?.objective || "",
     },
   });
   const { isSubmitting, isValid } = form.formState;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/admins/${adminId}/courses/${courseId}/tutors/${tutorId}/descriptions`, values);
-      toast.success("Tutor updated.");
+      await axios.patch(`/api/admins/${adminId}/courses/${courseId}/tutors/${tutorId}/objectives`, values);
+      toast.success("Objective updated.");
       toggleEdit();
       router.refresh();
     } catch {
@@ -60,14 +60,14 @@ export const TutorDescriptionForm = ({
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Tutorial description
+        Tutorial objective
         <Button onClick={toggleEdit} variant="ghost">
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit description
+              Edit objective
             </>
           )}
         </Button>
@@ -76,10 +76,10 @@ export const TutorDescriptionForm = ({
         <p
           className={cn(
             "text-sm mt-2",
-            !initialData.description && "text-slate-500 italic"
+            !initialData.objective && "text-slate-500 italic"
           )}
         >
-          {initialData.description || "Brief overview of the tutorial."}
+          {initialData.objective || "Highlight the goal(s) of the tutorial."}
         </p>
       )}
       {isEditing && (
@@ -90,13 +90,13 @@ export const TutorDescriptionForm = ({
           >
             <FormField
               control={form.control}
-              name="description"
+              name="objective"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Textarea
                       disabled={isSubmitting}
-                      placeholder="e.g., 'This tutorial demonstrates...'"
+                      placeholder="e.g., 'By the end of this tutorial you will be able to...'"
                       {...field}
                     />
                   </FormControl>

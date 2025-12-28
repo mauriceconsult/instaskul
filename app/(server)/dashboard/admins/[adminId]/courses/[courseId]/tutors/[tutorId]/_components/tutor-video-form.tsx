@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FileUpload } from "@/components/file-upload";
 import { Tutor, MuxData } from '@prisma/client';
+import MuxPlayer from "@mux/mux-player-react";
 
 interface TutorVideoFormProps {
   initialData: Tutor & { muxData?: MuxData | null };
@@ -31,13 +32,12 @@ export const TutorVideoForm = ({
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      // Fixed: removed /videos from the end
+    try {     
       await axios.patch(
         `/api/admins/${adminId}/courses/${courseId}/tutors/${tutorId}`,
         values
       );
-      toast.success("Tutorial updated.");
+      toast.success("Video uploaded! Processing may take a few minutes.");
       toggleEdit();
       router.refresh();
     } catch (error) {
@@ -48,40 +48,65 @@ export const TutorVideoForm = ({
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
-      <div className="font-medium text-sm flex items-center justify-between">
-        Tutorial video (at least one tutorial is required)*
+      <div className="font-medium flex items-center justify-between">
+        Tutorial video*
         <Button onClick={toggleEdit} variant="ghost">
           {isEditing && <>Cancel</>}
           {!isEditing && !initialData.videoUrl && (
             <>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Add tutorial video
+              Add video
             </>
           )}
           {!isEditing && initialData.videoUrl && (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit tutorial video
+              Edit video
             </>
           )}
         </Button>
       </div>
 
-      {!isEditing && !initialData.videoUrl && (
-        <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
-          <VideoIcon className="h-10 w-10 text-slate-500" />
-        </div>
-      )}
-
-      {!isEditing && initialData.videoUrl && (
-        <div className="relative aspect-video mt-2">
-          <p className="text-sm text-slate-600">Video uploaded</p>
-          {initialData.muxData?.playbackId && (
-            <div className="text-xs text-muted-foreground mt-2">
-              Playback ID: {initialData.muxData.playbackId}
+      {!isEditing && (
+        <>
+          {!initialData.videoUrl && (
+            <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
+              <VideoIcon className="h-10 w-10 text-slate-500" />
             </div>
           )}
-        </div>
+          
+          {initialData.videoUrl && !initialData.muxData?.playbackId && (
+            <div className="relative aspect-video mt-2 bg-slate-100 rounded-md flex items-center justify-center border-2 border-slate-300">
+              <div className="text-center p-8">
+                <div className="animate-pulse mb-4">
+                  <VideoIcon className="h-12 w-12 text-slate-400 mx-auto" />
+                </div>
+                <p className="text-sm font-medium text-slate-700">Processing video...</p>
+                <p className="text-xs text-slate-500 mt-2">
+                  This usually takes 1-3 minutes depending on video length
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.refresh()}
+                  className="mt-4"
+                >
+                  Refresh to check status
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {initialData.muxData?.playbackId && (
+            <div className="relative aspect-video mt-2">
+              <MuxPlayer
+                playbackId={initialData.muxData.playbackId}
+                title={initialData.title || "Tutorial Video"}
+                className="w-full h-full"
+              />
+            </div>
+          )}
+        </>
       )}
 
       {isEditing && (
@@ -95,15 +120,16 @@ export const TutorVideoForm = ({
             }}
           />
           <div className="text-xs text-muted-foreground mt-4">
-            Upload a tutorial video. Supported formats: MP4, MOV, AVI
+            Upload tutorial video. Supported formats: MP4, MOV, AVI, WEBM
           </div>
         </div>
       )}
 
-      {initialData.videoUrl && !isEditing && (
-        <div className="text-xs text-muted-foreground mt-2">
-          Videos can take a few minutes to process after uploading. 
-          If you don't see the video right away, please check back shortly or refresh the page.
+      {initialData.videoUrl && !isEditing && !initialData.muxData?.playbackId && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mt-2">
+          <p className="text-xs text-yellow-800">
+            <strong>Note:</strong> Video processing in progress. The video player will appear once processing is complete.
+          </p>
         </div>
       )}
     </div>
