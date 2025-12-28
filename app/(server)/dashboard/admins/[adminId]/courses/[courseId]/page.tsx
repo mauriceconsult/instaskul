@@ -37,7 +37,7 @@ const CourseIdPage = async ({
     },
   });
 
-  if (!course) redirect("/");
+  if (!course) redirect("/dashboard");
 
   const admins = await prisma.admin.findMany({
     orderBy: { title: "asc" },
