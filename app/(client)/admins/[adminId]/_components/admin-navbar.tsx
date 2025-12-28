@@ -3,7 +3,6 @@
 import { Admin } from "@prisma/client";
 import { AdminMobileSidebar } from "./admin-mobile-sidebar";
 
-
 interface AdminNavbarProps {
   admin: Admin;
 }
@@ -19,6 +18,7 @@ export const AdminNavbar = ({ admin }: AdminNavbarProps) => {
   );
 };
 
-AdminNavbar.MobileTrigger = function MobileTrigger({ admin }: { admin: Admin }) {
+// Export as a separate component instead
+export const AdminNavbarMobileTrigger = ({ admin }: { admin: Admin }) => {
   return <AdminMobileSidebar admin={admin} />;
 };

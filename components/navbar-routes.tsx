@@ -64,7 +64,7 @@ const NavbarRoutes = ({ className, adminId, courseId }: NavbarRoutesProps) => {
             onClick={() => router.push("/dashboard/search")}
           >
             <LogOut className="h-4 w-4 mr-2" />
-            Exit to Learner View
+            Exit 
           </Button>
         )}
 

@@ -44,7 +44,7 @@ export default async function AdminLayout({
         {admin && <AdminSidebar admin={admin} />}
       </div>
 
-      {admin && <AdminNavbar.MobileTrigger admin={admin} />}
+      {admin && <AdminNavbar admin={admin} />}
 
       <main className="md:pl-80 pt-[80px] h-full bg-gray-50">
         {children}
