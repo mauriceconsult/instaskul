@@ -1,3 +1,4 @@
+// app/(client)/admins/[adminId]/courses/[courseId]/layout.tsx
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -39,6 +40,9 @@ export default async function CourseLayout({
         include: {
           userProgress: {
             where: { userId },
+            select: {
+              isCompleted: true, // ← Add this select
+            },
           },
         },
         orderBy: { position: "asc" },
@@ -55,7 +59,11 @@ export default async function CourseLayout({
   return (
     <div className="h-full">
       <div className="h-[80px] md:pl-80 fixed inset-y-0 w-full z-50">
-        <CourseNavbar course={course} />
+       <CourseNavbar 
+    course={course} 
+    progressCount={courseProgressCount}
+    adminId={adminId}
+  />
       </div>
       <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50">
         <CourseSidebar 
