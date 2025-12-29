@@ -1,4 +1,3 @@
-// app/(client)/admins/[adminId]/courses/[courseId]/_components/course-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -19,14 +18,14 @@ interface CourseSidebarProps {
   };
   courseProgressCount: number;
   courseworkProgressCount: number;
-  adminId: string;
+  adminId: string; 
 }
 
 export const CourseSidebar = ({ 
   course, 
   courseProgressCount,
   courseworkProgressCount,
-  adminId 
+  adminId,
 }: CourseSidebarProps) => {
   const pathname = usePathname();
 
@@ -38,17 +37,17 @@ export const CourseSidebar = ({
     },
     { 
       icon: Video, 
-      label: "All Tutorials", 
-      href: `/admins/${adminId}/courses/${course.id}/courses` 
+      label: "Tutorials", 
+      href: `/admins/${adminId}/courses/${course.id}/tutors` 
     },
     { 
       icon: Bell, 
-      label: "Noticeboards", 
-      href: `/admins/${adminId}/courses/${course.id}/noticeboards` 
+      label: "Course notices", 
+      href: `/admins/${adminId}/courses/${course.id}/coursenoticeboards` 
     },
     { 
       icon: ClipboardList, 
-      label: "Coursework", 
+      label: "Courseworks", 
       href: `/admins/${adminId}/courses/${course.id}/courseworks` 
     },
   ];

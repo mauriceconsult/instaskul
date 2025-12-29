@@ -1,4 +1,3 @@
-// app/(client)/admins/[adminId]/courses/[courseId]/_components/course-mobile-sidebar.tsx
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Course, Tutor, Coursework } from "@prisma/client";
 import { Menu } from "lucide-react";

@@ -12,7 +12,7 @@ import { CourseProgressButton } from "./_components/course-progress-button";
 const TutorIdPage = async ({
   params,
 }: {
-  params: Promise<{ courseId: string; tutorId: string }>;
+    params: Promise<{ adminId: string; courseId: string; tutorId: string }>;
 }) => {
   const { userId } = await auth();
   if (!userId) {
@@ -33,6 +33,7 @@ const TutorIdPage = async ({
     userId,
     tutorId: resolvedParams.tutorId,
     courseId: resolvedParams.courseId,
+    adminId: resolvedParams.adminId,
   });
 
   if (!tutorial || !course) {

@@ -1,4 +1,3 @@
-// app/(client)/admins/[adminId]/courses/[courseId]/_components/course-sidebar-item.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -15,8 +14,7 @@ interface CourseSidebarItemProps {
 const CourseSidebarItem = ({ label, id, courseId, adminId }: CourseSidebarItemProps) => {
   const pathname = usePathname();
   const router = useRouter();
-  const Icon = CircleArrowRight;
-  
+  const Icon = CircleArrowRight;  
   const isActive = pathname?.includes(id);
   
   const onClick = () => {

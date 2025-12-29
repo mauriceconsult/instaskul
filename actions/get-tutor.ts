@@ -1,83 +1,97 @@
 import { prisma } from "@/lib/db";
-import { Assignment, Attachment, Tutor } from "@prisma/client";
 
 interface GetTutorProps {
   userId: string;
-  courseId: string; 
+  adminId: string;
+  courseId: string;
   tutorId: string;
 }
+
 export const getTutor = async ({
   userId,
-  courseId,  
+  adminId,
+  courseId,
   tutorId,
 }: GetTutorProps) => {
   try {
-
-    const tuition = await prisma.tuition.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId,
-        },
-      },
-    });
-    const course = await prisma.course.findUnique({
-      where: {
-        isPublished: true,
-        id: courseId,
-      },
-      select: {
-        amount: true,
-      },
-    });
+    // Get tutorial first to verify it exists
     const tutorial = await prisma.tutor.findUnique({
       where: {
         id: tutorId,
         isPublished: true,
       },
       include: {
-        assignments: true,
-        attachments: true,
-      }
+        assignments: {
+          where: { isPublished: true },
+          orderBy: { position: "asc" },
+        },
+        attachments: {
+          orderBy: { createdAt: "desc" },
+        },
+        course: {
+          select: {
+            id: true,
+            adminId: true,
+            amount: true,
+            isPublished: true,
+          },
+        },
+      },
     });
-    if (!course || !tutorial) {
-      throw new Error("Admin, Course or Tutorial not found");
+
+    if (!tutorial || !tutorial.course) {
+      throw new Error("Tutorial not found or not published");
     }
+
+    // Verify the course matches the URL parameters
+    if (tutorial.course.id !== courseId) {
+      throw new Error("Tutorial does not belong to this course");
+    }
+
+    // Verify the admin matches (if provided)
+    if (adminId && tutorial.course.adminId !== adminId) {
+      throw new Error("Course does not belong to this admin");
+    }
+
+    if (!tutorial.course.isPublished) {
+      throw new Error("Course is not published");
+    }
+
+    // Check if user has enrolled/purchased
+    const tuition = await prisma.tuition.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId: tutorial.course.id,
+        },
+      },
+    });
+
+    // Get MuxData if tutorial is free or user enrolled
     let muxData = null;
-    let attachments: Attachment[] = [];
-    let assignments: Assignment[] = [];
-    let nextTutorial: Tutor | null = null;
-    if (tuition) {
-      attachments = await prisma.attachment.findMany({
-        where: {
-          courseId: courseId,
-        },
-      });
-      assignments = await prisma.assignment.findMany({
-        where: {
-          tutorId: tutorId,
-        },
-      });
-    }
     if (tutorial.isFree || tuition) {
       muxData = await prisma.muxData.findUnique({
         where: {
           tutorId: tutorId,
         },
       });
-      nextTutorial = await prisma.tutor.findFirst({
-        where: {
-          courseId: courseId,
-          isPublished: true,
-          position: {
-            gt: tutorial?.position ?? 0,
-          },
-        },
-        orderBy: {
-          position: "asc",
-        },
-      });
     }
+
+    // Get next tutorial
+    const nextTutorial = await prisma.tutor.findFirst({
+      where: {
+        courseId: tutorial.course.id,
+        isPublished: true,
+        position: {
+          gt: tutorial.position,
+        },
+      },
+      orderBy: {
+        position: "asc",
+      },
+    });
+
+    // Get user progress
     const userProgress = await prisma.userProgress.findUnique({
       where: {
         userId_tutorId: {
@@ -86,12 +100,13 @@ export const getTutor = async ({
         },
       },
     });
+
     return {
       tutorial,
-      course,   
+      course: tutorial.course,
       muxData,
-      assignments,
-      attachments,
+      assignments: tutorial.assignments,
+      attachments: tutorial.attachments,
       nextTutorial,
       userProgress,
       tuition,
@@ -100,7 +115,7 @@ export const getTutor = async ({
     console.log("[GET_TUTOR_ERROR]", error);
     return {
       tutorial: null,
-      course: null,      
+      course: null,
       muxData: null,
       attachments: [],
       assignments: [],
