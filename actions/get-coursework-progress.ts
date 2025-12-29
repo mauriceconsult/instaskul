@@ -1,4 +1,4 @@
-// lib/get-coursework-progress.ts
+// actions/get-coursework-progress.ts
 import { prisma } from "@/lib/db";
 
 export const getCourseworkProgress = async (
@@ -25,7 +25,7 @@ export const getCourseworkProgress = async (
       }),
     ]);
 
-    if (publishedCount === 0) return 100;
+    if (publishedCount === 0) return 0; // ← Changed: No coursework = 0% (not complete)
 
     return Math.round((completedCount / publishedCount) * 100);
   } catch (error) {

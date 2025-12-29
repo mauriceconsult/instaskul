@@ -1,3 +1,4 @@
+// actions/get-assignment-progress.ts
 import { prisma } from "@/lib/db";
 
 export const getAssignmentProgress = async (
@@ -24,7 +25,7 @@ export const getAssignmentProgress = async (
       }),
     ]);
 
-    if (publishedCount === 0) return 100;
+    if (publishedCount === 0) return 0; // ← Changed: No assignments = 0% (not complete)
 
     return Math.round((completedCount / publishedCount) * 100);
   } catch (error) {

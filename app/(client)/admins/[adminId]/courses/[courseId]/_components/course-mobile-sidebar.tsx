@@ -1,21 +1,23 @@
+// app/(client)/admins/[adminId]/courses/[courseId]/_components/course-mobile-sidebar.tsx
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Tutor, Course } from "@prisma/client";
+import { Course, Tutor, Coursework } from "@prisma/client";
 import { Menu } from "lucide-react";
 import { CourseSidebar } from "./course-sidebar";
 
 interface CourseMobileSidebarProps {
   course: Course & {
-    tutors: (Tutor & {
-      userProgress: { isCompleted: boolean }[] | null;
-    })[];
+    tutors: (Tutor & { userProgress: { isCompleted: boolean }[] })[];
+    courseworks: (Coursework & { userProgress: { isCompleted: boolean }[] })[];
   };
-  progressCount: number;
+  courseProgressCount: number;
+  courseworkProgressCount: number;
   adminId: string;
 }
 
 export const CourseMobileSidebar = ({ 
   course, 
-  progressCount, 
+  courseProgressCount, 
+  courseworkProgressCount,
   adminId 
 }: CourseMobileSidebarProps) => {
   return (
@@ -28,7 +30,8 @@ export const CourseMobileSidebar = ({
       <SheetContent side="left" className="p-0 bg-white w-72">
         <CourseSidebar 
           course={course} 
-          progressCount={progressCount}
+          courseProgressCount={courseProgressCount}
+          courseworkProgressCount={courseworkProgressCount}
           adminId={adminId}
         />
       </SheetContent>

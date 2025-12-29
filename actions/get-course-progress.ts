@@ -24,7 +24,7 @@ export const getCourseProgress = async (
       }),
     ]);
 
-    if (publishedTutorsCount === 0) return 100; // No tutors → course complete
+    if (publishedTutorsCount === 0) return 0; // ← Changed: No tutorials = 0% (not complete)
 
     return Math.round((completedTutorsCount / publishedTutorsCount) * 100);
   } catch (error) {

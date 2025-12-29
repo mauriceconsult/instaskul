@@ -7,31 +7,37 @@ import { cn } from "@/lib/utils";
 
 interface AdminSidebarRoutesProps {
   adminId: string;
+  courseId: string;
 }
 
-export const AdminSidebarRoutes = ({ adminId }: AdminSidebarRoutesProps) => {
+export const AdminSidebarRoutes = ({ adminId, courseId }: AdminSidebarRoutesProps) => {
   const pathname = usePathname();
 
   const routes = [
     {
       icon: LayoutDashboard,
       label: "Overview",
-      href: `/admins/${adminId}`,
+      href: `/admins/${adminId}/courses/${courseId}`,
     },
     {
-      icon: LayoutDashboard,
-      label: "Courses",
-      href: `/admins/${adminId}/courses`,
+      icon: Video,
+      label: "Tutorials",
+      href: `/admins/${adminId}/courses/${courseId}/tutors`,
     }, 
     {
+      icon: LayoutDashboard,
+      label: "Courseworks",
+      href: `/admins/${adminId}/courses/${courseId}/courseworks`,
+    },
+    {
       icon: Bell,
-      label: "Noticeboards",
-      href: `/admins/${adminId}/noticeboards`,
+      label: "Course notices",
+      href: `/admins/${adminId}/courses/${courseId}/coursenoticeboards`,
     },   
     {
       icon: BarChart,
       label: "Analytics",
-      href: `/admins/${adminId}/analytics`,
+      href: `/admins/${adminId}/courses/${courseId}/analytics`,
     },
   ];
 

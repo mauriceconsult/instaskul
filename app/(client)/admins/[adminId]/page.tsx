@@ -29,7 +29,7 @@ const AdminIdPage = async ({ params }: AdminIdPageProps) => {
         include: {
           tutors: {
             where: { isPublished: true },
-            select: { id: true }, // Only count needed
+            select: { id: true }, 
           },
         },
         orderBy: { createdAt: "desc" },

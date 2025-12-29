@@ -1,22 +1,33 @@
+// app/(client)/admins/[adminId]/courses/[courseId]/_components/course-sidebar.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Course, Tutor } from "@prisma/client";
+import { Course, Tutor, Coursework } from "@prisma/client";
 import { CheckCircle, Lock, LayoutDashboard, Video, Bell, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 
 interface CourseSidebarProps {
   course: Course & {
     tutors: (Tutor & {
-      userProgress: { isCompleted: boolean }[] | null;
+      userProgress: { isCompleted: boolean }[];
+    })[];
+    courseworks: (Coursework & {
+      userProgress: { isCompleted: boolean }[];
     })[];
   };
-  progressCount: number;
+  courseProgressCount: number;
+  courseworkProgressCount: number;
   adminId: string;
 }
 
-export const CourseSidebar = ({ course, progressCount, adminId }: CourseSidebarProps) => {
+export const CourseSidebar = ({ 
+  course, 
+  courseProgressCount,
+  courseworkProgressCount,
+  adminId 
+}: CourseSidebarProps) => {
   const pathname = usePathname();
 
   const mainRoutes = [
@@ -28,7 +39,7 @@ export const CourseSidebar = ({ course, progressCount, adminId }: CourseSidebarP
     { 
       icon: Video, 
       label: "All Tutorials", 
-      href: `/admins/${adminId}/courses/${course.id}/tutorials` 
+      href: `/admins/${adminId}/courses/${course.id}/courses` 
     },
     { 
       icon: Bell, 
@@ -42,14 +53,49 @@ export const CourseSidebar = ({ course, progressCount, adminId }: CourseSidebarP
     },
   ];
 
+  // Calculate overall progress
+  const overallProgress = Math.round((courseProgressCount + courseworkProgressCount) / 2);
+
   return (
     <div className="h-full border-r flex flex-col overflow-y-auto bg-white shadow-sm">
-      {/* Course Header */}
-      <div className="p-6 border-b">
+      {/* Course Header with Progress */}
+      <div className="p-6 border-b space-y-4">
         <h1 className="text-lg font-bold line-clamp-2">{course.title}</h1>
-        <div className="mt-2 flex items-center gap-x-2">
-          <div className="text-sm text-muted-foreground">Progress:</div>
-          <div className="font-semibold text-blue-600">{progressCount}%</div>
+        
+        {/* Tutorial Progress */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground font-medium">Tutorials</span>
+            <span className="font-semibold text-sky-600">{courseProgressCount}%</span>
+          </div>
+          <Progress 
+            value={courseProgressCount} 
+            variant="default" 
+            className="h-2" 
+          />
+        </div>
+
+        {/* Coursework Progress */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground font-medium">Coursework</span>
+            <span className="font-semibold text-emerald-700">{courseworkProgressCount}%</span>
+          </div>
+          <Progress 
+            value={courseworkProgressCount} 
+            variant="success" 
+            className="h-2" 
+          />
+        </div>
+
+        {/* Overall Progress */}
+        <div className="pt-2 border-t">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-slate-700">Overall</span>
+            <span className="text-lg font-bold text-slate-900">
+              {overallProgress}%
+            </span>
+          </div>
         </div>
       </div>
 
