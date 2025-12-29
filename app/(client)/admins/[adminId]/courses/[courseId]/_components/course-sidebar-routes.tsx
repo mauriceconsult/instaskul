@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, Video, Bell, ClipboardList, BarChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface AdminSidebarRoutesProps {
+interface CourseSidebarRoutesProps {
   adminId: string;
   courseId: string;
 }
 
-export const AdminSidebarRoutes = ({ adminId, courseId }: AdminSidebarRoutesProps) => {
+export const CourseSidebarRoutes = ({ adminId, courseId }: CourseSidebarRoutesProps) => {
   const pathname = usePathname();
 
   const routes = [
@@ -23,17 +23,17 @@ export const AdminSidebarRoutes = ({ adminId, courseId }: AdminSidebarRoutesProp
       icon: Video,
       label: "Tutorials",
       href: `/admins/${adminId}/courses/${courseId}/tutors`,
-    }, 
+    },
     {
-      icon: LayoutDashboard,
+      icon: ClipboardList, // ← Fixed: was LayoutDashboard
       label: "Courseworks",
       href: `/admins/${adminId}/courses/${courseId}/courseworks`,
     },
     {
       icon: Bell,
-      label: "Course notices",
+      label: "Noticeboards", // ← Shortened from "Course notices"
       href: `/admins/${adminId}/courses/${courseId}/coursenoticeboards`,
-    },   
+    },
     {
       icon: BarChart,
       label: "Analytics",
