@@ -1,3 +1,4 @@
+// app/(course)/courses/[courseId]/layout.tsx
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -11,7 +12,7 @@ export default async function CourseLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ adminId: string; courseId: string }>;
+  params: Promise<{ courseId: string }>; // ← Only courseId
 }) {
   const { userId } = await auth();
   
@@ -19,16 +20,22 @@ export default async function CourseLayout({
     return redirect("/sign-in");
   }
 
-  const { adminId, courseId } = await params;
+  const { courseId } = await params;
 
   // Parallel queries for better performance
   const [course, courseProgressCount, courseworkProgressCount] = await Promise.all([
     prisma.course.findUnique({
       where: {
         id: courseId,
-        adminId,
+        isPublished: true, // ← Only show published courses
       },
       include: {
+        admin: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
         courseNoticeboards: {
           where: { isPublished: true },
           orderBy: { position: "asc" },
@@ -64,7 +71,7 @@ export default async function CourseLayout({
   ]);
 
   if (!course) {
-    return redirect(`/admins/${adminId}`);
+    return redirect("/dashboard/search");
   }
 
   return (
@@ -72,20 +79,18 @@ export default async function CourseLayout({
       {/* Fixed Navbar */}
       <div className="h-[80px] md:pl-80 fixed inset-y-0 w-full z-50">
         <CourseNavbar 
-          course={course} 
+          course={course}
           courseProgressCount={courseProgressCount}
           courseworkProgressCount={courseworkProgressCount}
-          adminId={adminId}
         />
       </div>
 
       {/* Fixed Sidebar */}
       <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50">
         <CourseSidebar 
-          course={course} 
+          course={course}
           courseProgressCount={courseProgressCount}
           courseworkProgressCount={courseworkProgressCount}
-          adminId={adminId}
         />
       </div>
 

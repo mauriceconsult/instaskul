@@ -22,7 +22,7 @@ export const TutorCard = ({
   progress,
 }: TutorCardProps) => {
   return (
-    <Link href={`/admins/${id}/courses/${id}/tutors/${id}`} className="block">
+    <Link href={`/courses/${id}/tutors/${id}`} className="block">
       <div className="group hover:shadow-lg transition overflow-hidden border rounded-lg p-3 h-full bg-white">
         <div className="relative w-full aspect-video rounded-md overflow-hidden">
           <Image

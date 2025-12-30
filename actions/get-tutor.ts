@@ -1,23 +1,23 @@
+// actions/get-tutor.ts
 import { prisma } from "@/lib/db";
 
 interface GetTutorProps {
   userId: string;
-  adminId: string;
   courseId: string;
   tutorId: string;
 }
 
 export const getTutor = async ({
   userId,
-  adminId,
   courseId,
   tutorId,
 }: GetTutorProps) => {
   try {
-    // Get tutorial first to verify it exists
+    // Get tutorial
     const tutorial = await prisma.tutor.findUnique({
       where: {
         id: tutorId,
+        courseId,
         isPublished: true,
       },
       include: {
@@ -31,7 +31,6 @@ export const getTutor = async ({
         course: {
           select: {
             id: true,
-            adminId: true,
             amount: true,
             isPublished: true,
           },
@@ -39,56 +38,36 @@ export const getTutor = async ({
       },
     });
 
-    if (!tutorial || !tutorial.course) {
-      throw new Error("Tutorial not found or not published");
+    if (!tutorial || !tutorial.course || !tutorial.course.isPublished) {
+      throw new Error("Tutorial not found or course not published");
     }
 
-    // Verify the course matches the URL parameters
-    if (tutorial.course.id !== courseId) {
-      throw new Error("Tutorial does not belong to this course");
-    }
-
-    // Verify the admin matches (if provided)
-    if (adminId && tutorial.course.adminId !== adminId) {
-      throw new Error("Course does not belong to this admin");
-    }
-
-    if (!tutorial.course.isPublished) {
-      throw new Error("Course is not published");
-    }
-
-    // Check if user has enrolled/purchased
+    // Check enrollment
     const tuition = await prisma.tuition.findUnique({
       where: {
         userId_courseId: {
           userId,
-          courseId: tutorial.course.id,
+          courseId,
         },
       },
     });
 
-    // Get MuxData if tutorial is free or user enrolled
+    // Get MuxData if free or enrolled
     let muxData = null;
     if (tutorial.isFree || tuition) {
       muxData = await prisma.muxData.findUnique({
-        where: {
-          tutorId: tutorId,
-        },
+        where: { tutorId },
       });
     }
 
     // Get next tutorial
     const nextTutorial = await prisma.tutor.findFirst({
       where: {
-        courseId: tutorial.course.id,
+        courseId,
         isPublished: true,
-        position: {
-          gt: tutorial.position,
-        },
+        position: { gt: tutorial.position },
       },
-      orderBy: {
-        position: "asc",
-      },
+      orderBy: { position: "asc" },
     });
 
     // Get user progress

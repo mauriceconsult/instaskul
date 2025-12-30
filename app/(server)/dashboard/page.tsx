@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { getDashboardData } from "@/actions/get-dashboard-data";
-import InfoCard from "@/app/(client)/admins/[adminId]/_components/info-card";
+import InfoCard from "@/app/(admin)/admins/[adminId]/_components/info-card";
 
 export const dynamic = "force-dynamic";
 

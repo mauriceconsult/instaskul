@@ -23,7 +23,7 @@ export const CourseworkCard = ({
   progress,
 }: CourseworkCardProps) => {
   return (
-    <Link href={`/admins/${id}/courses/${id}/courseworks/${id}`} className="group block">
+    <Link href={`/courses/${id}/courseworks/${id}`} className="group block">
       <div className="group hover:shadow-lg transition overflow-hidden border rounded-lg p-4 h-full bg-white">
         <div className="flex flex-col">
           <h3 className="text-lg font-medium group-hover:text-sky-700 transition line-clamp-2">

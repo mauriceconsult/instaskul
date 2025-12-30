@@ -1,3 +1,4 @@
+// app/(course)/courses/[courseId]/_components/course-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -18,14 +19,12 @@ interface CourseSidebarProps {
   };
   courseProgressCount: number;
   courseworkProgressCount: number;
-  adminId: string; 
 }
 
 export const CourseSidebar = ({ 
   course, 
   courseProgressCount,
   courseworkProgressCount,
-  adminId,
 }: CourseSidebarProps) => {
   const pathname = usePathname();
 
@@ -33,26 +32,25 @@ export const CourseSidebar = ({
     { 
       icon: LayoutDashboard, 
       label: "Overview", 
-      href: `/admins/${adminId}/courses/${course.id}` 
+      href: `/courses/${course.id}` 
     },
     { 
       icon: Video, 
       label: "Tutorials", 
-      href: `/admins/${adminId}/courses/${course.id}/tutors` 
+      href: `/courses/${course.id}/tutors` 
     },
     { 
       icon: Bell, 
       label: "Course notices", 
-      href: `/admins/${adminId}/courses/${course.id}/coursenoticeboards` 
+      href: `/courses/${course.id}/coursenoticeboards` 
     },
     { 
       icon: ClipboardList, 
       label: "Courseworks", 
-      href: `/admins/${adminId}/courses/${course.id}/courseworks` 
+      href: `/courses/${course.id}/courseworks` 
     },
   ];
 
-  // Calculate overall progress
   const overallProgress = Math.round((courseProgressCount + courseworkProgressCount) / 2);
 
   return (
@@ -129,7 +127,7 @@ export const CourseSidebar = ({
             return (
               <Link
                 key={tutor.id}
-                href={`/admins/${adminId}/courses/${course.id}/tutors/${tutor.id}`}
+                href={`/courses/${course.id}/tutors/${tutor.id}`}
                 className={cn(
                   "flex items-center gap-x-2 text-slate-500 text-sm font-[500] px-6 py-3 transition-all hover:text-slate-600 hover:bg-slate-100",
                   isActive && "text-slate-700 bg-slate-200/20 border-r-4 border-sky-700",

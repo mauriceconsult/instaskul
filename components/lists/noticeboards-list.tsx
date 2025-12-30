@@ -2,7 +2,7 @@
 "use client";
 
 import { NoticeboardWithRelations } from "@/actions/get-noticeboards";
-import { NoticeboardCard } from "../noticeboard-card";
+import { NoticeboardCard } from "../cards/noticeboard-card";
 
 interface NoticeboardsListProps {
   items: NoticeboardWithRelations[];
