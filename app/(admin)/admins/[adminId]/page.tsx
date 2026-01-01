@@ -124,18 +124,19 @@ const AdminIdPage = async ({ params }: AdminIdPageProps) => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {admin.courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  id={course.id}
-                  title={course.title}
-                  imageUrl={course.imageUrl || "/placeholder-course.jpg"}
-                  description={course.description || ""}
-                  admin={admin.title}
-                  tutorialsLength={course.tutors.length}
-                  progress={null} // Public view — no user progress
-                />
-              ))}
+             {admin.courses.map((course) => (
+  <CourseCard
+    key={course.id}
+    id={course.id}
+    title={course.title}
+    imageUrl={course.imageUrl || "/placeholder-course.jpg"}
+    description={course.description || ""}
+    admin={admin.title}
+    tutorialsLength={course.tutors.length}
+    amount={course.amount || "Contact for pricing"} // Or "Free" if amount === "0"
+    progress={null} // Public page — no user progress
+  />
+))}
             </div>
           )}
         </section>

@@ -43,7 +43,7 @@ export const AdminImageForm = ({ initialData, adminId }: AdminImageFormProps) =>
           {!isEditing && !initialData.imageUrl && (
             <>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Add the topic image
+              Add the admin image
             </>            
           )}
           {!isEditing && initialData.imageUrl && (

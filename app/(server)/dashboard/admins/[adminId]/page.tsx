@@ -33,11 +33,12 @@ const AdminIdPage = async ({
     },
   });
 
-  if (!admin) redirect("/");
-
+  
   const schools = await prisma.school.findMany({
     orderBy: { name: "asc" },
   });
+  
+  if (!admin) redirect("/sign-in");
 
   const requiredFields = [
     admin.title,
