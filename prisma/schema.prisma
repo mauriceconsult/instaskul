@@ -141,7 +141,7 @@ model Course {
   userId             String?
   description        String?
   imageUrl           String?
-  amount             String?
+  amount             String              @default("0") // ← No longer nullable, default to 0
   position           Int?
   isPublished        Boolean             @default(false)
   createdAt          DateTime            @default(now())
@@ -157,7 +157,7 @@ model Course {
   tuitions           Tuition[]
   tutors             Tutor[]
   userProgress       UserProgress[]
-  payrolls          Payroll[]
+  payrolls           Payroll[]
 
   @@index([adminId])
 }

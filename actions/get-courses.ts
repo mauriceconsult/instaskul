@@ -6,20 +6,20 @@ import { getCourseProgress } from "./get-course-progress";
 
 export interface CourseWithProgressWithAdmin extends Course {
   admin: Admin | null;
-tutors: {
-  id: string;
-  title: string;
-  position: number;
-  isFree: boolean;
-  muxData: {
-    playbackId: string | null;
-  } | null;
-}[];
-
+  tutors: {
+    id: string;
+    title: string;
+    position: number;
+    isFree: boolean;
+    muxData: {
+      playbackId: string | null;
+    } | null;
+  }[];
   progress: number | null;
   tuition: Tuition | null;
   tuitions: Tuition[];
   userProgress: UserProgress[];
+  freeTutorialsCount: number; // ← Add this
 }
 
 export type GetCoursesParams = {
@@ -46,18 +46,17 @@ export const getCourses = async ({
         admin: true,
         tutors: {
           where: { isPublished: true },
-        select: {
-  id: true,
-  title: true,
-  isFree: true,
-  position: true,
-  muxData: {
-    select: {
-      playbackId: true,
-    },
-  },
-},
-
+          select: {
+            id: true,
+            title: true,
+            isFree: true,
+            position: true,
+            muxData: {
+              select: {
+                playbackId: true,
+              },
+            },
+          },
           orderBy: { position: "asc" },
         },
         tuitions: {
@@ -75,13 +74,14 @@ export const getCourses = async ({
     const coursesWithProgress = await Promise.all(
       courses.map(async (course) => {
         const progress = await getCourseProgress(userId, course.id);
-
-        const tuition = course.tuitions[0] || null; // First matching tuition
+        const tuition = course.tuitions[0] || null;
+        const freeTutorialsCount = course.tutors.filter(t => t.isFree).length;
 
         return {
           ...course,
           progress,
           tuition,
+          freeTutorialsCount, // ← Add this
         };
       })
     );

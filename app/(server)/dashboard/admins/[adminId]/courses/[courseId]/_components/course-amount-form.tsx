@@ -29,7 +29,8 @@ interface CourseAmountFormProps {
 const formSchema = z.object({
   amount: z.string()
     .min(1, "Amount is required")
-    .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number (e.g. 50000 or 50000.00)"),
+    .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number")
+    .refine((val) => parseFloat(val) > 0, "Course amount must be greater than 0"),
 });
 
 export const CourseAmountForm = ({

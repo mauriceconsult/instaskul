@@ -1,4 +1,3 @@
-// app/(course)/courses/[courseId]/_components/course-mobile-sidebar.tsx
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Course, Tutor, Coursework } from "@prisma/client";
 import { Menu } from "lucide-react";
@@ -27,10 +26,10 @@ export const CourseMobileSidebar = ({
       </SheetTrigger>
       <SheetContent side="left" className="p-0 bg-white w-72">
         <CourseSidebar 
-          course={course} 
+          course={course}
           courseProgressCount={courseProgressCount}
           courseworkProgressCount={courseworkProgressCount}
-        />
+          isEnrolled={false} />
       </SheetContent>
     </Sheet>
   );

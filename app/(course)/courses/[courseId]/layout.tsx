@@ -1,4 +1,3 @@
-// app/(course)/courses/[courseId]/layout.tsx
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -12,7 +11,7 @@ export default async function CourseLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ courseId: string }>; // ← Only courseId
+  params: Promise<{ courseId: string }>;
 }) {
   const { userId } = await auth();
   
@@ -22,12 +21,12 @@ export default async function CourseLayout({
 
   const { courseId } = await params;
 
-  // Parallel queries for better performance
-  const [course, courseProgressCount, courseworkProgressCount] = await Promise.all([
+  // Parallel queries
+  const [course, courseProgressCount, courseworkProgressCount, tuition] = await Promise.all([
     prisma.course.findUnique({
       where: {
         id: courseId,
-        isPublished: true, // ← Only show published courses
+        isPublished: true,
       },
       include: {
         admin: {
@@ -68,6 +67,14 @@ export default async function CourseLayout({
     }),
     getCourseProgress(userId, courseId),
     getCourseworkProgress(userId, courseId),
+    prisma.tuition.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+    }),
   ]);
 
   if (!course) {
@@ -91,6 +98,7 @@ export default async function CourseLayout({
           course={course}
           courseProgressCount={courseProgressCount}
           courseworkProgressCount={courseworkProgressCount}
+          isEnrolled={!!tuition}
         />
       </div>
 

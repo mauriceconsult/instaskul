@@ -1,4 +1,3 @@
-// app/(course)/courses/[courseId]/_components/course-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -7,6 +6,7 @@ import { Course, Tutor, Coursework } from "@prisma/client";
 import { CheckCircle, Lock, LayoutDashboard, Video, Bell, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { CourseSidebarItem } from "./course-sidebar-item";
 
 interface CourseSidebarProps {
   course: Course & {
@@ -19,12 +19,14 @@ interface CourseSidebarProps {
   };
   courseProgressCount: number;
   courseworkProgressCount: number;
+  isEnrolled: boolean; // ← Add this prop
 }
 
 export const CourseSidebar = ({ 
   course, 
   courseProgressCount,
   courseworkProgressCount,
+  isEnrolled, // ← Add this
 }: CourseSidebarProps) => {
   const pathname = usePathname();
 
@@ -56,8 +58,21 @@ export const CourseSidebar = ({
   return (
     <div className="h-full border-r flex flex-col overflow-y-auto bg-white shadow-sm">
       {/* Course Header with Progress */}
-      <div className="p-6 border-b space-y-4">
+      <div className="p-6 flex flex-col border-b space-y-4">
         <h1 className="text-lg font-bold line-clamp-2">{course.title}</h1>
+        {/**check tuition */}
+        <div className="flex flex-col w-full">
+          {course.tutors.map((tutor) => (
+            <CourseSidebarItem
+              key={tutor.id}
+              id={tutor.id}
+              label={tutor.title}
+              isCompleted={!!tutor.userProgress?.[0]?.isCompleted}
+              courseId={course.id}
+              isLocked={!tutor.isFree && !isEnrolled}
+            />
+          ))}
+        </div>
         
         {/* Tutorial Progress */}
         <div className="space-y-2">
@@ -122,7 +137,7 @@ export const CourseSidebar = ({
           {course.tutors.map((tutor) => {
             const isCompleted = tutor.userProgress?.[0]?.isCompleted || false;
             const isActive = pathname?.includes(tutor.id);
-            const isLocked = !tutor.isFree && !isCompleted;
+            const isLocked = !tutor.isFree && !isEnrolled; // ← Use isEnrolled prop
 
             return (
               <Link

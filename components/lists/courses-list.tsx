@@ -1,4 +1,3 @@
-// components/courses-list.tsx
 "use client";
 
 import { CourseWithProgressWithAdmin } from "@/actions/get-courses";
@@ -28,6 +27,8 @@ export const CoursesList = ({ items }: CoursesListProps) => {
           description={item.description || ""}
           admin={item.admin?.title || "Unknown Admin"}
           tutorialsLength={item.tutors.length}
+          amount={item.amount} // ← Now guaranteed to exist
+          freeTutorialsCount={item.freeTutorialsCount} // ← Show preview badge
           progress={item.progress}
         />
       ))}

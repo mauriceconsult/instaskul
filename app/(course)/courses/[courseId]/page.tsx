@@ -1,4 +1,3 @@
-// app/(course)/courses/[courseId]/page.tsx
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";

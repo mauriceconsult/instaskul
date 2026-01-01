@@ -27,7 +27,7 @@ export default async function AdminIdLayout({
   });
 
   if (!admin) {
-    return redirect("/admins");
+    return redirect("/dashboard/admins");
   }
 
   return (
