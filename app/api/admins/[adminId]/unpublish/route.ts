@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 export async function PATCH(
   req: Request,
@@ -11,42 +12,38 @@ export async function PATCH(
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const { adminId } = await params;
+
     const admin = await prisma.admin.findUnique({
       where: {
-        id: (await params).adminId,
+        id: adminId,
         userId,
-        },
-        include: {
-          courses: true,
-      }  
+      },
     });
+
     if (!admin) {
       return new NextResponse("Not found", { status: 404 });
     }
-    const hasPublishedCourse = admin.courses.some(
-      (course) => course.isPublished
-    );
-    if (
-      !admin.title ||
-      !admin.description ||
-      !admin.imageUrl ||
-      !admin.schoolId ||
-      !hasPublishedCourse
-    ) {
-      return new NextResponse("Missing required fields", { status: 401 });
-    }
-    const publishedAdmin = await prisma.admin.update({
+
+    const unpublishedAdmin = await prisma.admin.update({
       where: {
-        id: (await params).adminId,
+        id: adminId,
         userId,
       },
       data: {
-        isPublished: true,
+        isPublished: false,
       },
     });
-    return NextResponse.json(publishedAdmin);
+
+    // Revalidate relevant paths
+    revalidatePath(`/dashboard/admins/${adminId}`);
+    revalidatePath(`/dashboard/admins`);
+    revalidatePath(`/admins/${adminId}`);
+
+    return NextResponse.json(unpublishedAdmin);
   } catch (error) {
-    console.log("[ADMIN_ID_PUBLISH]", error);
+    console.log("[ADMIN_ID_UNPUBLISH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

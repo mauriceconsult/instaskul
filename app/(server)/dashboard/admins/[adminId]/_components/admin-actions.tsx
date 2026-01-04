@@ -14,12 +14,18 @@ interface AdminActionsProps {
   isPublished: boolean;
 }
 
-export const AdminActions = ({ disabled, adminId, isPublished }: AdminActionsProps) => {
+export const AdminActions = ({ 
+  disabled, 
+  adminId, 
+  isPublished 
+}: AdminActionsProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
   const onClick = async () => {
     try {
       setIsLoading(true);
+      
       if (isPublished) {
         await axios.patch(`/api/admins/${adminId}/unpublish`);
         toast.success("Admin unpublished");
@@ -27,26 +33,38 @@ export const AdminActions = ({ disabled, adminId, isPublished }: AdminActionsPro
         await axios.patch(`/api/admins/${adminId}/publish`);
         toast.success("Admin published");
       }
+      
+      // Force a hard refresh to see changes
       router.refresh();
-    } catch {
-      toast.error("Something went wrong");
+      
+      // Optional: Add a small delay then refresh again to ensure data is loaded
+      setTimeout(() => {
+        router.refresh();
+      }, 100);
+      
+    } catch (error: any) {
+      console.error("Publish error:", error);
+      toast.error(error?.response?.data || "Something went wrong");
     } finally {
       setIsLoading(false);
     }
   };
+
   const onDelete = async () => {
     try {
       setIsLoading(true);
       await axios.delete(`/api/admins/${adminId}`);
       toast.success("Admin deleted");
-      router.refresh();
       router.push(`/dashboard/admins`);
-    } catch {
+      router.refresh();
+    } catch (error) {
+      console.error("Delete error:", error);
       toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="flex items-center gap-x-2">
       <Button

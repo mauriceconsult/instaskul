@@ -20,10 +20,8 @@ export const CourseSidebarItem = ({
   courseId,
 }: CourseSidebarItemProps) => {
   const pathname = usePathname();
-  const router = useRouter();
-  
+  const router = useRouter();  
   const isActive = pathname?.includes(id);
-
   const onClick = () => {
     if (!isLocked) {
       router.push(`/courses/${courseId}/tutors/${id}`);

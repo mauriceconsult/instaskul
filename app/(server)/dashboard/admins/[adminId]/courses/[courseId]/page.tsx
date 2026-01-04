@@ -145,7 +145,7 @@ const CourseIdPage = async ({
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={File} />
-                <h2 className="text-2xl">Course Resources & attachments</h2>
+                <h2 className="text-2xl">Course resources & attachments</h2>
               </div>
               <CourseAttachmentsForm initialData={{ attachments: course.attachments || [] }}  adminId={adminId}  courseId={courseId} />
             </div>

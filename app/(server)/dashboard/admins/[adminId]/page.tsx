@@ -13,6 +13,8 @@ import type { Course, School } from '@prisma/client';
 import { AdminNoticeboardsForm } from "./_components/admin-noticeboards-form";
 import { AdminCoursesForm } from "./_components/admin-courses-form";
 import { AdminAttachmentsForm } from "./_components/admin-attachments-form";
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const AdminIdPage = async ({
   params,

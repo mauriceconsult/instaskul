@@ -82,7 +82,7 @@ export const AdminNoticeboardsForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input disabled={isSubmitting} placeholder="e.g., 'Level 1 Biology: Term 1'" {...field} />
+                    <Input disabled={isSubmitting} placeholder="e.g., 'Invitation to create new courses'" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

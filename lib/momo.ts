@@ -1,13 +1,10 @@
-// lib/momo.ts
 import "dotenv/config";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-
-// CORRECT IMPORT — default export from mtn-momo
 import momoLib from "mtn-momo";
 
 const momo = {
-  // === COLLECTIONS (unchanged) ===
+  // === COLLECTIONS 
   collections: {
     async getAccessToken() {
       const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY, MOMOUSER_ID, MOMOUSER_SECRET } = process.env;

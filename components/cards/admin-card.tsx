@@ -1,40 +1,65 @@
 "use client";
 
 import Link from "next/link";
-import { FC } from "react";
 import Image from "next/image";
+import { User } from "lucide-react";
 
 interface AdminCardProps {
   id: string;
   title: string;
-  imageUrl: string;
-  description: string;
+  imageUrl: string | null;
+  description: string | null;
   school: string;
 }
 
-export const AdminCard: FC<AdminCardProps> = ({
+export const AdminCard = ({
   id,
   title,
-  imageUrl,  
+  imageUrl,
   school,
-  description
-}) => {
+  description,
+}: AdminCardProps) => {
   return (
-    <Link href={`/admins/${id}`}>
-      <div className="group hover:shadow-md transition overflow-hidden border rounded-lg p-3 h-full">
-        <div className="relative w-full aspect-video rounded-md overflow-hidden">
-          <Image fill className="object-cover" alt={title} src={imageUrl} />
+    <Link
+      href={`/admins/${id}`}
+      className="group block h-full"
+    >
+      <div className="overflow-hidden border rounded-lg bg-white shadow-sm hover:shadow-lg transition-all h-full flex flex-col">
+        {/* Image Section */}
+        <div className="relative w-full aspect-video overflow-hidden bg-slate-100">
+          {imageUrl ? (
+            <Image
+              fill
+              src={imageUrl}
+              alt={title}
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            // Fallback for null images
+            <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+              <div className="text-center">
+                <User className="h-16 w-16 text-slate-400 mx-auto mb-2" />
+                <p className="text-xs text-slate-500">No photo</p>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col pt-2">
-          <div className="text-lg md:text-base font-medium group-hover:text-sky-700 transition">
+
+        {/* Content Section */}
+        <div className="flex flex-col gap-2 p-4 flex-1">
+          <h3 className="text-lg font-semibold line-clamp-2 group-hover:text-sky-700 transition-colors">
             {title}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {school || "No school"}
+          </h3>
+          
+          <p className="text-xs text-muted-foreground font-medium">
+            {school || "Unassigned"}
           </p>
-          <span>
-            {description}
-          </span>
+          
+          {description && (
+            <p className="text-sm text-slate-600 line-clamp-2 mt-1">
+              {description}
+            </p>
+          )}
         </div>
       </div>
     </Link>

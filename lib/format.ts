@@ -8,7 +8,7 @@ export const formatAmount = (amount: string | number | null | undefined) => {
     }
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'EUR',
+        currency: 'UGX',
     }).format(numericAmount);
 };
 
@@ -20,7 +20,7 @@ export const formatAmountWithAccounting = (amount: string | number | null | unde
     }
     try {
         return formatMoney(numericAmount, {
-            symbol: '€',
+            symbol: 'UGX',
             decimal: '.',
             thousand: ',',
             precision: 2,

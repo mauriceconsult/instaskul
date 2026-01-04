@@ -1,4 +1,3 @@
-// actions/get-tutor.ts
 import { prisma } from "@/lib/db";
 
 interface GetTutorProps {

@@ -42,15 +42,7 @@ export default function DocsPage() {
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
           About InstaSkul
-        </h3>
-
-        {/* <Image
-          src="/adminImage.png"
-          alt="Admin Image"
-          width={500}
-          height={300}
-          className="rounded-md mb-8"
-        /> */}
+        </h3>    
 
         <p className="text-slate-600 mb-8">
           InstaSkul enables educators to build and share educational courses,
@@ -64,11 +56,7 @@ export default function DocsPage() {
         <p className="text-slate-600 mb-8">
           This guide helps educators and learners navigate InstaSkul’s features.
           The Terms of Use section ensures proper use and protects intellectual
-          property. For updates, visit our{" "}
-          {/* <Link href="/docs" className="text-blue-600 hover:underline">
-            docs page
-          </Link> */}
-          .
+          property. 
         </p>
 
         <h2 className="text-2xl font-semibold text-slate-800 mb-4">
@@ -76,7 +64,12 @@ export default function DocsPage() {
         </h2>
         <p className="text-slate-600 mb-4">
           This section explains how educators can set up and manage courses on
-          InstaSkul.
+          InstaSkul. A new admin set up requires: admin title, school of
+          specialization, description, cover image, and optional supporting
+          materials. You must create at least one Course under the Admin before
+          publishing. Each Course must have at least one Tutorial and a Coursework
+          before it can be published. Each Tutorial should have an assignment for
+          students to submit upon completion. 
         </p>
         <h3 className="text-xl font-medium text-slate-800 mb-2">
           Navigating the Admin Interface

@@ -33,8 +33,7 @@ export default function CourseEnrollButton({
     <Button
       disabled={isLoading}
       size={"sm"}
-      onClick={onClick}
-      // onClick={() => router.push(`/courses/${courseId}/checkout`)}
+      onClick={onClick}      
       className="w-full md:w-auto"
     >
       Enroll for {formatAmount(amount)}

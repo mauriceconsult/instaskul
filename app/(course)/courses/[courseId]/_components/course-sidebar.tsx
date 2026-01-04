@@ -19,14 +19,14 @@ interface CourseSidebarProps {
   };
   courseProgressCount: number;
   courseworkProgressCount: number;
-  isEnrolled: boolean; // ← Add this prop
+  isEnrolled: boolean; 
 }
 
 export const CourseSidebar = ({ 
   course, 
   courseProgressCount,
   courseworkProgressCount,
-  isEnrolled, // ← Add this
+  isEnrolled, 
 }: CourseSidebarProps) => {
   const pathname = usePathname();
 
@@ -137,7 +137,7 @@ export const CourseSidebar = ({
           {course.tutors.map((tutor) => {
             const isCompleted = tutor.userProgress?.[0]?.isCompleted || false;
             const isActive = pathname?.includes(tutor.id);
-            const isLocked = !tutor.isFree && !isEnrolled; // ← Use isEnrolled prop
+            const isLocked = !tutor.isFree && !isEnrolled; 
 
             return (
               <Link
