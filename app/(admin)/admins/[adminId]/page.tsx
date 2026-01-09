@@ -28,9 +28,14 @@ const AdminIdPage = async ({ params }: AdminIdPageProps) => {
         where: { isPublished: true },
         include: {
           tutors: {
-            where: { isPublished: true },
-            select: { id: true }, 
-          },
+            include: {
+              assignments: {
+                where: {
+                  isPublished: true
+                }
+              }
+            }
+          }
         },
         orderBy: { createdAt: "desc" },
       },

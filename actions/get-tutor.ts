@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { getAssignmentProgress } from "./get-assignment-progress";
 
 interface GetTutorProps {
   userId: string;
@@ -13,6 +14,7 @@ export const getTutor = async ({
 }: GetTutorProps) => {
   try {
     // Get tutorial
+    
     const tutorial = await prisma.tutor.findUnique({
       where: {
         id: tutorId,
@@ -78,12 +80,16 @@ export const getTutor = async ({
         },
       },
     });
+    const assignmentProgress = tuition
+  ? await getAssignmentProgress(userId, tutorId)
+  : 0;
 
     return {
       tutorial,
       course: tutorial.course,
       muxData,
       assignments: tutorial.assignments,
+      assignmentProgress,
       attachments: tutorial.attachments,
       nextTutorial,
       userProgress,

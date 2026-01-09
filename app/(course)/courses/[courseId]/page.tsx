@@ -23,6 +23,16 @@ const CourseIdPage = async ({
     include: {
       tutors: {
         where: { isPublished: true },
+        include: {
+          assignments: {
+            where: {
+              isPublished: true
+            }
+          }
+        }
+      },
+      courseworks: {
+        where: { isPublished: true },
         orderBy: { position: "asc" },
       },
     },
