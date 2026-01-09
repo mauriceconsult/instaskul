@@ -22,7 +22,7 @@ export async function PUT(
       where: {
         userId_tutorId: {
           userId,
-          tutorId: tutorialId, // Map tutorialId from URL to tutorId in schema
+          tutorId: tutorialId, 
         },
       },
       update: {
@@ -31,7 +31,7 @@ export async function PUT(
       create: {
         userId,
         tutorId: tutorialId,
-        courseId, // Required field
+        courseId, 
         isCompleted,
       },
     });

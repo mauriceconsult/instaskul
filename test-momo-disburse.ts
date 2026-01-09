@@ -1,15 +1,13 @@
-// test-momo-disburse.ts
 import "dotenv/config";
 import { momo } from "./lib/momo";
 
-// Test payload (sandbox-friendly)
 const payload = {
-  amount: "100", // MTN sandbox only allows 100–5000 EUR
+  amount: "100",
   currency: "EUR",
-  externalId: `test_${Date.now()}`, // Must be unique every time
+  externalId: `test_${Date.now()}`,
   payee: {
     partyIdType: "MSISDN" as const,
-    partyId: "256777123456", // Official MTN sandbox test number
+    partyId: "256777123456",
   },
   payerMessage: "Instaskul Payroll Test",
   payeeNote: "Thank you for teaching!",
@@ -19,17 +17,14 @@ const payload = {
   console.log("=== SELF-SERVICE DISBURSEMENT TEST STARTED ===");
 
   try {
-    // Step 1: Initiate transfer
     console.log("Sending disbursement...");
-    const transactionId = await momo.disbursements.client.transfer(payload);
+    const transactionId = await momo.disbursements.transfer(payload);
     console.log("Transaction ID:", transactionId);
 
-    // Step 2: Wait a bit
     console.log("Waiting 8 seconds for processing...");
     await new Promise((resolve) => setTimeout(resolve, 8000));
 
-    // Step 3: Check status
-    const status = await momo.disbursements.client.getTransaction(transactionId);
+    const status = await momo.disbursements.getTransactionStatus(transactionId);
     console.log("Final Status:", status);
 
     if (status.status === "SUCCESSFUL") {
@@ -39,6 +34,6 @@ const payload = {
     }
   } catch (error: any) {
     console.error("DISBURSEMENT FAILED");
-    console.error("Error:", error?.response?.data || error.message || error);
+    console.error(error?.response?.data || error.message || error);
   }
 })();
