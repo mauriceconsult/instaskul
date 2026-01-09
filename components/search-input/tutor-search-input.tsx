@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 
 interface TutorSearchInputProps {
   courseId?: string;  
-  adminId?: string;  
+  adminId?: string;
+  tutorId?: string;
 }
-export const TutorSearchInput = ({ courseId, adminId }: TutorSearchInputProps) => {
+export const TutorSearchInput = ({ courseId, adminId, tutorId }: TutorSearchInputProps) => {
   const [value, setValue] = useState("");
   const debouncedValue = useDebounce(value);
   const router = useRouter();
@@ -24,6 +25,7 @@ export const TutorSearchInput = ({ courseId, adminId }: TutorSearchInputProps) =
         query: {          
           courseId,
           adminId,
+          tutorId,
           title: debouncedValue,
         },
       },

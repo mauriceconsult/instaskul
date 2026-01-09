@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 interface CourseNoticeboardSearchInputProps {
   courseId?: string; 
   adminId?: string;
+  coursenoticeboardId?: string;
 }
-export const CourseNoticeboardSearchInput = ({ courseId, adminId }: CourseNoticeboardSearchInputProps) => {
+export const CourseNoticeboardSearchInput = ({ courseId, adminId, coursenoticeboardId }: CourseNoticeboardSearchInputProps) => {
   const [value, setValue] = useState("");
   const debouncedValue = useDebounce(value);
   const router = useRouter();
@@ -23,7 +24,8 @@ export const CourseNoticeboardSearchInput = ({ courseId, adminId }: CourseNotice
         url: pathname,
         query: {          
           courseId,          
-          adminId,          
+          adminId,
+          coursenoticeboardId,
           title: debouncedValue,
         },
       },

@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 
 interface NoticeboardSearchInputProps {
   adminId?: string;
+  noticeboardId?: string;
   
 }
-export const NoticeboardSearchInput = ({ adminId }: NoticeboardSearchInputProps) => {
+export const NoticeboardSearchInput = ({ adminId, noticeboardId }: NoticeboardSearchInputProps) => {
   const [value, setValue] = useState("");
   const debouncedValue = useDebounce(value);
   const router = useRouter();
@@ -22,7 +23,8 @@ export const NoticeboardSearchInput = ({ adminId }: NoticeboardSearchInputProps)
       {
         url: pathname,
         query: {
-          adminId,          
+          adminId, 
+          noticeboardId,
           title: debouncedValue,
         },
       },

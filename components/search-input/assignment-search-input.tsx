@@ -11,8 +11,9 @@ interface AssignmentSearchInputProps {
   tutorId?: string;
   adminId?: string;
   courseId?: string;
+  assignmentId?: string;
 }
-export const AssignmentSearchInput = ({ tutorId, adminId, courseId }: AssignmentSearchInputProps) => {
+export const AssignmentSearchInput = ({ tutorId, adminId, courseId, assignmentId }: AssignmentSearchInputProps) => {
   const [value, setValue] = useState("");
   const debouncedValue = useDebounce(value);
   const router = useRouter();
@@ -26,6 +27,7 @@ export const AssignmentSearchInput = ({ tutorId, adminId, courseId }: Assignment
           tutorId,          
           adminId,
           courseId,
+          assignmentId,
           title: debouncedValue,
         },
       },

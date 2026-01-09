@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 interface CourseworkSearchInputProps {
   courseId?: string;
   adminId?: string;
+  courseworkId?: string;
 }
-export const CourseworkSearchInput = ({ courseId, adminId }: CourseworkSearchInputProps) => {
+export const CourseworkSearchInput = ({ courseId, adminId, courseworkId }: CourseworkSearchInputProps) => {
   const [value, setValue] = useState("");
   const debouncedValue = useDebounce(value);
   const router = useRouter();
@@ -24,6 +25,7 @@ export const CourseworkSearchInput = ({ courseId, adminId }: CourseworkSearchInp
         query: {         
           courseId,
           adminId,
+          courseworkId,
           title: debouncedValue,
         },
       },

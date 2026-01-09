@@ -16,7 +16,7 @@ const momo = {
       
       const response = await axios.post(
         `${MOMO_TARGET_ENVIRONMENT}/collection/token/`,
-        {},
+        null,
         {
           headers: {
             "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
@@ -72,9 +72,9 @@ const momo = {
   // === DISBURSEMENTS ===
   disbursements: {
     async getAccessToken() {
-      const { MOMO_TARGET_ENVIRONMENT, MOMO_DISBURSE_PRIMARY_KEY, MOMO_DISBURSE_USER_ID, MOMO_DISBURSE_USER_SECRET } = process.env;
+      const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY_DISBURSEMENTS, MOMO_DISBURSE_USER_ID, MOMO_DISBURSE_USER_SECRET } = process.env;
       
-      if (!MOMO_TARGET_ENVIRONMENT || !MOMO_DISBURSE_PRIMARY_KEY || !MOMO_DISBURSE_USER_ID || !MOMO_DISBURSE_USER_SECRET) {
+      if (!MOMO_TARGET_ENVIRONMENT || !MOMO_PRIMARY_KEY_DISBURSEMENTS || !MOMO_DISBURSE_USER_ID || !MOMO_DISBURSE_USER_SECRET) {
         throw new Error("Missing Disbursements env vars");
       }
   
@@ -82,10 +82,10 @@ const momo = {
       
       const response = await axios.post(
         `${MOMO_TARGET_ENVIRONMENT}/disbursement/token/`,
-        {},
+        null,
         {
           headers: {
-            "Ocp-Apim-Subscription-Key": MOMO_DISBURSE_PRIMARY_KEY,
+            "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY_DISBURSEMENTS,
             Authorization: `Basic ${authToken}`,
           },
         }
@@ -95,7 +95,7 @@ const momo = {
     },
   
     async transfer(payload: any) {
-      const { MOMO_TARGET_ENVIRONMENT, MOMO_DISBURSE_PRIMARY_KEY } = process.env;
+      const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY_DISBURSEMENTS } = process.env;
       const accessToken = await this.getAccessToken();
       const referenceId = uuidv4();
   
@@ -106,7 +106,7 @@ const momo = {
           headers: {
             "X-Reference-Id": referenceId,
             "X-Target-Environment": "sandbox",
-            "Ocp-Apim-Subscription-Key": MOMO_DISBURSE_PRIMARY_KEY,
+            "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY_DISBURSEMENTS,
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
@@ -118,7 +118,7 @@ const momo = {
 
     // ✅ ADD THIS METHOD
     async getTransactionStatus(referenceId: string) {
-      const { MOMO_TARGET_ENVIRONMENT, MOMO_DISBURSE_PRIMARY_KEY } = process.env;
+      const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY_DISBURSEMENTS } = process.env;
       const accessToken = await this.getAccessToken();
 
       const response = await axios.get(
@@ -126,7 +126,7 @@ const momo = {
         {
           headers: {
             "X-Target-Environment": "sandbox",
-            "Ocp-Apim-Subscription-Key": MOMO_DISBURSE_PRIMARY_KEY,
+            "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY_DISBURSEMENTS,
             Authorization: `Bearer ${accessToken}`,
           },
         }
@@ -136,7 +136,7 @@ const momo = {
     },
   
     async getBalance() {
-      const { MOMO_TARGET_ENVIRONMENT, MOMO_DISBURSE_PRIMARY_KEY } = process.env;
+      const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY_DISBURSEMENTS } = process.env;
       const accessToken = await this.getAccessToken();
   
       const response = await axios.get(
@@ -144,7 +144,7 @@ const momo = {
         {
           headers: {
             "X-Target-Environment": "sandbox",
-            "Ocp-Apim-Subscription-Key": MOMO_DISBURSE_PRIMARY_KEY,
+            "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY_DISBURSEMENTS,
             Authorization: `Bearer ${accessToken}`,
           },
         }

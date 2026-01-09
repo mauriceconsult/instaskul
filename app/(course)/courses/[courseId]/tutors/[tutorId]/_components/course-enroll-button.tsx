@@ -1,4 +1,3 @@
-// app/(course)/courses/[courseId]/tutors/[tutorId]/_components/course-enroll-button.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -20,7 +19,7 @@ export default function CourseEnrollButton({
 
   const onClick = () => {
     setIsLoading(true);
-    console.log("Navigating to:", `/courses/${courseId}/checkout`); // Debug log
+    console.log("Navigating to:", `/courses/${courseId}/checkout`); 
     router.push(`/courses/${courseId}/checkout`);
   };
 
