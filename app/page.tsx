@@ -17,7 +17,7 @@ export default async function HomePage() {
         </span>     
 
       <p className="text-xl text-gray-600 max-w-2xl text-center">
-        Home for knowledge managers, schools and freelance tutors.
+        Secure knowledge sharing ecosystem for schools, colleges & universities, human resource developers, freelance tutors and knowledge seekers.
       </p>
 
       <div className="flex gap-6 mt-8">

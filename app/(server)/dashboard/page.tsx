@@ -1,29 +1,29 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { getDashboardData } from "@/actions/get-dashboard-data";
 import InfoCard from "@/app/(admin)/admins/[adminId]/_components/info-card";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0; 
 
-export default async function Dashboard() {
-  headers();
+export default async function Dashboard() {  
+
+  let data;
 
   try {
-    const data = await getDashboardData();
+    data = await getDashboardData();
+
     const {
-      coursesInProgress = [],
-      completedCourses = [],
+      coursesInProgress = 0,
+      completedCourses = 0,
       adminsInProgress = 0,
       completedAdmins = 0,
     } = data || {};
 
     return (
       <div className="p-6 space-y-8">
-        {/* Header with Admin Link */}
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Dashboard</h1>
           
-          {/* Admin Link Button - Slate Gray */}
           <Link
             href="/dashboard/admins"
             className="px-6 py-3 bg-slate-600 text-white font-medium rounded-lg hover:bg-slate-700 transition"
@@ -32,7 +32,6 @@ export default async function Dashboard() {
           </Link>
         </div>
 
-        {/* Dashboard Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <InfoCard 
             iconName="Clock" 
@@ -53,7 +52,7 @@ export default async function Dashboard() {
           <InfoCard 
             iconName="Clock" 
             label="Courses In Progress" 
-            numberOfItems={Array.isArray(coursesInProgress) ? coursesInProgress.length : 0} 
+            numberOfItems={coursesInProgress} 
             variant="default" 
             singular="course" 
             plural="courses" 
@@ -61,7 +60,7 @@ export default async function Dashboard() {
           <InfoCard 
             iconName="CheckCircle" 
             label="Live Courses" 
-            numberOfItems={Array.isArray(completedCourses) ? completedCourses.length : 0} 
+            numberOfItems={completedCourses} 
             variant="success" 
             singular="course" 
             plural="courses" 
@@ -75,7 +74,9 @@ export default async function Dashboard() {
       <div className="p-6">
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <p className="text-red-600 font-medium">Error loading dashboard</p>
-          <p className="text-red-500 text-sm mt-1">Please refresh the page to try again.</p>
+          <p className="text-red-500 text-sm mt-1">
+            Data may be temporarily unavailable. Please refresh.
+          </p>
         </div>
       </div>
     );
