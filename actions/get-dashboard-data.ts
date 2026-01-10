@@ -1,56 +1,60 @@
-// actions/get-dashboard-data.ts
 import { prisma } from "@/lib/db";
-import { Admin, Course, UserProgress } from "@prisma/client";
+import { getCourseProgress } from "./get-course-progress";
 
-type AdminWithProgress = Admin & { userProgress: UserProgress[] };
-type CourseWithProgress = Course & { userProgress: UserProgress[] };
-
-export async function getDashboardData(): Promise<{
+// actions/get-dashboard-data.ts
+export interface DashboardStats {
   adminsInProgress: number;
-  completedAdmins: number;
+  liveAdmins: number;
   coursesInProgress: number;
   completedCourses: number;
-}> {
+}
+
+export const getDashboardData = async (userId: string): Promise<DashboardStats> => {
   try {
+    // Fetch admins
     const admins = await prisma.admin.findMany({
-      where: { isPublished: true },
-      include: { userProgress: true },
+      where: { userId },
+      select: { isPublished: true },
     });
 
-    const courses = await prisma.course.findMany({
-      where: { isPublished: true },
-      include: { userProgress: true },
+    const liveAdmins = admins.filter(a => a.isPublished).length;
+    const adminsInProgress = admins.length - liveAdmins; // or your real logic
+
+    // Fetch purchased courses with progress
+    const purchasedCourses = await prisma.course.findMany({
+      where: {
+        tuitions: { some: { userId } },
+      },
+      select: { id: true },
     });
 
-    const adminsInProgress = admins.filter((admin) =>
-      admin.userProgress.some((p) => !p.isCompleted)
-    ).length;
+    let coursesInProgress = 0;
+    let completedCourses = 0;
 
-    const completedAdmins = admins.filter((admin) =>
-      admin.userProgress.length > 0 && admin.userProgress.every((p) => p.isCompleted)
-    ).length;
-
-    const coursesInProgress = courses.filter((course) =>
-      course.userProgress.some((p) => !p.isCompleted)
-    ).length;
-
-    const completedCourses = courses.filter((course) =>
-      course.userProgress.length > 0 && course.userProgress.every((p) => p.isCompleted)
-    ).length;
+    await Promise.all(
+      purchasedCourses.map(async ({ id }) => {
+        const progress = await getCourseProgress(userId, id);
+        if (progress === 100) {
+          completedCourses++;
+        } else if (progress > 0) {
+          coursesInProgress++;
+        }
+      })
+    );
 
     return {
       adminsInProgress,
-      completedAdmins,
+      liveAdmins,
       coursesInProgress,
       completedCourses,
     };
   } catch (error) {
-    console.error("Database query failed:", error);
+    console.error("[GET_DASHBOARD_DATA]", error);
     return {
       adminsInProgress: 0,
-      completedAdmins: 0,
+      liveAdmins: 0,
       coursesInProgress: 0,
       completedCourses: 0,
     };
   }
-}
+};

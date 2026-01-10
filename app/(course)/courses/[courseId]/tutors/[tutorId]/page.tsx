@@ -8,10 +8,8 @@ import { VideoPlayer } from "./_components/video-player";
 import CourseEnrollButton from "./_components/course-enroll-button";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
-import { Progress } from "@/components/ui/progress"; // ← Add this
-import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress"; 
 import { File, CheckCircle } from "lucide-react";
-import Link from "next/link";
 
 const TutorIdPage = async ({
   params,
@@ -86,14 +84,7 @@ const TutorIdPage = async ({
                   {assignmentProgress}% completed
                 </p>
               </div>
-            </div>
-
-            {/* Optional: Link to assignments page */}
-            <Link href={`/courses/${courseId}/assignments?tutorial=${tutorId}`}>
-              <Button variant="outline" size="sm">
-                View tutorial assignment
-              </Button>
-            </Link>
+            </div>       
           </div>
         ) : (
           <CourseEnrollButton courseId={courseId} amount={course.amount} />

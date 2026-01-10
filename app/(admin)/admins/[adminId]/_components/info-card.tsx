@@ -1,41 +1,40 @@
+// app/(admin)/admins/[adminId]/_components/info-card.tsx
 'use client'
 
 import { IconBadge } from "@/components/icon-badge";
-import * as Icons from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
 interface InfoCardProps {
+  iconName: keyof typeof LucideIcons;
+  label: string;
   numberOfItems: number;
   variant?: "default" | "success";
-  label: string;
-  iconName: string;  // Changed from LucideIcon to string
   singular?: string;
   plural?: string;
 }
 
-const InfoCard = ({
-  variant = "default",
+export default function InfoCard({
   iconName,
   label,
   numberOfItems,
+  variant = "default",
   singular = "item",
   plural = "items",
-}: InfoCardProps) => {
+}: InfoCardProps) {
+  // Safely get the icon component (with fallback)
+  const Icon = LucideIcons[iconName] as LucideIcons.LucideIcon || LucideIcons.HelpCircle;
+
   const itemText = numberOfItems === 1 ? singular : plural;
-  
-  // Get the icon component from the icon name
-  const Icon = (Icons as any)[iconName] as Icons.LucideIcon;
 
   return (
-    <div className="border rounded-md flex items-center gap-x-2 p-3">
+    <div className="border rounded-lg flex items-center gap-x-4 p-4 bg-white shadow-sm hover:shadow transition-shadow">
       <IconBadge variant={variant} icon={Icon} />
       <div>
-        <p className="font-medium">{label}</p>
-        <p className="text-gray-500 text-sm">
+        <p className="font-medium text-gray-900">{label}</p>
+        <p className="text-sm text-gray-500 mt-0.5">
           {numberOfItems} {itemText}
         </p>
       </div>
     </div>
   );
-};
-
-export default InfoCard;
+}
