@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDashboardData } from "@/actions/get-dashboard-data";
 import InfoCard from "@/app/(admin)/admins/[adminId]/_components/info-card";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -10,7 +11,7 @@ export default async function Dashboard() {
   const { userId } = await auth();
   if (!userId) {
     // Handle unauthenticated - redirect or show message
-    return <div>Please sign in to view dashboard</div>;
+    return redirect("/sign-in")    
   }
 
   const data = await getDashboardData(userId).catch(() => ({

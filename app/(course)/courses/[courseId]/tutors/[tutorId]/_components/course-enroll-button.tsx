@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { formatAmount } from "@/lib/format";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { Loader2 } from "lucide-react";
 
 interface CourseEnrollButtonProps {
   courseId: string;
-  amount: string;
+  amount: string | number; // Accept both (DB string, formatted number)
 }
 
 export default function CourseEnrollButton({
@@ -15,22 +16,39 @@ export default function CourseEnrollButton({
   amount,
 }: CourseEnrollButtonProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-  const onClick = () => {
-    setIsLoading(true);
-    console.log("Navigating to:", `/courses/${courseId}/checkout`); 
-    router.push(`/courses/${courseId}/checkout`);
+  const numericAmount = Number(amount) || 0;
+
+  const handleEnroll = () => {
+    startTransition(() => {
+      setError(null);
+      router.push(`/courses/${courseId}/checkout`);
+    });
   };
 
   return (
-    <Button
-      disabled={isLoading}
-      size="sm"
-      onClick={onClick}
-      className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700"
-    >
-      Enroll for {formatAmount(amount)}
-    </Button>
+    <div className="w-full">
+      <Button
+        onClick={handleEnroll}
+        disabled={isPending}
+        size="lg"
+        className="w-full bg-emerald-600 hover:bg-emerald-700 transition-colors"
+      >
+        {isPending ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Redirecting...
+          </>
+        ) : (
+          <>Enroll for {formatAmount(amount)}</>
+        )}
+      </Button>
+
+      {error && (
+        <p className="text-sm text-red-600 mt-2 text-center">{error}</p>
+      )}
+    </div>
   );
 }

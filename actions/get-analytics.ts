@@ -1,32 +1,21 @@
 import { prisma } from "@/lib/db";
 import { Course, Tuition } from "@prisma/client";
 
-type TuitionWithCourse = Tuition & {
-  course: Course | null;
-};
+interface CourseEarnings {
+  name: string;
+  total: number;
+}
 
-export const groupByCourse = (
-  tuitions: TuitionWithCourse[]
-): { [courseTitle: string]: number } => {
-  const grouped: { [courseTitle: string]: number } = {};
+interface AnalyticsData {
+  data: CourseEarnings[];
+  totalRevenue: number;
+  totalSales: number;
+  totalPublishedAdmins: number;
+}
 
-  tuitions.forEach((tuition) => {
-    if (!tuition.course) {
-      return; // Skip if course is null
-    }
-    const courseTitle = tuition.course.title;
-    const amount = parseFloat(tuition.course.amount ?? "0") || 0;
-
-    if (!grouped[courseTitle]) {
-      grouped[courseTitle] = 0;
-    }
-    grouped[courseTitle] += amount;
-  });
-
-  return grouped;
-};
-export const getAnalytics = async (userId: string) => {
+export const getAnalytics = async (userId: string): Promise<AnalyticsData> => {
   try {
+    // 1. Fetch all tuitions + courses for this user
     const tuitions = await prisma.tuition.findMany({
       where: {
         course: {
@@ -36,28 +25,51 @@ export const getAnalytics = async (userId: string) => {
       include: {
         course: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    const groupedEarnings = groupByCourse(tuitions);
-    const data = Object.entries(groupedEarnings).map(([name, total]) => ({
+    // 2. Calculate earnings per course (sum of course.amount per title)
+    const earningsByCourse = tuitions.reduce<Record<string, number>>((acc, tuition) => {
+      const title = tuition.course?.title ?? "Untitled Course";
+      const amount = Number(tuition.course?.amount) || 0;
+
+      acc[title] = (acc[title] || 0) + amount;
+      return acc;
+    }, {});
+
+    // 3. Format for chart/data display
+    const data: CourseEarnings[] = Object.entries(earningsByCourse).map(([name, total]) => ({
       name,
       total,
     }));
 
-    const totalRevenue = data.reduce((acc, curr) => acc + curr.total, 0);
+    // 4. Totals
+    const totalRevenue = data.reduce((sum, item) => sum + item.total, 0);
     const totalSales = tuitions.length;
+
+    // 5. Bonus: count published admins (common dashboard metric)
+    const totalPublishedAdmins = await prisma.admin.count({
+      where: {
+        userId,
+        isPublished: true,
+      },
+    });
 
     return {
       data,
       totalRevenue,
       totalSales,
+      totalPublishedAdmins,
     };
   } catch (error) {
-    console.error(`[${new Date().toISOString()} GET_ANALYTICS]`, error);
+    console.error("[GET_ANALYTICS]", error);
     return {
       data: [],
       totalRevenue: 0,
       totalSales: 0,
+      totalPublishedAdmins: 0,
     };
   }
 };

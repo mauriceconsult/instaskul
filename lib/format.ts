@@ -1,32 +1,21 @@
-import { formatMoney } from 'accounting';
+export const formatAmount = (
+  amount: string | number | null | undefined,
+  currency: string = "UGX",
+  locale: string = "en-UG"
+): string => {
+  if (amount == null || amount === "") {
+    return "—";
+  }
 
-// Original function
-export const formatAmount = (amount: string | number | null | undefined) => {
-    const numericAmount = Number(amount);
-    if (isNaN(numericAmount)) {
-        return 'Invalid amount';
-    }
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'UGX',
-    }).format(numericAmount);
-};
+  const num = Number(amount);
+  if (Number.isNaN(num)) {
+    return "Invalid amount";
+  }
 
-// Enhanced function with accounting.js
-export const formatAmountWithAccounting = (amount: string | number | null | undefined) => {
-    const numericAmount = Number(amount);
-    if (isNaN(numericAmount)) {
-        return 'Invalid amount';
-    }
-    try {
-        return formatMoney(numericAmount, {
-            symbol: 'UGX',
-            decimal: '.',
-            thousand: ',',
-            precision: 2,
-            format: '%s%v',
-        });
-    } catch {
-        return formatAmount(numericAmount); // Use numericAmount for fallback
-    }
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num);
 };
