@@ -25,8 +25,7 @@ export const metadata: Metadata = {
     "employment",
     "e-learning",
     "education",
-    "privacy policy",   
-
+    "privacy policy",
   ],
 };
 
@@ -48,11 +47,11 @@ export default function AboutPage() {
         </p>  
        
         <p className="text-slate-600 mb-8">
-          InstaSkul connects knowledge to learners through structured open sourced, online courses.
+          InstaSkul connects knowledge to learners through structured open sourced online courses.
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
-            For empowered individuals and communities.
+            Empowered individuals and communities.
           </li>         
           <li>
             Global reach and resources.
@@ -61,7 +60,7 @@ export default function AboutPage() {
             Market driven.
           </li>
           <li>
-            Public access in a safe environment for all including children.
+            Public access in a safe space for the family.
           </li>
         </ul>
 
@@ -69,15 +68,13 @@ export default function AboutPage() {
           Privacy Policy
         </h2>
         <p className="text-slate-600 mb-8">
-          We do not store personal data or solicit outside our ecosystem.
-          Our core system is designed for knowledge sharing without
-          privacy intrusion.
+          We do not store or solicit personal data.           
         </p>
         <h3 className="text-xl font-medium text-slate-800 mb-2">
           Our Trusted Partners
         </h3>
         <p className="text-slate-600 mb-4">
-          We work with respected service providers to ensure a secure and seamless
+          We work with service providers to ensure a secure and seamless
           experience:
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
@@ -94,19 +91,19 @@ export default function AboutPage() {
           Admin and Course Creation
         </h3>
         <p className="text-slate-600 mb-4">
-          Admins publish their Course.
+          Published Admins publish their Courses, receive tuition fees and manage a self-service payroll. 
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
-            Admin Noticeboard: Enables inline adhoc communication within the Admin.
+            Admin noticeboard: Enables adhoc communication within the Admin.
           </li>
           <li>
-            Course Noticeboard: Enables inline adhoc communication with students.
+            Course Noticeboard: Enables adhoc communication with students.
           </li>
           <li>
             Admin Analytics: Provides a detailed dashboard view of relevant data,
             including courses produced, enrollment rates, tuition fees
-            received and payroll.
+            received.
           </li>
         </ul>
 
@@ -118,7 +115,7 @@ export default function AboutPage() {
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-8 space-y-2">
           <li>
-            Prompt payroll dispatches immediately upon Tuition payment.
+            Prompt payroll dispatches.
           </li>
           <li>Platform fees at only ten percent.</li>          
         </ul>

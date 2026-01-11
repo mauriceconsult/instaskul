@@ -47,7 +47,7 @@ export default function DocsPage() {
         <p className="text-slate-600 mb-8">
           InstaSkul enables educators to build and share educational courses,
           while learners can enroll, track progress, and complete tutorials. Our
-          platform is accessible on web and mobile, with secure payments.
+          platform is accessible on web and mobile, with secure self-service payroll for admins.
         </p>
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
@@ -67,7 +67,7 @@ export default function DocsPage() {
           InstaSkul. A new admin set up requires: admin title, school of
           specialization, description, cover image, and optional supporting
           materials. You must create at least one Course under the Admin before
-          publishing. Each Course must have at least one Tutorial and a Coursework
+          publishing. Each Course must have at least a Tutorial and a Coursework
           before it can be published. Each Tutorial should have an assignment for
           students to submit upon completion. 
         </p>
@@ -75,10 +75,10 @@ export default function DocsPage() {
           Navigating the Admin Interface
         </h3>
         <p className="text-slate-600 mb-4">
-          The admin provides organizational space to embark on your Course
+          The admin is your organizational space to embark on Course
           creation and management. If you are an organization, such as an
           education institution or a company, you can create multiple admins
-          that suit your organization’s Faculties or Departments. InstaSkul
+          to suit your organization’s Faculties or Departments. InstaSkul
           facilitates continuous improvement allowing you to create and produce
           Courses at own pace and publish only when you are ready. You can also
           unpublish your works. You maintain copyright to your content.
@@ -114,13 +114,13 @@ export default function DocsPage() {
             title. This enables the edit link that navigates to the course page.
           </li>
           <li>
-            At least one Course is required before you can publish your Admin.
-            Afterwards, you can continue adding more Courses to the admin.
+            At least one published Course is required before you can publish your Admin.
+            You can continue adding more Courses to the admin as necessary.
           </li>
-          <li>
+          {/* <li>
             Customized configurations if needed can be arranged on request as
             separate projects.
-          </li>
+          </li> */}
         </ul>
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
@@ -155,7 +155,7 @@ export default function DocsPage() {
           </li>
           <li>
             Communicate internally with your student when and if necessary,
-            through Course Noticeboard.
+            through Course notices.
           </li>
           <li>Give a coursework to be submitted at Course completion.</li>
           <li>
@@ -166,10 +166,10 @@ export default function DocsPage() {
             You must first publish at least one Tutorial before you can publish
             a Course. Afterwards you can continue adding more Tutorials.
           </li>
-          <li>
+          {/* <li>
             Customized configurations if needed can be arranged on request as
             separate projects.
-          </li>
+          </li> */}
         </ul>
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
@@ -201,13 +201,13 @@ export default function DocsPage() {
             the form of pdfs, videos, text or images.
           </li>
           <li>
-            Ensure that each Tutorial is accompanied by an assignment for
+            Ensure that each Tutorial is accompanied by a published assignment for
             students to submit upon watching the Tutorial.
           </li>
-          <li>
+          {/* <li>
             Customized configurations if needed can be arranged on request as
             separate projects.
-          </li>
+          </li> */}
         </ul>
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
@@ -232,11 +232,10 @@ export default function DocsPage() {
           Publishing Your Content
         </h3>
         <p className="text-slate-600 mb-4">
-          Note: When publishing your first admin, your publishing will begin at
-          the Tutorial page, then use the backlink (at the top of the page) to
-          navigate to Course and publish it and then use the backlink to Admin
-          and publish it. You now have a published Course under your Admin. You
-          can then continue adding Courses and Tutorials to your Admin.
+          Note: When publishing your first admin, your first Admin publishing will begin at
+          the Assignment page, then use the backlink (at the top of the page) to
+          navigate to the associated Tutorial, Course through to Admin, publishing each of them. You now have a published Course under your Admin. You
+          can then continue adding Courses and Tutorials as necessary. You can publish multiple admins to suit your organization.
         </p>
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
@@ -246,6 +245,7 @@ export default function DocsPage() {
           <li>Use clear, concise titles and descriptions.</li>
           <li>Ensure content is original to avoid copyright issues.</li>
           <li>Test tutorials for accessibility on mobile and web.</li>
+          <li>Use (your phone's or camera's) landscape mode to capture your images and videos.</li>
         </ul>
 
         <h2 className="text-2xl font-semibold text-slate-800 mb-4">
@@ -274,7 +274,7 @@ export default function DocsPage() {
         <ul className="list-disc list-inside text-slate-600 mb-4 space-y-2">
           <li>
             Access Sidebar: On desktop, view the sidebar at{" "}
-            instaskul.com/courses/[courseId] . On mobile, tap the menu icon to
+            instaskul.com/courses/[courseId]. On mobile, tap the menu icon to
             open it.
           </li>
           <li>
