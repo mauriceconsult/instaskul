@@ -22,13 +22,16 @@ export default async function AdminIdLayout({
   const admin = await prisma.admin.findUnique({
     where: {
       id: adminId,
-      userId, // Ensure user owns this admin
+      userId, 
     },
   });
 
   if (!admin) {
     return redirect("/dashboard/admins");
   }
+  // 🔍 DEBUG: Log admin in layout
+  console.log("AdminIdLayout - admin:", admin);
+  console.log("AdminIdLayout - admin.id:", admin.id);
 
   return (
     <div className="h-full">

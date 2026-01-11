@@ -1,3 +1,4 @@
+// app/admins/[adminId]/payrolls/page.tsx
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -7,34 +8,37 @@ import PayrollClient from "./_components/payroll-client";
 export default async function PayrollPage({
   params,
 }: {
-  params: { adminId: string };
+  params: Promise<{ adminId: string }>;
 }) {
   const { userId } = await auth();
-  if (!userId) redirect("/");
+  if (!userId) redirect("/sign-in");
 
-  // Verify admin ownership
-  const admin = await prisma.admin.findFirst({
-    where: { 
-      id: params.adminId, 
-      userId 
+  const { adminId } = await params;
+
+  // Verify ownership
+  const admin = await prisma.admin.findUnique({
+    where: {
+      id: adminId,
+      userId,
     },
+    select: { id: true },
   });
 
   if (!admin) redirect("/dashboard/admins");
 
-  // Fetch all data in parallel using payrollService
-  const [stats, pendingPayrolls, historyPayrolls] = await Promise.all([
-    payrollService.getPayrollStats(admin.id),
-    payrollService.getPendingPayrolls(admin.id),
-    payrollService.getHistoryPayrolls(admin.id, 20),
+  // Fetch data in parallel
+  const [stats, pending, history] = await Promise.all([
+    payrollService.getPayrollStats(adminId),
+    payrollService.getPendingPayrolls(adminId),
+    payrollService.getHistoryPayrolls(adminId, 20), // assuming this method exists
   ]);
 
   return (
     <PayrollClient
       initialStats={stats}
-      pendingPayrolls={pendingPayrolls}
-      historyPayrolls={historyPayrolls}
-      adminId={admin.id}
+      pendingPayrolls={pending}
+      historyPayrolls={history}
+      adminId={adminId}
     />
   );
 }

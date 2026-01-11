@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Video, Bell, ClipboardList, BarChart } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  Video, 
+  Bell, 
+  BarChart,
+  Wallet 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdminSidebarRoutesProps {
@@ -19,7 +25,7 @@ export const AdminSidebarRoutes = ({ adminId }: AdminSidebarRoutesProps) => {
       href: `/admins/${adminId}`,
     },
     {
-      icon: LayoutDashboard,
+      icon: Video,
       label: "Courses",
       href: `/admins/${adminId}/courses`,
     }, 
@@ -27,7 +33,12 @@ export const AdminSidebarRoutes = ({ adminId }: AdminSidebarRoutesProps) => {
       icon: Bell,
       label: "Noticeboards",
       href: `/admins/${adminId}/noticeboards`,
-    },   
+    },
+ {
+    icon: Wallet,
+    label: "Payrolls",
+    href: `/admins/${adminId}/payrolls`,
+  },
     {
       icon: BarChart,
       label: "Analytics",
