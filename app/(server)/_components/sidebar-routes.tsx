@@ -26,7 +26,7 @@ const adminRoutes = [
   {
     icon: BarChart,
     label: "Analytics",
-    href: "/dashboard/analytics",
+    href: "/dashboard/admins/analytics",
   },
 ];
 
@@ -34,7 +34,7 @@ export const SidebarRoutes = () => {
     const pathname = usePathname();
     
     // Show admin routes when in admin section
-    const isAdminSection = pathname?.includes("/dashboard/admins") || pathname?.includes("/dashboard/analytics");
+    const isAdminSection = pathname?.includes("/dashboard/admins") || pathname?.includes("/dashboard/admins/analytics");
     
     const routes = isAdminSection ? adminRoutes : guestRoutes;
     

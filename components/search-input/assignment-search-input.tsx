@@ -37,7 +37,7 @@ export const AssignmentSearchInput = ({ tutorId, adminId, courseId, assignmentId
   }, [debouncedValue, tutorId, adminId, courseId, router, pathname]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Search className="h-4 w-4 absolute top-3 left-3 text-slate-600" />
       <Input
         value={value}

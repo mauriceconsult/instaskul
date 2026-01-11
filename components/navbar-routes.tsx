@@ -21,8 +21,8 @@ const NavbarRoutes = ({ className, adminId, courseId }: NavbarRoutesProps) => {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Route checks
   const isRootPage = pathname === "/";
+  const isSearchPage = pathname === "/dashboard/search" || pathname.startsWith("/dashboard/search");
   const isAdminSection = pathname.startsWith("/dashboard/admins") || pathname.startsWith("/dashboard/analytics");
   const isLearnerContentPage = 
     pathname.includes("/courses/") ||
@@ -31,32 +31,70 @@ const NavbarRoutes = ({ className, adminId, courseId }: NavbarRoutesProps) => {
     pathname.includes("/courseworks/") ||
     pathname.includes("/coursenoticeboards");
 
-  // Search input logic (unchanged)
   const renderSearchInput = () => {
+    // Search page
+    if (isSearchPage) {
+      return <AdminSearchInput adminId={adminId} />;
+    }
+    
+    // Course-specific pages
     if (pathname.includes("/courses/") && !pathname.includes("/tutors") && !pathname.includes("/assignments")) {
       return <CourseSearchInput adminId={adminId} courseId={courseId} />;
     }
-    if (pathname.includes("/tutors/")) return <TutorSearchInput adminId={adminId} courseId={courseId} />;
-    if (pathname.includes("/noticeboards/")) return <NoticeboardSearchInput adminId={adminId} />;
-    if (pathname.includes("/courseworks/")) return <CourseworkSearchInput adminId={adminId} courseId={courseId} />;
-    if (isAdminSection) return <AdminSearchInput adminId={adminId} />;
+    
+    // Tutor pages
+    if (pathname.includes("/tutors/")) {
+      return <TutorSearchInput adminId={adminId} courseId={courseId} />;
+    }
+    
+    // Noticeboard pages
+    if (pathname.includes("/noticeboards/")) {
+      return <NoticeboardSearchInput adminId={adminId} />;
+    }
+    
+    // Coursework pages
+    if (pathname.includes("/courseworks/")) {
+      return <CourseworkSearchInput adminId={adminId} courseId={courseId} />;
+    }
+    
+    // Admin section
+    if (isAdminSection) {
+      return <AdminSearchInput adminId={adminId} />;
+    }
+    
     return null;
   };
 
+  const searchInput = renderSearchInput();
+
   return (
     <div className={`flex items-center gap-x-4 w-full px-4 ${className}`}>
-      {/* Dynamic Search Input */}
-      <div className="w-64">
-        {renderSearchInput()}
-      </div>
+      {/* Search Input – flexible width */}
+      {searchInput && (
+        <div className="flex-1 min-w-[220px] max-w-[480px]">
+          {searchInput}
+        </div>
+      )}
 
       {/* Right Side Navigation */}
       <div className="flex items-center gap-x-4 ml-auto">
-        <Link href="/docs" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+        <Link 
+          href="/docs" 
+          className="hidden md:block text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
           Docs
         </Link>
 
-        {/* Exit Button - Unified for ALL admin & content pages */}
+        {adminId && (
+          <Link 
+            href={`/admins/${adminId}/payrolls`} 
+            className="hidden md:block text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            Payrolls
+          </Link>
+        )}
+
+        {/* Exit Button */}
         {(isAdminSection || isLearnerContentPage) && (
           <Button
             size="sm"
@@ -64,11 +102,11 @@ const NavbarRoutes = ({ className, adminId, courseId }: NavbarRoutesProps) => {
             onClick={() => router.push("/dashboard/search")}
           >
             <LogOut className="h-4 w-4 mr-2" />
-            Exit 
+            Exit
           </Button>
         )}
 
-        {/* Dashboard Login - Only on root */}
+        {/* Dashboard Login */}
         {isRootPage && (
           <Link href="/dashboard">
             <Button size="sm" variant="ghost">
