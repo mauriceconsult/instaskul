@@ -375,3 +375,213 @@ model CourseworkSubmission {
   @@index([userId])
   @@unique([courseworkId, userId])
 }
+
+// prisma/schema.prisma
+
+model BetaInvite {
+  id            String   @id @default(uuid())
+  code          String   @unique // e.g., BETA-EDU-ABC123
+  email         String?  // Optional: pre-assign to specific user
+  type          String   // "STUDENT" or "EDUCATOR"
+  
+  // Status tracking
+  isUsed        Boolean  @default(false)
+  usedBy        String?  // userId who claimed it
+  usedAt        DateTime?
+  
+  // Metadata
+  createdBy     String   // Admin who generated it
+  notes         String?  // e.g., "LinkedIn outreach batch 1"
+  expiresAt     DateTime? // Optional: time-limited codes
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([code])
+  @@index([email])
+  @@index([isUsed])
+}
+
+enum MarketStatus {
+  PLANNED
+  ALPHA
+  BETA
+  GA
+  SUNSET
+}
+
+enum UserSegment {
+  CONSUMER
+  SMB
+  ENTERPRISE
+  DEVELOPER
+  EDUCATION
+}
+
+enum InvitationStatus {
+  ACTIVE
+  USED
+  EXPIRED
+  REVOKED
+}
+
+enum AccessTier {
+  ALPHA
+  BETA
+  GA
+}
+
+// Core market configuration
+model Market {
+  id                String        @id @default(cuid())
+  
+  // Identity
+  countryCode       String        @unique // ISO 3166-1 alpha-2 (KE, UG, etc)
+  countryName       String
+  region            String?       // e.g., "East Africa", "West Africa"
+  
+  // Status
+  status            MarketStatus  @default(PLANNED)
+  launchedAt        DateTime?
+  
+  // Configuration
+  allowedSegments   UserSegment[] // Which user types can access
+  defaultTier       AccessTier    @default(BETA)
+  maxBetaUsers      Int?          // Cap for beta users
+  
+  // Payment
+  paymentMethods    Json          // ["mpesa", "card", "bank_transfer"]
+  currency          String        // KES, UGX, USD, etc
+  pricingConfig     Json?         // Market-specific pricing
+  
+  // Features
+  featureFlags      Json          @default("{}")
+  
+  // Metadata
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  // Relations
+  invitations       Invitation[]
+  users             User[]
+  analytics         MarketAnalytics[]
+}
+
+// Invitation codes and links
+model Invitation {
+  id                String           @id @default(cuid())
+  
+  // Code
+  code              String           @unique
+  inviteLink        String           @unique // Full URL
+  
+  // Constraints
+  marketId          String
+  market            Market           @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  
+  segment           UserSegment
+  tier              AccessTier       @default(BETA)
+  
+  maxUses           Int              @default(1) // -1 for unlimited
+  currentUses       Int              @default(0)
+  
+  expiresAt         DateTime?
+  status            InvitationStatus @default(ACTIVE)
+  
+  // Attribution
+  createdBy         String?          // Admin user ID
+  campaign          String?          // "launch_event", "partner_acme"
+  notes             String?
+  
+  // Metadata
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  // Relations
+  redemptions       InvitationRedemption[]
+  
+  @@index([marketId, status])
+  @@index([code])
+}
+
+// Track who used which invitation
+model InvitationRedemption {
+  id                String     @id @default(cuid())
+  
+  invitationId      String
+  invitation        Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  redeemedAt        DateTime   @default(now())
+  ipAddress         String?
+  userAgent         String?
+  
+  @@unique([invitationId, userId])
+  @@index([userId])
+}
+
+// Extended user model (works with Clerk)
+model User {
+  id                String      @id // Clerk user ID
+  
+  // Market assignment
+  marketId          String
+  market            Market      @relation(fields: [marketId], references: [id])
+  
+  segment           UserSegment
+  accessTier        AccessTier  @default(BETA)
+  
+  // Beta lifecycle
+  invitedAt         DateTime    @default(now())
+  activatedAt       DateTime?   // First real usage
+  graduatedAt       DateTime?   // Moved to GA
+  
+  // Status
+  isActive          Boolean     @default(true)
+  isBetaTester      Boolean     @default(true)
+  
+  // Metadata for analytics
+  metadata          Json        @default("{}")
+  
+  // Relations
+  invitationRedemptions InvitationRedemption[]
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@index([marketId, accessTier])
+  @@index([segment])
+}
+
+// Market performance tracking
+model MarketAnalytics {
+  id                String   @id @default(cuid())
+  
+  marketId          String
+  market            Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  
+  date              DateTime @db.Date
+  
+  // User metrics
+  totalUsers        Int      @default(0)
+  activeUsers       Int      @default(0)
+  newSignups        Int      @default(0)
+  
+  // Engagement
+  avgSessionDuration Float?
+  avgActionsPerUser  Float?
+  
+  // Conversion
+  paidUsers         Int      @default(0)
+  revenue           Float    @default(0)
+  
+  // Segment breakdown
+  segmentBreakdown  Json     @default("{}")
+  
+  createdAt         DateTime @default(now())
+  
+  @@unique([marketId, date])
+  @@index([date])
+}

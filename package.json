@@ -12,7 +12,12 @@
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && prisma generate && next build",
     "vercel-build": "prisma generate && NODE_OPTIONS='--max-old-space-size=8192' next build",
     "start": "next start",
-    "postinstall": "node -e \"try { require('child_process').execSync('npx prisma generate', { stdio: 'inherit' }); } catch (e) { console.error('Prisma generate failed:', e.message); }\""
+    "postinstall": "node -e \"try { require('child_process').execSync('npx prisma generate', { stdio: 'inherit' }); } catch (e) { console.error('Prisma generate failed:', e.message); }\"",
+    "claude": "tsx scripts/claude.ts",
+    "claude:review": "npm run claude review",
+    "claude:optimize": "npm run claude optimize",
+    "claude:explain": "npm run claude explain",
+    "beta:generate": "tsx scripts/generate-beta-codes.ts"
   },
   "prisma": {
     "seed": "node --loader ts-node/esm scripts/seed.ts"
@@ -22,6 +27,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@aws-sdk/client-s3": "^3.846.0",
     "@ckeditor/ckeditor5-core": "^46.0.3",
     "@ckeditor/ckeditor5-editor-classic": "^46.0.3",
@@ -52,7 +58,7 @@
     "@radix-ui/react-scroll-area": "^1.2.6",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-separator": "^1.1.0",
-    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.11",
     "@tailwindcss/typography": "^0.5.16",

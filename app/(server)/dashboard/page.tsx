@@ -3,6 +3,7 @@ import { getDashboardData } from "@/actions/get-dashboard-data";
 import InfoCard from "@/app/(admin)/admins/[adminId]/_components/info-card";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,6 +21,22 @@ export default async function Dashboard() {
     coursesInProgress: 0,
     completedCourses: 0,
   }));
+
+  const marketComparison = await prisma.market.findMany({
+  include: {
+    _count: {
+      select: { users: true }
+    },
+    analytics: {
+      where: {
+        date: {
+          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
+        }
+      },
+      orderBy: { date: 'asc' }
+    }
+  }
+});
 
   return (
     <div className="p-6 space-y-8">
