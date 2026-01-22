@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   
   const result = await InvitationService.redeemInvitation(code, userId, {
     ipAddress: req.ip,
-    userAgent: req.headers.get('user-agent')
+    userAgent: req.headers.get('user-agent') || undefined
   });
   
   return NextResponse.json(result);

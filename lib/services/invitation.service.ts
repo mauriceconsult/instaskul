@@ -1,13 +1,10 @@
 // lib/services/invitation.service.ts
 
-import { PrismaClient, UserSegment, AccessTier, InvitationStatus } from '@prisma/client';
-import { customAlphabet } from 'nanoid';
+import { prisma } from '@/lib/prisma';
+import { UserSegment, AccessTier, InvitationStatus } from '@prisma/client';
+import { nanoid } from 'nanoid';
 
-const prisma = new PrismaClient();
-const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 12);
-
-// Export types for use in API routes
-export interface GenerateInvitationParams {
+interface GenerateInvitationsParams {
   marketId: string;
   segment: UserSegment;
   tier: AccessTier;
@@ -16,141 +13,73 @@ export interface GenerateInvitationParams {
   expiresAt?: Date;
   campaign?: string;
   notes?: string;
-  createdBy?: string;
+  createdBy: string;
 }
 
-export interface InvitationDetails {
-  code: string;
-  inviteLink: string;
-  expiresAt?: Date;
-}
-
-export interface ValidationResult {
-  valid: boolean;
-  invitation?: {
-    market: {
-      countryName: string;
-      countryCode: string;
-    };
-    segment: UserSegment;
-    tier: AccessTier;
-    expiresAt?: Date;
-    usesRemaining: number;
-  };
-  error?: string;
-}
-
-export interface RedemptionResult {
-  success: boolean;
-  user?: {
-    id: string;
-    market: string;
-    segment: UserSegment;
-    tier: AccessTier;
-  };
-  error?: string;
+interface RedemptionMetadata {
+  ipAddress?: string;
+  userAgent?: string;
 }
 
 export class InvitationService {
   /**
-   * Generate invitation codes
+   * Generate multiple invitation codes
    */
-  static async generateInvitations(
-    params: GenerateInvitationParams
-  ): Promise<InvitationDetails[]> {
-    const invitations: InvitationDetails[] = [];
+  static async generateInvitations(params: GenerateInvitationsParams) {
+    const {
+      marketId,
+      segment,
+      tier,
+      count,
+      maxUses,
+      expiresAt,
+      campaign,
+      notes,
+      createdBy
+    } = params;
 
-    for (let i = 0; i < params.count; i++) {
-      // Generate code with market prefix
-      const marketPrefix = params.marketId.slice(0, 2).toUpperCase();
-      const code = `${marketPrefix}-${nanoid()}`;
-      
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      const inviteLink = `${baseUrl}/beta/join?code=${code}`;
+    // Verify market exists
+    const market = await prisma.market.findUnique({
+      where: { id: marketId }
+    });
+
+    if (!market) {
+      throw new Error('Market not found');
+    }
+
+    // Generate invitations
+    const invitations = [];
+
+    for (let i = 0; i < count; i++) {
+      const code = this.generateCode(segment);
+      const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${code}`;
 
       const invitation = await prisma.invitation.create({
         data: {
           code,
           inviteLink,
-          marketId: params.marketId,
-          segment: params.segment,
-          tier: params.tier,
-          maxUses: params.maxUses,
-          expiresAt: params.expiresAt,
-          campaign: params.campaign,
-          notes: params.notes,
-          createdBy: params.createdBy,
-          status: InvitationStatus.ACTIVE
+          marketId,
+          segment,
+          tier,
+          maxUses: maxUses === -1 ? 999999 : maxUses, // -1 means unlimited
+          currentUses: 0,
+          status: 'ACTIVE',
+          expiresAt,
+          campaign: campaign || 'admin_generated',
+          notes,
+          createdById: createdBy,
+        },
+        select: {
+          code: true,
+          inviteLink: true,
+          expiresAt: true,
         }
       });
 
-      invitations.push({
-        code: invitation.code,
-        inviteLink: invitation.inviteLink,
-        expiresAt: invitation.expiresAt || undefined
-      });
+      invitations.push(invitation);
     }
 
     return invitations;
-  }
-
-  /**
-   * Validate an invitation code
-   */
-  static async validateCode(code: string): Promise<ValidationResult> {
-    const invitation = await prisma.invitation.findUnique({
-      where: { code },
-      include: { market: true }
-    });
-
-    if (!invitation) {
-      return { valid: false, error: 'Invalid invitation code' };
-    }
-
-    if (invitation.status !== InvitationStatus.ACTIVE) {
-      return { 
-        valid: false, 
-        error: `Invitation is ${invitation.status.toLowerCase()}` 
-      };
-    }
-
-    if (invitation.expiresAt && invitation.expiresAt < new Date()) {
-      await prisma.invitation.update({
-        where: { id: invitation.id },
-        data: { status: InvitationStatus.EXPIRED }
-      });
-      return { valid: false, error: 'Invitation has expired' };
-    }
-
-    if (invitation.maxUses !== -1 && invitation.currentUses >= invitation.maxUses) {
-      return { 
-        valid: false, 
-        error: 'Invitation has reached maximum uses' 
-      };
-    }
-
-    if (invitation.market.status === 'PLANNED') {
-      return { 
-        valid: false, 
-        error: `${invitation.market.countryName} market is not yet available` 
-      };
-    }
-
-    return {
-      valid: true,
-      invitation: {
-        market: {
-          countryName: invitation.market.countryName,
-          countryCode: invitation.market.countryCode
-        },
-        segment: invitation.segment,
-        tier: invitation.tier,
-        expiresAt: invitation.expiresAt || undefined,
-        usesRemaining: invitation.maxUses === -1 
-          ? -1 
-          : invitation.maxUses - invitation.currentUses
-      }
-    };
   }
 
   /**
@@ -158,153 +87,217 @@ export class InvitationService {
    */
   static async redeemInvitation(
     code: string,
-    clerkUserId: string,
-    metadata?: { ipAddress?: string; userAgent?: string }
-  ): Promise<RedemptionResult> {
-    // Validate the code first
-    const validation = await this.validateCode(code);
-
-    if (!validation.valid) {
-      return { success: false, error: validation.error };
-    }
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { id: clerkUserId }
-    });
-
-    if (existingUser) {
-      return { 
-        success: false, 
-        error: 'You already have beta access' 
-      };
-    }
-
-    const invitation = await prisma.invitation.findUnique({
-      where: { code },
-      include: { market: true }
-    });
-
-    if (!invitation) {
-      return { success: false, error: 'Invitation not found' };
-    }
-
-    try {
-      // Create user record
-      const user = await prisma.user.create({
-        data: {
-          id: clerkUserId,
-          marketId: invitation.marketId,
-          segment: invitation.segment,
-          accessTier: invitation.tier,
-          invitedAt: new Date(),
-          isActive: true,
-          isBetaTester: true,
-          metadata: metadata || {}
-        }
-      });
-
-      // Record redemption
-      await prisma.invitationRedemption.create({
-        data: {
-          invitationId: invitation.id,
-          userId: clerkUserId,
-          ipAddress: metadata?.ipAddress,
-          userAgent: metadata?.userAgent
-        }
-      });
-
-      // Increment usage count
-      await prisma.invitation.update({
-        where: { id: invitation.id },
-        data: {
-          currentUses: { increment: 1 }
-        }
-      });
-
-      // Mark as used if single-use invitation
-      if (invitation.maxUses === 1) {
-        await prisma.invitation.update({
-          where: { id: invitation.id },
-          data: { status: InvitationStatus.USED }
-        });
-      }
-
-      return {
-        success: true,
-        user: {
-          id: user.id,
-          market: invitation.market.countryName,
-          segment: user.segment,
-          tier: user.accessTier
-        }
-      };
-    } catch (error) {
-      console.error('Error redeeming invitation:', error);
-      return { 
-        success: false, 
-        error: 'Failed to redeem invitation. Please try again.' 
-      };
-    } finally {
-      await prisma.$disconnect();
-    }
-  }
-
-  /**
-   * Get invitation statistics
-   */
-  static async getInvitationStats(code: string) {
+    userId: string,
+    metadata?: RedemptionMetadata
+  ) {
+    // Find invitation
     const invitation = await prisma.invitation.findUnique({
       where: { code },
       include: {
         market: true,
         redemptions: {
-          include: {
-            user: true
-          }
-        },
-        _count: {
-          select: {
-            redemptions: true
-          }
+          where: { userId }
         }
       }
     });
 
     if (!invitation) {
-      return null;
+      throw new Error('Invitation not found');
     }
 
+    // Validate invitation
+    const validationError = this.validateInvitation(invitation);
+    if (validationError) {
+      throw new Error(validationError);
+    }
+
+    // Check if user already redeemed
+    if (invitation.redemptions.length > 0) {
+      throw new Error('You have already used this invitation code');
+    }
+
+    // Redeem invitation
+    const redemption = await prisma.$transaction(async (tx) => {
+      // Create redemption record
+      const redemption = await tx.invitationRedemption.create({
+        data: {
+          invitationId: invitation.id,
+          userId,
+          ipAddress: metadata?.ipAddress || null,
+          userAgent: metadata?.userAgent || null,
+        }
+      });
+
+      // Update invitation usage
+      await tx.invitation.update({
+        where: { id: invitation.id },
+        data: {
+          currentUses: { increment: 1 },
+          status: invitation.currentUses + 1 >= invitation.maxUses ? 'USED' : 'ACTIVE'
+        }
+      });
+
+      // Update market beta user count (if the field exists in your schema)
+      // await tx.market.update({
+      //   where: { id: invitation.marketId },
+      //   data: {
+      //     currentBetaUsers: { increment: 1 }
+      //   }
+      // });
+
+      return redemption;
+    });
+
     return {
-      code: invitation.code,
-      status: invitation.status,
-      market: invitation.market.countryName,
+      success: true,
+      redemption,
+      market: invitation.market,
       segment: invitation.segment,
-      tier: invitation.tier,
-      totalUses: invitation.currentUses,
-      maxUses: invitation.maxUses,
-      redemptions: invitation.redemptions.length,
-      expiresAt: invitation.expiresAt,
-      createdAt: invitation.createdAt,
-      campaign: invitation.campaign
+      tier: invitation.tier
     };
   }
 
   /**
-   * Revoke an invitation
+   * Verify if an invitation code is valid
    */
-  static async revokeInvitation(code: string): Promise<boolean> {
-    try {
-      await prisma.invitation.update({
-        where: { code },
-        data: { status: InvitationStatus.REVOKED }
-      });
-      return true;
-    } catch (error) {
-      console.error('Error revoking invitation:', error);
-      return false;
-    } finally {
-      await prisma.$disconnect();
+  static async verifyInvitation(code: string, userId?: string) {
+    const invitation = await prisma.invitation.findUnique({
+      where: { code },
+      include: {
+        market: true,
+        redemptions: userId ? {
+          where: { userId }
+        } : undefined
+      }
+    });
+
+    if (!invitation) {
+      return {
+        valid: false,
+        error: 'Invitation not found'
+      };
     }
+
+    const error = this.validateInvitation(invitation);
+    if (error) {
+      return {
+        valid: false,
+        error
+      };
+    }
+
+    // Check if user already redeemed
+    if (userId && invitation.redemptions && invitation.redemptions.length > 0) {
+      return {
+        valid: false,
+        error: 'You have already used this invitation code'
+      };
+    }
+
+    return {
+      valid: true,
+      invitation: {
+        code: invitation.code,
+        segment: invitation.segment,
+        tier: invitation.tier,
+        market: invitation.market,
+        expiresAt: invitation.expiresAt
+      }
+    };
+  }
+
+  /**
+   * List invitations with filters
+   */
+  static async listInvitations(filters?: {
+    marketId?: string;
+    status?: InvitationStatus;
+    segment?: UserSegment;
+    campaign?: string;
+  }) {
+    return prisma.invitation.findMany({
+      where: {
+        marketId: filters?.marketId,
+        status: filters?.status,
+        segment: filters?.segment,
+        campaign: filters?.campaign,
+      },
+      include: {
+        market: true,
+        _count: {
+          select: {
+            redemptions: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+  }
+
+  /**
+   * Get invitation statistics
+   */
+  static async getStats(marketId?: string) {
+    const where = marketId ? { marketId } : {};
+
+    const [total, active, used, expired] = await Promise.all([
+      prisma.invitation.count({ where }),
+      prisma.invitation.count({ where: { ...where, status: 'ACTIVE' } }),
+      prisma.invitation.count({ where: { ...where, status: 'USED' } }),
+      prisma.invitation.count({ where: { ...where, status: 'EXPIRED' } }),
+    ]);
+
+    const redemptions = await prisma.invitationRedemption.count({
+      where: marketId ? {
+        invitation: { marketId }
+      } : undefined
+    });
+
+    return {
+      total,
+      active,
+      used,
+      expired,
+      redemptions
+    };
+  }
+
+  /**
+   * Generate a unique invitation code
+   */
+  private static generateCode(segment: UserSegment): string {
+    const prefix = 'BETA';
+    const segmentCode = segment.substring(0, 3).toUpperCase();
+    const random = nanoid(8).toUpperCase();
+    return `${prefix}-${segmentCode}-${random}`;
+  }
+
+  /**
+   * Validate invitation status
+   */
+  private static validateInvitation(invitation: any): string | null {
+    // Check if already used up
+    if (invitation.currentUses >= invitation.maxUses) {
+      return 'This invitation code has been fully used';
+    }
+
+    // Check if expired
+    if (invitation.expiresAt && new Date(invitation.expiresAt) < new Date()) {
+      return 'This invitation code has expired';
+    }
+
+    // Check if revoked
+    if (invitation.status === 'REVOKED') {
+      return 'This invitation code has been revoked';
+    }
+
+    // Check if inactive
+    if (invitation.status !== 'ACTIVE') {
+      return 'This invitation code is not active';
+    }
+
+    return null;
   }
 }

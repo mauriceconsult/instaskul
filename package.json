@@ -20,7 +20,7 @@
     "beta:generate": "tsx scripts/generate-beta-codes.ts"
   },
   "prisma": {
-    "seed": "node --loader ts-node/esm scripts/seed.ts"
+    "seed": "node --loader ts-node/esm scripts/seed.ts tsx prisma/seed.ts tsx scripts/seed.ts"
   },
   "engines": {
     "node": "22.x"
@@ -47,7 +47,7 @@
     "@mux/mux-player": "^3.5.1",
     "@mux/mux-player-react": "^3.10.2",
     "@prisma/adapter-pg": "^7.1.0",
-    "@prisma/client": "^7.1.0",
+    "@prisma/client": "^7.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -107,6 +107,7 @@
     "lowlight": "^3.3.0",
     "lucide-react": "^0.461.0",
     "mtn-momo": "^2.0.0",
+    "nanoid": "^5.1.6",
     "next": "^14.2.35",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.5",

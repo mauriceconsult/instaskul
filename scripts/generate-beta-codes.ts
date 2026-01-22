@@ -1,36 +1,56 @@
+// scripts/generate-beta-codes.ts
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
+import { nanoid } from 'nanoid';
 
 const prisma = new PrismaClient();
 
-function generateBetaCode(type: string): string {
-  const prefix = type === 'STUDENT' ? 'STU' : 'EDU';
-  const random = crypto.randomBytes(4).toString('hex').toUpperCase();
+function generateInvitationCode(segment: string): string {
+  const prefix = segment === 'STUDENT' ? 'STU' : 'EDU';
+  const random = nanoid(8).toUpperCase();
   return `BETA-${prefix}-${random}`;
 }
 
 async function main() {
   // Configuration
   const COUNT = 10;
-  const TYPE = 'EDUCATOR'; // Change to 'STUDENT' for student codes
+  const SEGMENT = 'EDUCATOR'; // Change to 'STUDENT' for student codes
+  const MARKET_CODE = 'UG'; // Uganda market (change to 'KE' for Kenya)
   const EXPIRES_IN_DAYS = 14;
   
   const expiresAt = new Date(Date.now() + EXPIRES_IN_DAYS * 24 * 60 * 60 * 1000);
 
-  console.log(`\nÌæ´ Generating ${COUNT} ${TYPE} beta codes...\n`);
+  console.log(`\nüé´ Generating ${COUNT} ${SEGMENT} beta codes for ${MARKET_CODE}...\n`);
+
+  // Get the market
+  const market = await prisma.market.findUnique({
+    where: { countryCode: MARKET_CODE }
+  });
+
+  if (!market) {
+    throw new Error(`Market ${MARKET_CODE} not found. Please seed markets first.`);
+  }
+
+  console.log(`‚úì Using market: ${market.countryName} (${market.countryCode})\n`);
 
   const codes: string[] = [];
 
   for (let i = 0; i < COUNT; i++) {
-    const code = generateBetaCode(TYPE);
+    const code = generateInvitationCode(SEGMENT);
     
     try {
-      await prisma.betaInvite.create({
+      await prisma.invitation.create({
         data: {
           code,
-          type: TYPE,
-          createdBy: 'admin',
+          inviteLink: `https://yourapp.com/invite/${code}`,
+          marketId: market.id,
+          segment: SEGMENT as any,
+          tier: 'BETA',
+          maxUses: 1,
+          currentUses: 0,
+          status: 'ACTIVE',
+          campaign: 'beta_launch_jan_2026',
           notes: 'Beta launch - January 2026',
+          createdById: 'admin',
           expiresAt,
         },
       });
@@ -43,13 +63,16 @@ async function main() {
   }
 
   console.log(`\n‚úÖ Successfully generated ${codes.length} codes!\n`);
-  console.log('Ì≥ã Your Beta Codes:');
+  console.log('üìã Your Beta Invitation Codes:');
   console.log('‚îÄ'.repeat(60));
   codes.forEach((code, i) => {
     console.log(`  ${String(i + 1).padStart(2, ' ')}. ${code}`);
   });
   console.log('‚îÄ'.repeat(60));
-  console.log(`\nÌ≤æ All codes saved to database with ${EXPIRES_IN_DAYS}-day expiry\n`);
+  console.log(`\nüíæ All codes saved to database with ${EXPIRES_IN_DAYS}-day expiry`);
+  console.log(`üìç Market: ${market.countryName} (${market.countryCode})`);
+  console.log(`üë• Segment: ${SEGMENT}`);
+  console.log(`üéØ Campaign: beta_launch_jan_2026\n`);
 
   await prisma.$disconnect();
 }
@@ -62,5 +85,7 @@ main()
   .catch((error) => {
     console.error('\n‚ùå Script failed:', error.message);
     console.error('\nFull error:', error);
+    console.error('\nüí° Tip: Make sure you have run the market seed first:');
+    console.error('   npx prisma db seed\n');
     process.exit(1);
   });

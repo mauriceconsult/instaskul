@@ -1,5 +1,4 @@
 // /api/admin/invitations
-// Add this import to ANY file that uses these types
 import { UserSegment, AccessTier, MarketStatus, InvitationStatus } from '@prisma/client';
 
 interface GenerateInvitationRequest {

@@ -71,7 +71,13 @@ export async function POST(req: NextRequest) {
       createdBy: userId
     });
 
-    const response: GenerateInvitationResponse = { invitations };
+    const response: GenerateInvitationResponse = {
+      invitations: invitations.map(inv => ({
+        code: inv.code,
+        inviteLink: inv.inviteLink,
+        ...(inv.expiresAt && { expiresAt: inv.expiresAt })
+      }))
+    };
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {

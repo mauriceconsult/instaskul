@@ -1,6 +1,8 @@
+// app/api/beta/claim/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { InvitationService } from "@/lib/services/invitation.service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,48 +19,33 @@ export async function POST(req: NextRequest) {
 
     if (!code) {
       return NextResponse.json(
-        { error: "Beta code is required" },
+        { error: "Invitation code is required" },
         { status: 400 }
       );
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const betaInvite = await tx.betaInvite.findUnique({
-        where: { code: code.toUpperCase() },
-      });
-
-      if (!betaInvite) {
-        throw new Error("Invalid beta code");
+    // Use the new InvitationService
+    const result = await InvitationService.redeemInvitation(
+      code.toUpperCase(),
+      userId,
+      {
+        ipAddress: req.ip,
+        userAgent: req.headers.get('user-agent') || undefined
       }
-
-      if (betaInvite.isUsed) {
-        throw new Error("This beta code has already been used");
-      }
-
-      if (betaInvite.expiresAt && new Date() > betaInvite.expiresAt) {
-        throw new Error("This beta code has expired");
-      }
-
-      return await tx.betaInvite.update({
-        where: { id: betaInvite.id },
-        data: {
-          isUsed: true,
-          usedBy: userId,
-          usedAt: new Date(),
-        },
-      });
-    });
+    );
 
     return NextResponse.json({
       success: true,
-      type: result.type,
+      segment: result.segment,
+      tier: result.tier,
+      market: result.market,
       message: "Beta access granted!",
     });
   } catch (error: any) {
     console.error("[BETA_CLAIM]", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
-      { status: 500 }
+      { error: error.message || "Failed to claim invitation" },
+      { status: 400 }
     );
   }
 }

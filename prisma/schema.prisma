@@ -1,16 +1,22 @@
+// prisma/schema.prisma
+// Prisma 7 compatible schema
+
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+// ============================================================================
+// EXISTING MODELS (Your LMS System)
+// ============================================================================
+
 model School {
   id      String    @id @default(uuid())
   name    String    @unique
-  admins  Admin[] 
+  admins  Admin[]
 }
 
 model Tuition {
@@ -32,32 +38,33 @@ model Tuition {
   attachments    Attachment[]
   enrollment     Enrollment?  @relation("TuitionToEnrollment")
   payrolls        Payroll[]    @relation("TuitionToPayroll")
-  
+
   @@unique([userId, courseId])
   @@index([courseId])
 }
+
 model Payroll {
-  id               String   @id @default(uuid()) 
+  id               String   @id @default(uuid())
   tuitionId        String   @unique
   userId           String
   courseId         String
   adminId          String
-  
-  grossAmount      String   
-  platformFee      String   
-  transactionFee   String   
+
+  grossAmount      String
+  platformFee      String
+  transactionFee   String
   netPayout        String
- 
+
   momoReferenceId  String?  @unique
-  momoStatus       String   @default("PENDING") 
+  momoStatus       String   @default("PENDING")
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   paidAt           DateTime?
- 
+
   tuition          Tuition  @relation("TuitionToPayroll", fields: [tuitionId], references: [id], onDelete: Cascade)
-  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) 
-  
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
   @@index([adminId, momoStatus])
   @@index([tuitionId])
   @@index([courseId])
@@ -90,7 +97,7 @@ model CourseNoticeboard {
   updatedAt   DateTime     @updatedAt
   courseNoticeboardComments CourseNoticeboardComment[]
   attachments Attachment[]
-  
+
   course      Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
@@ -130,7 +137,7 @@ model Admin {
   attachments  Attachment[]
   courses      Course[]
   noticeboards Noticeboard[]
-  userProgress       UserProgress[]  
+  userProgress       UserProgress[]
 
   @@index([schoolId])
 }
@@ -141,7 +148,7 @@ model Course {
   userId             String?
   description        String?
   imageUrl           String?
-  amount             String              @default("0") // ← No longer nullable, default to 0
+  amount             String              @default("0")
   position           Int?
   isPublished        Boolean             @default(false)
   createdAt          DateTime            @default(now())
@@ -192,15 +199,13 @@ model Tutor {
   courseId     String?
   adminId      String?
   isCompleted  Boolean        @default(false)
-  
-  // Mux foreign key
+
   muxDataId    String?        @unique
 
-  // Relations
   assignments  Assignment[]
   attachments  Attachment[]
   course       Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  muxData      MuxData?       
+  muxData      MuxData?
   userProgress UserProgress[]
 
   @@index([courseId])
@@ -314,9 +319,9 @@ model NoticeboardComment {
   userId         String
   content        String
   createdAt      DateTime  @default(now())
-  adminId       String?   // for replies
+  adminId       String?
 
-  noticeboard    Noticeboard @relation(fields: [noticeboardId], references: [id])  
+  noticeboard    Noticeboard @relation(fields: [noticeboardId], references: [id])
   admin         NoticeboardComment? @relation("CommentReplies", fields: [adminId], references: [id])
   replies        NoticeboardComment[] @relation("CommentReplies")
 
@@ -340,6 +345,7 @@ model CourseNoticeboardComment {
   @@index([userId])
   @@index([courseId])
 }
+
 model AssignmentSubmission {
   id           String    @id @default(cuid())
   assignmentId String
@@ -369,38 +375,15 @@ model CourseworkSubmission {
   feedback     String?
 
   coursework   Coursework @relation(fields: [courseworkId], references: [id], onDelete: Cascade)
-  
 
   @@index([courseworkId])
   @@index([userId])
   @@unique([courseworkId, userId])
 }
 
-// prisma/schema.prisma
-
-model BetaInvite {
-  id            String   @id @default(uuid())
-  code          String   @unique // e.g., BETA-EDU-ABC123
-  email         String?  // Optional: pre-assign to specific user
-  type          String   // "STUDENT" or "EDUCATOR"
-  
-  // Status tracking
-  isUsed        Boolean  @default(false)
-  usedBy        String?  // userId who claimed it
-  usedAt        DateTime?
-  
-  // Metadata
-  createdBy     String   // Admin who generated it
-  notes         String?  // e.g., "LinkedIn outreach batch 1"
-  expiresAt     DateTime? // Optional: time-limited codes
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@index([code])
-  @@index([email])
-  @@index([isUsed])
-}
+// ============================================================================
+// NEW BETA/MARKET SYSTEM
+// ============================================================================
 
 enum MarketStatus {
   PLANNED
@@ -416,6 +399,8 @@ enum UserSegment {
   ENTERPRISE
   DEVELOPER
   EDUCATION
+  STUDENT
+  EDUCATOR
 }
 
 enum InvitationStatus {
@@ -431,157 +416,155 @@ enum AccessTier {
   GA
 }
 
-// Core market configuration
 model Market {
   id                String        @id @default(cuid())
-  
-  // Identity
-  countryCode       String        @unique // ISO 3166-1 alpha-2 (KE, UG, etc)
+
+  countryCode       String        @unique
   countryName       String
-  region            String?       // e.g., "East Africa", "West Africa"
-  
-  // Status
+  region            String?
+
   status            MarketStatus  @default(PLANNED)
   launchedAt        DateTime?
-  
-  // Configuration
-  allowedSegments   UserSegment[] // Which user types can access
+
+  allowedSegments   Json          @default("[]")
   defaultTier       AccessTier    @default(BETA)
-  maxBetaUsers      Int?          // Cap for beta users
-  
-  // Payment
-  paymentMethods    Json          // ["mpesa", "card", "bank_transfer"]
-  currency          String        // KES, UGX, USD, etc
-  pricingConfig     Json?         // Market-specific pricing
-  
-  // Features
+  maxBetaUsers      Int?
+  currentBetaUsers  Int           @default(0)
+
+  paymentMethods    Json          @default("[]")
+  currency          String
+  pricingConfig     Json?
+
   featureFlags      Json          @default("{}")
-  
-  // Metadata
+
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
-  
-  // Relations
+
   invitations       Invitation[]
   users             User[]
   analytics         MarketAnalytics[]
+
+  @@index([status])
+  @@index([countryCode, status])
 }
 
-// Invitation codes and links
 model Invitation {
   id                String           @id @default(cuid())
-  
-  // Code
+
   code              String           @unique
-  inviteLink        String           @unique // Full URL
-  
-  // Constraints
+  inviteLink        String           @unique
+
   marketId          String
   market            Market           @relation(fields: [marketId], references: [id], onDelete: Cascade)
-  
+
   segment           UserSegment
   tier              AccessTier       @default(BETA)
-  
-  maxUses           Int              @default(1) // -1 for unlimited
+
+  maxUses           Int              @default(1)
   currentUses       Int              @default(0)
-  
+
   expiresAt         DateTime?
   status            InvitationStatus @default(ACTIVE)
-  
-  // Attribution
-  createdBy         String?          // Admin user ID
-  campaign          String?          // "launch_event", "partner_acme"
+
+  assignedEmail     String?
+  createdById       String?
+  campaign          String?
   notes             String?
-  
-  // Metadata
+
+  metadata          Json             @default("{}")
+
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
-  
-  // Relations
+
   redemptions       InvitationRedemption[]
-  
+
   @@index([marketId, status])
+  @@index([marketId, status, expiresAt])
   @@index([code])
+  @@index([assignedEmail])
+  @@index([campaign])
+  @@index([status, expiresAt])
 }
 
-// Track who used which invitation
 model InvitationRedemption {
   id                String     @id @default(cuid())
-  
+
   invitationId      String
   invitation        Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
-  
+
   userId            String
   user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   redeemedAt        DateTime   @default(now())
   ipAddress         String?
   userAgent         String?
-  
+
   @@unique([invitationId, userId])
   @@index([userId])
+  @@index([invitationId])
+  @@index([redeemedAt])
 }
 
-// Extended user model (works with Clerk)
 model User {
-  id                String      @id // Clerk user ID
-  
-  // Market assignment
+  id                String      @id
+
+  email             String?     @unique
+  firstName         String?
+  lastName          String?
+
   marketId          String
   market            Market      @relation(fields: [marketId], references: [id])
-  
+
   segment           UserSegment
   accessTier        AccessTier  @default(BETA)
-  
-  // Beta lifecycle
+
   invitedAt         DateTime    @default(now())
-  activatedAt       DateTime?   // First real usage
-  graduatedAt       DateTime?   // Moved to GA
-  
-  // Status
+  activatedAt       DateTime?
+  graduatedAt       DateTime?
+
   isActive          Boolean     @default(true)
   isBetaTester      Boolean     @default(true)
-  
-  // Metadata for analytics
+
   metadata          Json        @default("{}")
-  
-  // Relations
+
   invitationRedemptions InvitationRedemption[]
-  
+
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
-  
+
   @@index([marketId, accessTier])
   @@index([segment])
+  @@index([isActive, isBetaTester])
+  @@index([email])
 }
 
-// Market performance tracking
 model MarketAnalytics {
   id                String   @id @default(cuid())
-  
+
   marketId          String
   market            Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
-  
+
   date              DateTime @db.Date
-  
-  // User metrics
+
   totalUsers        Int      @default(0)
   activeUsers       Int      @default(0)
   newSignups        Int      @default(0)
-  
-  // Engagement
+  churnedUsers      Int      @default(0)
+
   avgSessionDuration Float?
   avgActionsPerUser  Float?
-  
-  // Conversion
+
   paidUsers         Int      @default(0)
   revenue           Float    @default(0)
-  
-  // Segment breakdown
+
   segmentBreakdown  Json     @default("{}")
-  
+
+  invitesGenerated  Int      @default(0)
+  invitesRedeemed   Int      @default(0)
+
   createdAt         DateTime @default(now())
-  
+
   @@unique([marketId, date])
   @@index([date])
+  @@index([marketId, date])
 }
