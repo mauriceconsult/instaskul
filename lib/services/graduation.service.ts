@@ -1,8 +1,7 @@
 // lib/services/graduation.service.ts
+import { prisma } from '@/lib/prisma'
 
-import { PrismaClient, AccessTier, MarketStatus } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { AccessTier, MarketStatus } from '@prisma/client';
 
 interface GraduationCriteria {
   minDaysActive: number;
