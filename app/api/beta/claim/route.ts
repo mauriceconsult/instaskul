@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { InvitationService } from "@/lib/services/invitation.service"
+import { prisma } from "@/lib/prisma"
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { code } = await req.json()
+    const { code, referralCode } = await req.json()
 
     if (!code) {
       return NextResponse.json(
@@ -25,6 +26,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Redeem the invitation
     const result = await InvitationService.redeemInvitation(
       code.toUpperCase(),
       userId,
@@ -33,6 +35,20 @@ export async function POST(req: NextRequest) {
         userAgent: req.headers.get('user-agent') || undefined
       }
     )
+
+    // Track referral if provided
+    if (referralCode) {
+      const referrer = await prisma.user.findUnique({
+        where: { referralCode }
+      })
+
+      if (referrer) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { referredBy: referrer.id }
+        })
+      }
+    }
 
     return NextResponse.json({
       success: true,

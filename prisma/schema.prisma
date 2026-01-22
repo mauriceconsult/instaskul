@@ -509,6 +509,10 @@ model User {
   email             String?     @unique
   firstName         String?
   lastName          String?
+  referralCode   String?   @unique
+  referredBy     String?
+  referrer       User?     @relation("UserReferrals", fields: [referredBy], references: [id])
+  referrals      User[]    @relation("UserReferrals")
 
   marketId          String
   market            Market      @relation(fields: [marketId], references: [id])
