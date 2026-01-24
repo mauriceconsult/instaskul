@@ -38,7 +38,7 @@
     ".next/types/app/**/*.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "scripts/generate-beta-codes.js"  ],
   "exclude": [
     "node_modules"
   ]
