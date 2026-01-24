@@ -1,25 +1,13 @@
 // app/admin/invitations/page.tsx
 export const runtime = 'nodejs'
 
-import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
-import InvitationStats from '@/components/admin/invitation-stats'
 import InvitationTrackingTable from '@/components/admin/invitation-tracking-table'
+import InvitationStats from '@/components/admin/invitation-stats'
 
 export default async function AdminInvitationsPage() {
-  const { userId } = await auth()
+  // Auth check is in layout, so we can skip it here
   
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
-  // Check admin access
-  const adminIds = process.env.ADMIN_USER_IDS?.split(',') || []
-  if (!adminIds.includes(userId)) {
-    redirect('/dashboard')
-  }
-
   // Get all invitations with redemption data
   const invitations = await prisma.invitation.findMany({
     include: {
@@ -55,11 +43,12 @@ export default async function AdminInvitationsPage() {
     expired: invitations.filter(i => 
       i.expiresAt && new Date(i.expiresAt) < new Date()
     ).length,
-    redemptionRate: (
-      (invitations.filter(i => i._count.redemptions > 0).length / invitations.length) * 100
-    ).toFixed(1)
+    redemptionRate: invitations.length > 0
+      ? ((invitations.filter(i => i._count.redemptions > 0).length / invitations.length) * 100).toFixed(1)
+      : '0'
   }
 
+  // Calculate by campaign
   const byCampaign = invitations.reduce((acc, inv) => {
     const campaign = inv.campaign || 'Unknown'
     if (!acc[campaign]) {
@@ -73,7 +62,7 @@ export default async function AdminInvitationsPage() {
   }, {} as Record<string, { total: number; redeemed: number }>)
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <main className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Beta Invitation Tracking</h1>
@@ -83,7 +72,7 @@ export default async function AdminInvitationsPage() {
         </div>
         <a 
           href="/api/admin/invitations/export"
-          className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+          className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
         >
           Export CSV
         </a>
@@ -92,6 +81,6 @@ export default async function AdminInvitationsPage() {
       <InvitationStats stats={stats} byCampaign={byCampaign} />
       
       <InvitationTrackingTable invitations={invitations} />
-    </div>
+    </main>
   )
 }

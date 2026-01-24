@@ -81,7 +81,7 @@ export default function DocsPage() {
           to suit your organization’s Faculties or Departments. InstaSkul
           facilitates continuous improvement allowing you to create and produce
           Courses at own pace and publish only when you are ready. You can also
-          unpublish your works. You maintain copyright to your content.
+          unpublish your works. You maintain the copyright to your content.
         </p>
         <ul className="list-disc list-inside text-slate-600 mb-4 space-y-2">
           <li>

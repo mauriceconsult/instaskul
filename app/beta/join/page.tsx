@@ -2,6 +2,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { InstaSkulLogo } from '@/components/instaskul-logo'
 import BetaJoinForm from '@/components/beta-join-form'
 
 export default async function BetaJoinPage({
@@ -40,11 +41,27 @@ export default async function BetaJoinPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-muted">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-background to-muted">
+      {/* Large logo at top */}
+      <div className="mb-8">
+        <InstaSkulLogo size="lg" />
+      </div>
+
+      {/* Form */}
       <BetaJoinForm 
         inviteCode={inviteCode} 
         referralCode={referralCode}
       />
+
+      {/* Footer */}
+      <footer className="mt-12 text-center text-xs text-muted-foreground">
+        <p>© 2026 InstaSkul. Built in Uganda for Africa.</p>
+        <div className="flex gap-4 justify-center mt-2">
+          <a href="/terms" className="hover:underline">Terms</a>
+          <a href="/privacy" className="hover:underline">Privacy</a>
+          <a href="/about" className="hover:underline">About</a>
+        </div>
+      </footer>
     </div>
   )
 }
