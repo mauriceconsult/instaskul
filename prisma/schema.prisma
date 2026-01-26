@@ -174,6 +174,7 @@ model Enrollment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tuitionId String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   tuition   Tuition  @relation("TuitionToEnrollment", fields: [tuitionId], references: [id], onDelete: Cascade)
 
@@ -496,6 +497,7 @@ model InvitationRedemption {
   redeemedAt        DateTime   @default(now())
   ipAddress         String?
   userAgent         String?
+  createdAt    DateTime    @default(now())
 
   @@unique([invitationId, userId])
   @@index([userId])
@@ -511,6 +513,7 @@ model User {
   lastName          String?
   referralCode   String?   @unique
   referredBy     String?
+  premiumMonthsEarned   Int       @default(0)
   referrer       User?     @relation("UserReferrals", fields: [referredBy], references: [id])
   referrals      User[]    @relation("UserReferrals")
 
@@ -534,6 +537,12 @@ model User {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
+  // Relations
+  enrollments           Enrollment[]
+  
+  @@index([referralCode])
+  @@index([referredBy])
+  
   @@index([marketId, accessTier])
   @@index([segment])
   @@index([isActive, isBetaTester])

@@ -7,138 +7,177 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2 } from 'lucide-react'
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+// import { getAbsoluteUrl } from '@/lib/url' // ADD THIS
 
 interface BetaJoinFormProps {
   inviteCode?: string
   referralCode?: string
 }
 
-export default function BetaJoinForm({ 
-  inviteCode, 
-  referralCode 
-}: BetaJoinFormProps) {
+export default function BetaJoinForm({ inviteCode, referralCode }: BetaJoinFormProps) {
   const router = useRouter()
   const [code, setCode] = useState(inviteCode || '')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const [validating, setValidating] = useState(false)
+  const [claiming, setClaiming] = useState(false)
+  const [validationResult, setValidationResult] = useState<{
+    valid: boolean
+    message: string
+  } | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+  const validateCode = async () => {
+    if (!code.trim()) {
+      setValidationResult({
+        valid: false,
+        message: 'Please enter an invitation code'
+      })
+      return
+    }
+
+    setValidating(true)
+    setValidationResult(null)
 
     try {
-      // First validate the code
-      const validateRes = await fetch('/api/beta/validate', {
+      const response = await fetch('/api/beta/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code.toUpperCase() })
+        body: JSON.stringify({ code: code.trim() })
       })
 
-      const validateData = await validateRes.json()
+      const data = await response.json()
 
-      if (!validateRes.ok) {
-        throw new Error(validateData.error || 'Invalid invitation code')
-      }
+      setValidationResult({
+        valid: data.valid,
+        message: data.message || (data.valid ? 'Code is valid!' : 'Invalid code')
+      })
+    } catch (error) {
+      setValidationResult({
+        valid: false,
+        message: 'Failed to validate code. Please try again.'
+      })
+    } finally {
+      setValidating(false)
+    }
+  }
 
-      if (!validateData.valid) {
-        throw new Error(validateData.reason || 'This invitation code is not valid')
-      }
+  const claimInvite = async () => {
+    setClaiming(true)
 
-      // Then claim/redeem the code
-      const claimRes = await fetch('/api/beta/claim', {
+    try {
+      const response = await fetch('/api/beta/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          code: code.toUpperCase(),
-          referralCode 
+          code: code.trim(),
+          referralCode: referralCode 
         })
       })
 
-      const claimData = await claimRes.json()
+      const data = await response.json()
 
-      if (!claimRes.ok) {
-        throw new Error(claimData.error || 'Failed to claim invitation')
-      }
-
-      setSuccess(true)
-      
-      // Redirect to dashboard after success
-      setTimeout(() => {
+      if (data.success) {
+        // Redirect to welcome page
         router.push('/dashboard/beta-welcome')
-      }, 2000)
-
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+      } else {
+        setValidationResult({
+          valid: false,
+          message: data.error || 'Failed to claim invitation'
+        })
+      }
+    } catch (error) {
+      setValidationResult({
+        valid: false,
+        message: 'Failed to claim invitation. Please try again.'
+      })
     } finally {
-      setLoading(false)
+      setClaiming(false)
     }
   }
 
   return (
-    <div className="w-full max-w-md space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Join InstaSkul Beta</h1>
+    <div className="max-w-md w-full bg-card p-8 rounded-lg border shadow-lg">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-2">Join InstaSkul Beta</h2>
         <p className="text-muted-foreground">
           Enter your invitation code to get started
         </p>
       </div>
 
-      {referralCode && (
-        <Alert>
-          <AlertDescription>
-            🎉 You were referred by a friend! You'll both get rewards when you join.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
+      <div className="space-y-4">
+        <div>
           <Label htmlFor="code">Invitation Code</Label>
           <Input
             id="code"
             type="text"
-            placeholder="BETA-XXXX-XXXX"
+            placeholder="XXXX-XXXX-XXXX"
             value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            required
-            disabled={loading || success}
-            className="font-mono"
+            onChange={(e) => {
+              setCode(e.target.value.toUpperCase())
+              setValidationResult(null)
+            }}
+            disabled={validating || claiming}
           />
-          <p className="text-xs text-muted-foreground">
-            Don't have a code? <a href="/beta-signup" className="underline">Request access</a>
-          </p>
         </div>
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+        {validationResult && (
+          <Alert variant={validationResult.valid ? 'default' : 'destructive'}>
+            <div className="flex items-center gap-2">
+              {validationResult.valid ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <XCircle className="h-4 w-4" />
+              )}
+              <AlertDescription>{validationResult.message}</AlertDescription>
+            </div>
           </Alert>
         )}
 
-        {success && (
-          <Alert className="bg-green-50 border-green-200">
-            <AlertDescription className="text-green-700">
-              ✅ Welcome to InstaSkul Beta! Redirecting to dashboard...
-            </AlertDescription>
-          </Alert>
-        )}
+        <div className="flex gap-2">
+          <Button
+            onClick={validateCode}
+            disabled={!code.trim() || validating || claiming}
+            variant="outline"
+            className="flex-1"
+          >
+            {validating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Validating...
+              </>
+            ) : (
+              'Validate Code'
+            )}
+          </Button>
 
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={loading || success || !code}
-        >
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {success ? 'Access Granted!' : 'Join Beta'}
-        </Button>
-      </form>
+          <Button
+            onClick={claimInvite}
+            disabled={!validationResult?.valid || claiming}
+            className="flex-1"
+          >
+            {claiming ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Claiming...
+              </>
+            ) : (
+              'Claim Invite'
+            )}
+          </Button>
+        </div>
 
-      <div className="text-center text-sm text-muted-foreground">
-        <p>Already have an account? <a href="/sign-in" className="underline">Sign in</a></p>
+        <div className="text-center text-sm text-muted-foreground">
+          Don't have a code?{' '}
+          <a href="/beta-signup" className="text-primary hover:underline">
+            Request access
+          </a>
+        </div>
       </div>
+
+      {referralCode && (
+        <div className="mt-4 p-3 bg-primary/10 rounded text-sm">
+          🎁 You were referred by a friend! You'll both get rewards when you join.
+        </div>
+      )}
     </div>
   )
 }

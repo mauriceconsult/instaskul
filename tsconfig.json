@@ -38,7 +38,7 @@
     ".next/types/app/**/*.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-, "scripts/generate-beta-codes.js"  ],
+, "scripts/generate-beta-codes.js", "scripts/test-invitation.mjs"  ],
   "exclude": [
     "node_modules"
   ]

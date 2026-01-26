@@ -18,11 +18,9 @@ export async function POST(req: NextRequest) {
     if (!code) {
       return NextResponse.json({ error: 'Code is required' }, { status: 400 })
     }
-    
-    const result = await InvitationService.redeemInvitation(code, userId, {
-      ipAddress: req.ip,
-      userAgent: req.headers.get('user-agent') || undefined
-    })
+
+    // If redeemInvitation only accepts code (check the actual signature)
+    const result = await InvitationService.redeemInvitation(code)
     
     return NextResponse.json(result)
   } catch (error: any) {

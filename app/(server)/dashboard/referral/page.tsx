@@ -1,20 +1,22 @@
-// app/dashboard/referral/page.tsx
+// app/(server)/dashboard/referral/page.tsx
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
 import ReferralCard from '@/components/referral-card'
 
 export default async function ReferralPage() {
   const { userId } = await auth()
-  
+
   if (!userId) {
     redirect('/sign-in')
   }
 
-  // Get user's referral stats
+  // Get user with referral data
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: {
+    select: {
+      referralCode: true,
+      premiumMonthsEarned: true,
       _count: {
         select: {
           referrals: true
@@ -27,79 +29,62 @@ export default async function ReferralPage() {
     redirect('/sign-in')
   }
 
-  // Generate or get user's referral code
-  const referralCode = user.referralCode || user.id.slice(0, 8).toUpperCase()
+  // Handle null referralCode - generate one if missing
+  let referralCode = user.referralCode
   
-  // Update user with referral code if they don't have one
-  if (!user.referralCode) {
+  if (!referralCode) {
+    // Generate a new referral code if user doesn't have one
+    referralCode = `REF-${userId.slice(0, 8).toUpperCase()}`
+    
+    // Update user with new referral code
     await prisma.user.update({
       where: { id: userId },
       data: { referralCode }
     })
   }
 
+  // Build referral link
   const referralLink = `${process.env.NEXT_PUBLIC_APP_URL}/beta/join?ref=${referralCode}`
+  
   const referralCount = user._count.referrals
+  const premiumMonthsEarned = user.premiumMonthsEarned || 0
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">Invite Friends, Get Rewards</h1>
-      <p className="text-muted-foreground mb-8">
-        Share InstaSkul and earn benefits for every friend who joins
-      </p>
-
-      <div className="grid gap-6 md:grid-cols-3 mb-8">
-        <div className="bg-card p-6 rounded-lg border">
-          <div className="text-4xl mb-2">🎁</div>
-          <h3 className="font-semibold mb-1">Free Premium</h3>
-          <p className="text-sm text-muted-foreground">
-            1 month free per successful referral
-          </p>
-        </div>
-        
-        <div className="bg-card p-6 rounded-lg border">
-          <div className="text-4xl mb-2">🏆</div>
-          <h3 className="font-semibold mb-1">Lifetime Access</h3>
-          <p className="text-sm text-muted-foreground">
-            Top 10 referrers get lifetime premium
-          </p>
-        </div>
-        
-        <div className="bg-card p-6 rounded-lg border">
-          <div className="text-4xl mb-2">⭐</div>
-          <h3 className="font-semibold mb-1">Special Badge</h3>
-          <p className="text-sm text-muted-foreground">
-            Unlock badges for 5+ referrals
-          </p>
-        </div>
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Invite Friends, Get Rewards</h1>
+        <p className="text-muted-foreground">
+          Share InstaSkul and earn benefits for every friend who joins
+        </p>
       </div>
 
-      <ReferralCard 
+      <ReferralCard
         referralLink={referralLink}
         referralCode={referralCode}
         referralCount={referralCount}
+        premiumMonthsEarned={premiumMonthsEarned}
       />
 
-      <div className="mt-8 bg-muted p-6 rounded-lg">
-        <h2 className="font-semibold mb-3">Your Referral Stats</h2>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Total Referrals:</span>
-            <span className="font-semibold">{referralCount}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Premium Months Earned:</span>
-            <span className="font-semibold">{referralCount}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Status:</span>
-            <span className="font-semibold">
-              {referralCount >= 10 ? '🏆 Top Referrer' : 
-               referralCount >= 5 ? '⭐ Beta Champion' : 
-               '👤 Beta User'}
-            </span>
-          </div>
-        </div>
+      <div className="bg-card border rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">How It Works</h2>
+        <ol className="space-y-3 text-sm">
+          <li className="flex items-start">
+            <span className="font-bold text-primary mr-2">1.</span>
+            <span>Share your unique referral link with friends</span>
+          </li>
+          <li className="flex items-start">
+            <span className="font-bold text-primary mr-2">2.</span>
+            <span>When they sign up using your link, you both get rewards</span>
+          </li>
+          <li className="flex items-start">
+            <span className="font-bold text-primary mr-2">3.</span>
+            <span>Earn 1 month of premium for every 5 successful referrals</span>
+          </li>
+          <li className="flex items-start">
+            <span className="font-bold text-primary mr-2">4.</span>
+            <span>Your friend gets instant beta access</span>
+          </li>
+        </ol>
       </div>
     </div>
   )
