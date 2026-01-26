@@ -131,13 +131,14 @@ export async function POST(
             return;
           }
 
-          // Create payroll record
+          // Create payroll record - ADD instructorId
           const payroll = await payrollService.createPayrollRecord({
             tuitionId: tuition.id,
             userId,
             courseId,
             adminId: admin.id,
-            tuitionAmount: amount.toString(), // Pass as string
+            instructorId: courseOwnerId, // ADD THIS - instructor is the course owner
+            tuitionAmount: amount.toString(),
           });
 
           console.log("✅ Payment successful - Enrollment and Payroll created:", {
@@ -145,6 +146,7 @@ export async function POST(
             enrollmentCreated: true,
             payrollId: payroll.id,
             adminId: admin.id,
+            instructorId: courseOwnerId, // ADD THIS LOG
             netPayout: payroll.netPayout,
           });
 

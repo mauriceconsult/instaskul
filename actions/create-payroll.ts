@@ -1,5 +1,7 @@
-import { prisma } from "@/lib/db";
+// actions/create-payroll.ts
+import { payrollService } from "@/lib/payroll";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/db";
 
 export async function createPayrollFromTuition(tuitionId: string) {
   const { userId } = await auth();
@@ -14,34 +16,22 @@ export async function createPayrollFromTuition(tuitionId: string) {
     }
   });
 
-  // Safety checks
   if (!tuition?.isPaid || !tuition.amount || !tuition.courseId || !tuition.course?.adminId) {
     return;
   }
 
-  // Prevent double payroll
   const existing = await prisma.payroll.findUnique({
     where: { tuitionId }
   });
   if (existing) return;
 
-  const gross = parseFloat(tuition.amount);
-
-  const platformFee = (gross * 0.10).toFixed(2);
-  const transactionFee = (gross * 0.025).toFixed(2);
-  const netPayout = (gross * 0.875).toFixed(2);
-
-  await prisma.payroll.create({
-    data: {
-      userId,
-      tuitionId: tuition.id,
-      courseId: tuition.courseId,
-      adminId: tuition.course.adminId,
-      grossAmount: tuition.amount,
-      platformFee,
-      transactionFee,
-      netPayout,
-      momoStatus: "PENDING",
-    },
+  // Use the service method with instructorId
+  return await payrollService.createPayrollRecord({
+    tuitionId: tuition.id,
+    userId,
+    courseId: tuition.courseId,
+    adminId: tuition.course.adminId,
+    instructorId: tuition.course.adminId, // ADD THIS - instructor is the course admin
+    tuitionAmount: tuition.amount,
   });
 }

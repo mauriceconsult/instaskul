@@ -29,6 +29,7 @@ model Tuition {
   isPaid         Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  currency          String?
   status         String?
   transId        String?
   transactionId  String?
@@ -37,37 +38,55 @@ model Tuition {
   enrollment     Enrollment?  @relation("TuitionToEnrollment")
   payrolls        Payroll[]    @relation("TuitionToPayroll")
 
+  // Mobile Money fields
+  momoPhoneNumber   String?      // ADD THIS
+  momoNetwork       String?      // ADD THIS
+  momoReferenceId   String?      @unique  // ADD THIS
+  momoTransactionId String?      // ADD THIS
+  momoStatus        String?      @default("PENDING")  // ADD THIS
+
+  
+  @@index([momoReferenceId])  // ADD THIS
+  @@index([momoStatus])       // ADD THIS
   @@unique([userId, courseId])
   @@index([courseId])
 }
 
 model Payroll {
-  id               String   @id @default(uuid())
-  tuitionId        String   @unique
-  userId           String
-  courseId         String
-  adminId          String
+  id                String   @id @default(uuid())
+  tuitionId         String   @unique
+  userId            String
+  courseId          String
+  adminId           String
+  instructorId      String   // ✅ Already added
 
-  grossAmount      String
-  platformFee      String
-  transactionFee   String
-  netPayout        String
+  grossAmount       String
+  platformFee       String
+  transactionFee    String
+  netPayout         String
+  currency          String?  @default("UGX")  // ADD THIS
 
-  momoReferenceId  String?  @unique
-  momoStatus       String   @default("PENDING")
+  // Mobile Money fields
+  momoPhoneNumber   String?  // ADD THIS
+  momoNetwork       String?  // ADD THIS
+  momoReferenceId   String?  @unique
+  momoTransactionId String?  // ADD THIS
+  momoStatus        String   @default("PENDING")
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  paidAt           DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  paidAt            DateTime?
 
-  tuition          Tuition  @relation("TuitionToPayroll", fields: [tuitionId], references: [id], onDelete: Cascade)
-  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tuition           Tuition  @relation("TuitionToPayroll", fields: [tuitionId], references: [id], onDelete: Cascade)
+  course            Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([adminId, momoStatus])
   @@index([tuitionId])
   @@index([courseId])
   @@index([adminId])
+  @@index([instructorId])  // ADD THIS
   @@index([momoStatus])
+  @@index([momoReferenceId])  // ADD THIS
   @@index([paidAt])
   @@index([createdAt])
 }

@@ -84,12 +84,14 @@ class PayrollService {
     userId,
     courseId,
     adminId,
+    instructorId, // ADD THIS PARAMETER
     tuitionAmount,
   }: {
     tuitionId: string;
     userId: string;
     courseId: string;
     adminId: string;
+    instructorId: string; // ADD THIS TYPE
     tuitionAmount: number | string;
   }) {
     const calculation = this.calculatePayroll(tuitionAmount);
@@ -100,6 +102,7 @@ class PayrollService {
         userId,
         courseId,
         adminId,
+        instructorId, // ADD THIS FIELD
         grossAmount: calculation.grossAmount,
         platformFee: calculation.platformFee,
         transactionFee: calculation.transactionFee,
