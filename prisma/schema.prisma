@@ -39,15 +39,15 @@ model Tuition {
   payrolls        Payroll[]    @relation("TuitionToPayroll")
 
   // Mobile Money fields
-  momoPhoneNumber   String?      // ADD THIS
-  momoNetwork       String?      // ADD THIS
-  momoReferenceId   String?      @unique  // ADD THIS
-  momoTransactionId String?      // ADD THIS
-  momoStatus        String?      @default("PENDING")  // ADD THIS
+  momoPhoneNumber   String?     
+  momoNetwork       String?     
+  momoReferenceId   String?      @unique 
+  momoTransactionId String?     
+  momoStatus        String?      @default("PENDING") 
 
   
-  @@index([momoReferenceId])  // ADD THIS
-  @@index([momoStatus])       // ADD THIS
+  @@index([momoReferenceId]) 
+  @@index([momoStatus])      
   @@unique([userId, courseId])
   @@index([courseId])
 }
@@ -64,13 +64,13 @@ model Payroll {
   platformFee       String
   transactionFee    String
   netPayout         String
-  currency          String?  @default("UGX")  // ADD THIS
+  currency          String?  @default("UGX") 
 
   // Mobile Money fields
-  momoPhoneNumber   String?  // ADD THIS
-  momoNetwork       String?  // ADD THIS
+  momoPhoneNumber   String? 
+  momoNetwork       String? 
   momoReferenceId   String?  @unique
-  momoTransactionId String?  // ADD THIS
+  momoTransactionId String? 
   momoStatus        String   @default("PENDING")
 
   createdAt         DateTime @default(now())
@@ -84,9 +84,9 @@ model Payroll {
   @@index([tuitionId])
   @@index([courseId])
   @@index([adminId])
-  @@index([instructorId])  // ADD THIS
+  @@index([instructorId]) 
   @@index([momoStatus])
-  @@index([momoReferenceId])  // ADD THIS
+  @@index([momoReferenceId]) 
   @@index([paidAt])
   @@index([createdAt])
 }
@@ -597,4 +597,34 @@ model MarketAnalytics {
   @@unique([marketId, date])
   @@index([date])
   @@index([marketId, date])
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text  // Rich HTML content from Tiptap
+  excerpt     String?  @db.Text
+  coverImage  String?  // Uploadthing URL
+  
+  authorId    String
+  authorName  String?
+  authorImage String?
+  
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  
+  tags        String[] @default([])
+  category    String?
+  
+  views       Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([authorId])
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@index([category])
 }
