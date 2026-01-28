@@ -1,42 +1,34 @@
-import { prisma } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from "@/lib/db";
+import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
+// app/api/admins/[adminId]/courses/[courseId]/amounts/route.ts
 export async function PATCH(
-  req: NextRequest,
-  props: { params: Promise<{ adminId: string; courseId: string }> }
+  req: Request,
+  { params }: { params: { adminId: string; courseId: string } }
 ) {
-  const params = await props.params;
   try {
-    const { adminId, courseId } = params;
-    const { amount } = await req.json();
+    const { userId } = await auth();
+    const { amount, currency } = await req.json();
 
-    if (!adminId || !courseId) {
-      return NextResponse.json({ message: 'Invalid adminId or courseId' }, { status: 400 });
+    if (!userId || userId !== params.adminId) {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const course = await prisma.course.findFirst({
-      where: { id: courseId },
+    const course = await prisma.course.update({
+      where: {
+        id: params.courseId,
+        userId: params.adminId,
+      },
+      data: {
+        amount,
+        currency: currency || "UGX",
+      },
     });
 
-    if (!course) {
-      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
-    }
-
-    if (amount !== null && (typeof amount !== 'string' || isNaN(Number(amount)))) {
-      return NextResponse.json(
-        { message: 'Invalid amount: must be a string representing a number or null' },
-        { status: 400 }
-      );
-    }
-
-    const updatedCourse = await prisma.course.update({
-      where: { id: courseId },
-      data: { amount },
-    });
-
-    return NextResponse.json(updatedCourse);
+    return NextResponse.json(course);
   } catch (error) {
-    console.error('Update course amount error:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    console.error("[COURSE_AMOUNT]", error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
 }
