@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, Menu, Wallet } from "lucide-react";
+import { LogOut, LogIn, Menu, Wallet, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import {
@@ -44,6 +44,7 @@ export default function NavbarRoutes({
     pathname.includes("/assignments") ||
     pathname.includes("/courseworks/") ||
     pathname.includes("/coursenoticeboards");
+  const isBlogPage = pathname.startsWith("/blog");
 
   // Dynamic search input
   const getSearchInput = () => {
@@ -83,7 +84,14 @@ export default function NavbarRoutes({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem asChild>
-                <Link href="/docs">Docs</Link>
+                <Link href="/blog" className="flex items-center">
+                  <BookOpen className="h-4 w-4 mr-2 text-blue-600" />
+                  <span className="font-medium">Blog</span>
+                </Link>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem asChild>
+                <Link href="/docs">User Guide</Link>
               </DropdownMenuItem>
 
               {showPayrolls && (
@@ -113,10 +121,22 @@ export default function NavbarRoutes({
 
         {/* Desktop links */}
         <Link
+          href="/blog"
+          className={`hidden md:flex items-center gap-x-1.5 text-sm font-medium transition-colors ${
+            isBlogPage
+              ? "text-blue-600"
+              : "text-slate-600 hover:text-blue-600"
+          }`}
+        >
+          <BookOpen className="h-4 w-4" />
+          <span>Blog</span>
+        </Link>
+
+        <Link
           href="/docs"
           className="hidden md:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
         >
-          Docs
+          Guide
         </Link>
 
         {showPayrolls && (
