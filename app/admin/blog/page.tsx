@@ -85,9 +85,9 @@ export default async function AdminBlogPage() {
                           </span>
                         )}
                       </td>
-                      <td className="p-4 text-muted-foreground">
+                      {/* <td className="p-4 text-muted-foreground">
                         {post.views}
-                      </td>
+                      </td> */}
                       <td className="p-4 text-sm text-muted-foreground">
                         {formatDistanceToNow(new Date(post.updatedAt), { addSuffix: true })}
                       </td>

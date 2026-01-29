@@ -602,33 +602,22 @@ model MarketAnalytics {
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   title       String
   slug        String   @unique
-  content     String   @db.Text  // Rich HTML content from Tiptap
+  content     String   @db.Text
   excerpt     String?  @db.Text
-  coverImage  String?  // Uploadthing URL
-  
-  authorId    String
-  authorName  String?
-  authorImage String?
-  
-  isPublished Boolean  @default(false)
-  publishedAt DateTime?
-  
-  tags        String[] @default([])
+  coverImage  String?  @db.Text
   category    String?
-  
-  views       Int      @default(0)
-  
+  tags        String[]
+  isPublished Boolean  @default(false)
+  authorId    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  @@index([slug])
+
   @@index([authorId])
+  @@index([slug])
   @@index([isPublished])
-  @@index([publishedAt])
-  @@index([category])
 }
 //Mpesa
 model MPesaTransaction {

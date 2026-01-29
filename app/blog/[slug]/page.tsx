@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import Image from "next/image"
-import { format } from "date-fns"
 import { InstaSkulLogo } from "@/components/instaskul-logo"
-import { Share2, Calendar, Eye } from "lucide-react"
+import { Share2 } from "lucide-react"
 
 export default async function BlogPostPage({
   params,
@@ -17,10 +16,10 @@ export default async function BlogPostPage({
   if (!post) notFound()
 
   // Fire-and-forget view increment (doesn't block render)
-  prisma.blogPost.update({
-    where: { id: post.id },
-    data: { views: { increment: 1 } },
-  }).catch(() => {})
+  // prisma.blogPost.update({
+  //   where: { id: post.id },
+  //   data: { views: { increment: 1 } },
+  // }).catch(() => {})
 
   const postUrl = `https://instaskul.com/blog/${post.slug}`
 
@@ -35,7 +34,7 @@ export default async function BlogPostPage({
       <main className="max-w-4xl mx-auto px-4 py-12">
         <article>
           <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-
+{/* 
           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
             {post.publishedAt && (
               <span className="flex items-center gap-1">
@@ -47,7 +46,7 @@ export default async function BlogPostPage({
               <Eye className="h-3 w-3" />
               {post.views} views
             </span>
-          </div>
+          </div> */}
 
           {post.coverImage && (
             <div className="relative h-96 mb-8 rounded-lg overflow-hidden">

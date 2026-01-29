@@ -22,10 +22,10 @@ export async function GET(
     }
 
     // Increment views
-    await prisma.blogPost.update({
-      where: { id: postId },
-      data: { views: { increment: 1 } }
-    })
+    // await prisma.blogPost.update({
+    //   where: { id: postId },
+    //   data: { views: { increment: 1 } }
+    // })
 
     return NextResponse.json(post)
   } catch (error: any) {
@@ -62,7 +62,7 @@ export async function PATCH(
     // If publishing for the first time, set publishedAt
     const currentPost = await prisma.blogPost.findUnique({
       where: { id: postId },
-      select: { isPublished: true, publishedAt: true }
+      select: { isPublished: true}
     })
 
     const updateData: any = {

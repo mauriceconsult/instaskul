@@ -8,7 +8,7 @@ import { InstaSkulLogo } from '@/components/instaskul-logo'
 export default async function BlogPage() {
   const posts = await prisma.blogPost.findMany({
     where: { isPublished: true },
-    orderBy: { publishedAt: 'desc' }
+    orderBy: { createdAt: 'desc' }
   })
 
   return (
@@ -64,8 +64,8 @@ export default async function BlogPage() {
                           {post.category}
                         </span>
                       )}
-                      {post.publishedAt && (
-                        <span>{format(new Date(post.publishedAt), 'MMM d, yyyy')}</span>
+                      {post.createdAt && (
+                        <span>{format(new Date(post.createdAt), 'MMM d, yyyy')}</span>
                       )}
                     </div>
                     <h2 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">

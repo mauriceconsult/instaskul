@@ -1,107 +1,90 @@
 // app/api/blog/route.ts
-export const runtime = 'nodejs'
+import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/db";
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
-
-// GET - List all blog posts (public + admin filter)
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url)
-    const isAdmin = searchParams.get('admin') === 'true'
-    
-    const { userId } = await auth()
-
-    // Admin view - all posts
-    if (isAdmin && userId) {
-      const adminIds = process.env.ADMIN_USER_IDS?.split(',') || []
-      if (!adminIds.includes(userId)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-      }
-
-      const posts = await prisma.blogPost.findMany({
-        orderBy: { createdAt: 'desc' }
-      })
-
-      return NextResponse.json(posts)
-    }
-
-    // Public view - only published posts
-    const posts = await prisma.blogPost.findMany({
-      where: { isPublished: true },
-      orderBy: { publishedAt: 'desc' }
-    })
-
-    return NextResponse.json(posts)
-  } catch (error: any) {
-    console.error('[BLOG_GET]', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch posts' },
-      { status: 500 }
-    )
-  }
+// Helper function to generate slug from title
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }
 
-// POST - Create new blog post
-export async function POST(req: NextRequest) {
+// Helper function to ensure unique slug
+async function getUniqueSlug(baseSlug: string): Promise<string> {
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (await prisma.blogPost.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  return slug;
+}
+
+export async function POST(req: Request) {
   try {
-    const { userId } = await auth()
+    const { userId } = await auth();
     
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Check admin access
-    const adminIds = process.env.ADMIN_USER_IDS?.split(',') || []
+    // Check if user is admin
+    const adminIds = process.env.ADMIN_USER_IDS?.split(',') || [];
     if (!adminIds.includes(userId)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return new NextResponse("Forbidden", { status: 403 });
     }
 
-    const user = await currentUser()
-    const body = await req.json()
+    const body = await req.json();
+    const { title, content, excerpt, coverImage, category, tags, isPublished } = body;
 
-    const { title, content, excerpt, coverImage, tags, category, isPublished } = body
-
+    // Validate required fields
     if (!title || !content) {
-      return NextResponse.json(
-        { error: 'Title and content are required' },
-        { status: 400 }
-      )
+      return new NextResponse("Title and content are required", { status: 400 });
     }
 
-    // Generate slug from title
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-      + `-${Date.now().toString(36)}`
+    // Generate unique slug from title
+    const baseSlug = generateSlug(title);
+    const slug = await getUniqueSlug(baseSlug);
 
     const post = await prisma.blogPost.create({
       data: {
         title,
         slug,
         content,
-        excerpt: excerpt || content.substring(0, 160),
-        coverImage,
-        authorId: userId,
-        authorName: user?.firstName && user?.lastName 
-          ? `${user.firstName} ${user.lastName}`
-          : user?.emailAddresses[0]?.emailAddress || 'Anonymous',
-        authorImage: user?.imageUrl,
+        excerpt: excerpt || null,
+        coverImage: coverImage || null,
+        category: category || null,
         tags: tags || [],
-        category,
         isPublished: isPublished || false,
-        publishedAt: isPublished ? new Date() : null,
-      }
-    })
+        authorId: userId,
+      },
+    });
 
-    return NextResponse.json(post)
-  } catch (error: any) {
-    console.error('[BLOG_POST]', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to create post' },
-      { status: 500 }
-    )
+    return NextResponse.json(post);
+  } catch (error) {
+    console.error("[BLOG_POST]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        isPublished: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return NextResponse.json(posts);
+  } catch (error) {
+    console.error("[BLOG_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
 }
