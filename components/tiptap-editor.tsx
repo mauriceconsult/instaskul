@@ -51,6 +51,7 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML())
     },
+    immediatelyRender: false, // ✅ Critical fix for SSR/hydration
   })
 
   useEffect(() => {
