@@ -1,7 +1,7 @@
 // app/api/blog/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 // Helper function to generate slug from title
 function generateSlug(title: string): string {
@@ -22,6 +22,18 @@ async function getUniqueSlug(baseSlug: string): Promise<string> {
   }
 
   return slug;
+}
+
+// Helper to clean form data (convert empty strings to null)
+function cleanFormData(data: any) {
+  return {
+    ...data,
+    excerpt: data.excerpt?.trim() || null,
+    coverImage: data.coverImage?.trim() || null,
+    category: data.category?.trim() || null,
+    tags: Array.isArray(data.tags) ? data.tags : [],
+    isPublished: Boolean(data.isPublished), // Ensure boolean
+  };
 }
 
 export async function POST(req: Request) {
@@ -50,23 +62,35 @@ export async function POST(req: Request) {
     const baseSlug = generateSlug(title);
     const slug = await getUniqueSlug(baseSlug);
 
+    // Clean the data
+    const cleanedData = cleanFormData({ excerpt, coverImage, category, tags, isPublished });
+
+    console.log('[BLOG_CREATE] Creating post with data:', {
+      title,
+      slug,
+      ...cleanedData,
+      authorId: userId,
+    });
+
     const post = await prisma.blogPost.create({
       data: {
         title,
         slug,
         content,
-        excerpt: excerpt || null,
-        coverImage: coverImage || null,
-        category: category || null,
-        tags: tags || [],
-        isPublished: isPublished || false,
+        excerpt: cleanedData.excerpt,
+        coverImage: cleanedData.coverImage,
+        category: cleanedData.category,
+        tags: cleanedData.tags,
+        isPublished: cleanedData.isPublished,
         authorId: userId,
       },
     });
 
+    console.log('[BLOG_CREATE] Post created successfully:', post.id, 'isPublished:', post.isPublished);
+
     return NextResponse.json(post);
   } catch (error) {
-    console.error("[BLOG_POST]", error);
+    console.error("[BLOG_POST_CREATE]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

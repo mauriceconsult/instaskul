@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/form";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { BlogUploadButton } from "@/lib/uploadthing-blog";
-// import { BlogUploadButton } from "@/lib/server/uploadthing-blog"; // ← Use blog-specific client
 
 interface BlogPostFormProps {
   initialData?: {
@@ -72,34 +71,50 @@ export function BlogPostForm({ initialData }: BlogPostFormProps) {
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      startTransition(async () => {
-        const url = initialData?.id
-          ? `/api/blog/${initialData.id}`
-          : "/api/blog";
+  try {
+    const url = initialData?.id
+      ? `/api/blog/${initialData.id}`
+      : "/api/blog";
 
-        const method = initialData?.id ? "PATCH" : "POST";
+    const method = initialData?.id ? "PATCH" : "POST";
 
-        const res = await fetch(url, {
-          method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
-        });
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
 
-        if (!res.ok) {
-          const error = await res.text();
-          throw new Error(error || "Failed to save post");
-        }
+    if (!res.ok) {
+      const raw = await res.text();
+      let message = `HTTP ${res.status} error`;
 
-        toast.success(initialData?.id ? "Post updated!" : "Post created!");
-        router.push("/admin/blog");
-        router.refresh();
-      });
-    } catch (error: any) {
-      console.error("Save error:", error);
-      toast.error(error.message || "Failed to save post");
+      try {
+        const json = JSON.parse(raw);
+        message =
+          json.message ||
+          json.error ||
+          JSON.stringify(json);
+      } catch {
+        if (raw) message = raw;
+      }
+
+      throw new Error(message);
     }
-  };
+
+    toast.success(
+      initialData?.id ? "Post updated!" : "Post created!"
+    );
+
+    startTransition(() => {
+      router.push("/admin/blog");
+      router.refresh();
+    });
+  } catch (error: any) {
+    console.error("[BLOG_FORM_SUBMIT]", error);
+    toast.error(error.message || "Failed to save post");
+  }
+};
+
 
   const addTag = () => {
     const trimmedTag = tagInput.trim();
@@ -144,7 +159,7 @@ export function BlogPostForm({ initialData }: BlogPostFormProps) {
           )}
         />
 
-        {/* Cover Image - Using existing UploadThing setup */}
+        {/* Cover Image */}
         <div className="space-y-2">
           <Label>Cover Image</Label>
           {form.watch("coverImage") ? (

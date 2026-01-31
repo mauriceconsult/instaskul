@@ -51,7 +51,7 @@ export default async function AdminBlogPage() {
                 <tr>
                   <th className="text-left p-4">Title</th>
                   <th className="text-left p-4">Status</th>
-                  <th className="text-left p-4">Views</th>
+                  <th className="text-left p-4">createdAt</th>
                   <th className="text-left p-4">Updated</th>
                   <th className="text-right p-4">Actions</th>
                 </tr>

@@ -407,10 +407,17 @@ model CourseworkSubmission {
 
 enum MarketStatus {
   PLANNED
+  BETA
+  ACTIVE
+  PAUSED
+  SUNSET
+}
+
+enum AccessTier {
   ALPHA
   BETA
-  GA
-  SUNSET
+  GENERAL
+  PREMIUM
 }
 
 enum UserSegment {
@@ -428,12 +435,6 @@ enum InvitationStatus {
   USED
   EXPIRED
   REVOKED
-}
-
-enum AccessTier {
-  ALPHA
-  BETA
-  GA
 }
 
 model Market {
