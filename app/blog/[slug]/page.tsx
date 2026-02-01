@@ -224,25 +224,37 @@ export default async function BlogPostPage({
           </div>
 
           {/* Related Posts Section - Optional */}
-          <div className="mt-12 pt-8 border-t">
-            <h3 className="text-2xl font-bold mb-6">Continue Reading</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Link
-                href="/blog"
-                className="p-6 border rounded-lg hover:shadow-md transition-shadow bg-white"
-              >
-                <p className="text-sm text-blue-600 font-medium mb-2">← Previous</p>
-                <p className="font-semibold text-slate-900">Browse All Posts</p>
-              </Link>
-              <Link
-                href="/browse"
-                className="p-6 border rounded-lg hover:shadow-md transition-shadow bg-white"
-              >
-                <p className="text-sm text-blue-600 font-medium mb-2">Explore →</p>
-                <p className="font-semibold text-slate-900">Browse Courses</p>
-              </Link>
-            </div>
-          </div>
+      {/* Related Posts Section */}
+<div className="mt-12 pt-8 border-t">
+  <h3 className="text-2xl font-bold mb-6">What's Next?</h3>
+  <div className="grid gap-4 md:grid-cols-2">
+    <Link
+      href="/blog"
+      className="group p-6 border rounded-lg hover:shadow-md hover:border-blue-200 transition-all bg-white"
+    >
+      <p className="text-sm text-blue-600 font-medium mb-2 group-hover:translate-x-[-4px] transition-transform">
+        ← More Articles
+      </p>
+      <p className="font-semibold text-slate-900">Explore Our Blog</p>
+      <p className="text-xs text-slate-600 mt-1">
+        Education insights & tips
+      </p>
+    </Link>
+    
+    <Link
+      href="/dashboard/search"
+      className="group p-6 border rounded-lg hover:shadow-md hover:border-blue-200 transition-all bg-white"
+    >
+      <p className="text-sm text-blue-600 font-medium mb-2 group-hover:translate-x-1 transition-transform">
+        Explore →
+      </p>
+      <p className="font-semibold text-slate-900">Browse Courses</p>
+      <p className="text-xs text-slate-600 mt-1">
+        Discover courses from top educators
+      </p>
+    </Link>
+  </div>
+</div>
         </article>
       </main>
 
