@@ -518,7 +518,7 @@ export default function DocsPage() {
               <span className="font-medium">LinkedIn</span>
             </a>
             <a 
-              href="https://www.instagram.com/mauriceconsulat" 
+              href="https://www.instagram.com/insta_skul" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
