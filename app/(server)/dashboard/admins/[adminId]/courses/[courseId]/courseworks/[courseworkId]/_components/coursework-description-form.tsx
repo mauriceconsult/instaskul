@@ -96,7 +96,7 @@ export const CourseworkDescriptionForm = ({
                   <FormControl>
                     <Textarea
                       disabled={isSubmitting}
-                      placeholder="e.g., 'This courseworkial demonstrates...'"
+                      placeholder="e.g., 'Provide an action plan that ...'"
                       {...field}
                     />
                   </FormControl>

@@ -1,4 +1,4 @@
-// import { InstaSkulLogo } from "@/components/instaskul-logo";
+// app/docs/page.tsx
 import { Metadata } from "next";
 import Link from "next/link";
 import { Mail, Twitter, Facebook, Linkedin, Instagram } from "lucide-react";
@@ -489,47 +489,44 @@ export default function DocsPage() {
           <p className="text-slate-600 mb-4">
             Follow us on social media for updates, tips, and educational content:
           </p>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <a 
-              href="https://twitter.com/instaskul" 
+              href="https://x.com/insta_skul" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
             >
               <Twitter className="h-5 w-5" />
-              <span className="font-medium">Twitter</span>
+              <span className="font-medium">X (Twitter)</span>
             </a>
             <a 
-              href="https://facebook.com/instaskul" 
+              href="https://www.facebook.com/mauriceconsulat" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Facebook className="h-5 w-5" />
               <span className="font-medium">Facebook</span>
             </a>
             <a 
-              href="https://linkedin.com/company/instaskul" 
+              href="https://www.linkedin.com/company/instaskul" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-800 rounded-lg hover:bg-blue-100 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
             >
               <Linkedin className="h-5 w-5" />
               <span className="font-medium">LinkedIn</span>
             </a>
             <a 
-              href="https://instagram.com/instaskul" 
+              href="https://www.instagram.com/mauriceconsulat" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-lg hover:bg-pink-100 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
             >
               <Instagram className="h-5 w-5" />
               <span className="font-medium">Instagram</span>
             </a>
           </div>
-          <p className="text-xs text-slate-500 mt-4">
-            * Social media links will be activated upon account setup
-          </p>
         </div>
 
         <div className="border-t pt-6 mt-12">

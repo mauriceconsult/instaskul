@@ -78,7 +78,7 @@ export const AdminTitleForm = ({ initialData, adminId }: AdminTitleFormProps) =>
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
-                      placeholder="e.g., 'Computer Science'"
+                      placeholder="e.g., 'Dr John Height', or 'Cooking with Shiroh'"
                       {...field}
                     />
                   </FormControl>
