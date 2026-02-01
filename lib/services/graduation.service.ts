@@ -1,23 +1,23 @@
 // lib/services/graduation.service.ts
-import { prisma } from '@/lib/prisma'
-
+import { prisma } from '@/lib/prisma';
 import { AccessTier, MarketStatus } from '@prisma/client';
 
 interface GraduationCriteria {
   minDaysActive: number;
   minActionsCompleted: number;
-  requireMarketGA: boolean;
+  requireMarketActive: boolean;
 }
 
 const DEFAULT_CRITERIA: GraduationCriteria = {
   minDaysActive: 30,
-  minActionsCompleted: 10, // Adjust based on your product
-  requireMarketGA: true
+  minActionsCompleted: 10,
+  requireMarketActive: true
 };
 
 export class GraduationService {
   /**
-   * Check if a single user is eligible for graduation from BETA to GA
+   * Check if a single user is eligible for graduation from BETA to GENERAL
+   * @param userId - Database user ID (NOT Clerk ID)
    */
   static async checkEligibility(
     userId: string,
@@ -25,7 +25,12 @@ export class GraduationService {
   ): Promise<{ eligible: boolean; reasons: string[] }> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { market: true }
+      select: {
+        id: true,
+        accessTier: true,
+        activatedAt: true,
+        marketId: true,
+      }
     });
 
     if (!user) {
@@ -52,13 +57,19 @@ export class GraduationService {
       reasons.push('User has not been activated yet');
     }
 
-    // Criteria 2: Market is in GA status (if required)
-    if (criteria.requireMarketGA && user.market.status !== MarketStatus.GA) {
-      reasons.push(`Market (${user.market.countryName}) is not in GA status`);
+    // Criteria 2: Market is ACTIVE (if required and user has market)
+    if (criteria.requireMarketActive && user.marketId) {
+      const market = await prisma.market.findUnique({
+        where: { id: user.marketId },
+        select: { status: true, countryName: true }
+      });
+
+      if (market && market.status !== MarketStatus.ACTIVE) {
+        reasons.push(`Market (${market.countryName}) is not in ACTIVE status`);
+      }
     }
 
     // Criteria 3: User has completed minimum actions
-    // TODO: Replace with your actual activity tracking
     const activityCount = await this.getUserActivityCount(userId);
     if (activityCount < criteria.minActionsCompleted) {
       reasons.push(
@@ -73,7 +84,8 @@ export class GraduationService {
   }
 
   /**
-   * Graduate a single user from BETA to GA
+   * Graduate a single user from BETA to GENERAL
+   * @param userId - Database user ID
    */
   static async graduateUser(userId: string): Promise<{ success: boolean; error?: string }> {
     try {
@@ -89,7 +101,7 @@ export class GraduationService {
       await prisma.user.update({
         where: { id: userId },
         data: {
-          accessTier: AccessTier.GA,
+          accessTier: AccessTier.GENERAL,
           graduatedAt: new Date(),
           isBetaTester: false
         }
@@ -120,7 +132,7 @@ export class GraduationService {
         accessTier: AccessTier.BETA,
         isActive: true
       },
-      include: { market: true }
+      select: { id: true }
     });
 
     const eligible: string[] = [];
@@ -169,21 +181,28 @@ export class GraduationService {
 
   /**
    * Get user's activity count
-   * TODO: Replace with your actual activity tracking logic
+   * Counts user's tuitions as activity metric
+   * @param userId - Database user ID
    */
   private static async getUserActivityCount(userId: string): Promise<number> {
-    // Example: Count actions from your activity/events table
-    // const count = await prisma.userActivity.count({
-    //   where: { userId }
-    // });
-    // return count;
+    try {
+      // Count user's tuitions
+      const tuitionCount = await prisma.tuition.count({
+        where: { userId }
+      });
 
-    // Placeholder - replace with real implementation
-    return 15; // Assume users have completed 15 actions
+      return tuitionCount;
+    } catch (error) {
+      console.error('Error getting user activity count:', error);
+      return 0;
+    }
   }
 
   /**
    * Manual graduation (admin-triggered)
+   * @param userId - Database user ID
+   * @param adminId - Admin's Clerk ID or email
+   * @param reason - Reason for manual graduation
    */
   static async manualGraduate(
     userId: string,
@@ -192,7 +211,12 @@ export class GraduationService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId },
+        select: { 
+          id: true, 
+          accessTier: true,
+          metadata: true 
+        }
       });
 
       if (!user) {
@@ -204,13 +228,13 @@ export class GraduationService {
       }
 
       await prisma.user.update({
-        where: { id: userId },
+        where: { id: user.id },
         data: {
-          accessTier: AccessTier.GA,
+          accessTier: AccessTier.GENERAL,
           graduatedAt: new Date(),
           isBetaTester: false,
           metadata: {
-            ...(user.metadata as object),
+            ...(user.metadata as object || {}),
             manualGraduation: {
               adminId,
               reason: reason || 'Manual graduation',
@@ -231,5 +255,75 @@ export class GraduationService {
         error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
+  }
+
+  /**
+   * Upgrade user to PREMIUM tier
+   * @param userId - Database user ID
+   * @param adminId - Admin's ID (optional)
+   */
+  static async upgradeToPremium(
+    userId: string,
+    adminId?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { 
+          id: true,
+          metadata: true 
+        }
+      });
+
+      if (!user) {
+        return { success: false, error: 'User not found' };
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          accessTier: AccessTier.PREMIUM,
+          metadata: {
+            ...(user.metadata as object || {}),
+            premiumUpgrade: {
+              adminId: adminId || 'system',
+              timestamp: new Date().toISOString()
+            }
+          }
+        }
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error upgrading to premium:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get graduation statistics
+   */
+  static async getGraduationStats(): Promise<{
+    totalBeta: number;
+    eligible: number;
+    graduated: number;
+  }> {
+    const totalBeta = await prisma.user.count({
+      where: { accessTier: AccessTier.BETA }
+    });
+
+    const graduated = await prisma.user.count({
+      where: {
+        accessTier: AccessTier.GENERAL,
+        graduatedAt: { not: null }
+      }
+    });
+
+    const eligible = (await this.findEligibleUsers()).length;
+
+    return { totalBeta, eligible, graduated };
   }
 }

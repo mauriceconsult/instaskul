@@ -1,26 +1,21 @@
 // app/admin/blog/new/page.tsx
-import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from "@/lib/is-admin";
+import { redirect } from "next/navigation";
 import { BlogPostFormWrapper } from '@/components/admin/blog-post-form-wrapper'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 export default async function NewBlogPostPage() {
-  const { userId } = await auth()
-
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
-  const adminIds = process.env.ADMIN_USER_IDS?.split(',') || []
-  if (!adminIds.includes(userId)) {
-    redirect('/dashboard')
+  // Protect the page
+  try {
+    await requireAdmin();
+  } catch {
+    redirect('/dashboard');
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Breadcrumb/Back navigation - NOT a full navbar */}
       <div className="border-b bg-white sticky top-0 z-10">
         <div className="flex items-center gap-4 p-4 max-w-4xl mx-auto">
           <Link href="/admin/blog">
