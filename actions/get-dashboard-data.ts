@@ -1,7 +1,6 @@
+// actions/get-dashboard-data.ts (Creator-Focused Version)
 import { prisma } from "@/lib/db";
-import { getCourseProgress } from "./get-course-progress";
 
-// actions/get-dashboard-data.ts
 export interface DashboardStats {
   adminsInProgress: number;
   liveAdmins: number;
@@ -11,36 +10,58 @@ export interface DashboardStats {
 
 export const getDashboardData = async (userId: string): Promise<DashboardStats> => {
   try {
-    // Fetch admins
-    const admins = await prisma.admin.findMany({
+    // Fetch user's admins with their courses
+    const userAdmins = await prisma.admin.findMany({
       where: { userId },
-      select: { isPublished: true },
-    });
-
-    const liveAdmins = admins.filter(a => a.isPublished).length;
-    const adminsInProgress = admins.length - liveAdmins; // or your real logic
-
-    // Fetch purchased courses with progress
-    const purchasedCourses = await prisma.course.findMany({
-      where: {
-        tuitions: { some: { userId } },
+      include: {
+        courses: {
+          select: {
+            id: true,
+            isPublished: true,
+          },
+        },
       },
-      select: { id: true },
     });
 
-    let coursesInProgress = 0;
-    let completedCourses = 0;
+    // Count admins
+    const liveAdmins = userAdmins.filter((a) => a.isPublished).length;
+    const adminsInProgress = userAdmins.length - liveAdmins;
 
-    await Promise.all(
-      purchasedCourses.map(async ({ id }) => {
-        const progress = await getCourseProgress(userId, id);
-        if (progress === 100) {
-          completedCourses++;
-        } else if (progress > 0) {
-          coursesInProgress++;
-        }
-      })
+    // Get all courses from user's admins
+    const allCourses = userAdmins.flatMap((admin) =>
+      admin.courses.map((course) => ({
+        courseId: course.id,
+        courseIsPublished: course.isPublished,
+        adminIsPublished: admin.isPublished,
+      }))
     );
+
+    // ✅ Courses in progress: Not published OR admin not published
+    const coursesInProgress = allCourses.filter(
+      (c) => !c.courseIsPublished || !c.adminIsPublished
+    ).length;
+
+    // ✅ Live courses: Both course AND admin are published
+    const completedCourses = allCourses.filter(
+      (c) => c.courseIsPublished && c.adminIsPublished
+    ).length;
+
+    console.log("[DASHBOARD_DATA] Creator Stats:", {
+      userId,
+      totalAdmins: userAdmins.length,
+      liveAdmins,
+      adminsInProgress,
+      totalCourses: allCourses.length,
+      completedCourses,
+      coursesInProgress,
+      breakdown: {
+        publishedCoursesInPublishedAdmins: completedCourses,
+        unpublishedCourses: allCourses.filter((c) => !c.courseIsPublished).length,
+        publishedCoursesInUnpublishedAdmins: allCourses.filter(
+          (c) => c.courseIsPublished && !c.adminIsPublished
+        ).length,
+      },
+    });
 
     return {
       adminsInProgress,
@@ -49,7 +70,7 @@ export const getDashboardData = async (userId: string): Promise<DashboardStats> 
       completedCourses,
     };
   } catch (error) {
-    console.error("[GET_DASHBOARD_DATA]", error);
+    console.error("[GET_DASHBOARD_DATA] Error:", error);
     return {
       adminsInProgress: 0,
       liveAdmins: 0,

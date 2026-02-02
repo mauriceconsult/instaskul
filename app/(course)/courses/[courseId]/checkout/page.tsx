@@ -103,7 +103,7 @@ export default async function CheckoutPage({
               Select Payment Method
             </h2>
 
-            {/* MTN MoMo */}
+            {/* MTN MoMo - Active */}
             <Link
               href={`/courses/${courseId}/checkout/momo`}
               className="block border-2 rounded-xl p-6 hover:border-yellow-500 hover:bg-yellow-50/40 transition-all duration-200 group"
@@ -129,18 +129,63 @@ export default async function CheckoutPage({
               </div>
             </Link>
 
-            {/* Airtel Money (placeholder) */}
-            <div className="border-2 border-dashed rounded-xl p-6 bg-slate-50/50 opacity-70">
-              <div className="flex items-center gap-5">
-                <div className="h-16 w-16 bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="h-8 w-8 text-slate-500" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-500 text-lg">Airtel Money</h3>
-                  <p className="text-sm text-slate-500 mt-1">Coming soon</p>
+            {/* M-Pesa - Coming Soon */}
+            <div className="border-2 border-dashed rounded-xl p-6 bg-green-50/30 opacity-70">
+              <div className="flex items-center justify-between gap-6">
+                <div className="flex items-center gap-5">
+                  <div className="h-16 w-16 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg 
+                      className="h-8 w-8 text-green-700" 
+                      fill="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-slate-500 text-lg">M-Pesa (Kenya)</h3>
+                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Pay securely with Safaricom M-Pesa
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Airtel Money - Coming Soon */}
+            <div className="border-2 border-dashed rounded-xl p-6 bg-slate-50/50 opacity-70">
+              <div className="flex items-center justify-between gap-6">
+                <div className="flex items-center gap-5">
+                  <div className="h-16 w-16 bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="h-8 w-8 text-slate-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-slate-500 text-lg">Airtel Money</h3>
+                      <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Pay with your Airtel Money account
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Info banner */}
+          <div className="mx-6 md:mx-10 mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <span className="font-semibold">💡 Currently Available:</span> MTN Mobile Money for Uganda. 
+              M-Pesa (Kenya) and Airtel Money coming soon!
+            </p>
           </div>
 
           {/* Footer note */}
