@@ -29,7 +29,7 @@ const TutorIdPage = async ({
     nextTutorial,
     userProgress,
     tuition,
-    assignmentProgress = 0, // ← Destructure with default
+    assignmentProgress = 0,
   } = await getTutor({
     userId,
     courseId,
