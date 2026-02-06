@@ -12,6 +12,7 @@ interface CourseOverviewProps {
     imageUrl: string | null;
     amount: string | number | null;
     admin: {
+      id: string;
       title: string;
     };
     tutors: any[];
@@ -212,13 +213,13 @@ export function CourseOverview({
             <h3 className="font-bold text-lg mb-4">Creator Actions</h3>
             <div className="space-y-2">
               <Link
-                href={`/admin/courses/${course.id}`}
+                href={`/dashboard/admins/${course.admin.id}/courses/${course.id}`}
                 className="block w-full py-2 bg-slate-100 text-slate-700 text-center rounded-lg font-medium hover:bg-slate-200 transition-colors"
               >
                 Edit Course
               </Link>
               <Link
-                href={`/admin/courses/${course.id}/analytics`}
+                href={`/dashboard/admins/${course.admin.id}/analytics`}
                 className="block w-full py-2 bg-slate-100 text-slate-700 text-center rounded-lg font-medium hover:bg-slate-200 transition-colors"
               >
                 View Analytics

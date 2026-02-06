@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, BookOpen, FileText, CheckSquare, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
 interface Tutorial {
   id: string;
   title: string;
@@ -27,10 +28,14 @@ interface CourseNavigationProps {
     title: string;
     tutors: Tutorial[];
     courseworks: Coursework[];
+    admin: {
+      userId?: string;
+    };
   };
   isEnrolled: boolean;
   isCreator: boolean;
 }
+
 
 export function CourseNavigation({ 
   course, 
@@ -125,9 +130,14 @@ export function CourseNavigation({
                   const isLocked = !tutor.isFree && !canAccess;
 
                   return (
-                    <Link
-                      key={tutor.id}
-                      href={isLocked ? "#" : `/courses/${course.id}/tutors/${tutor.id}`}
+<Link
+  key={tutor.id}
+  href={
+    isLocked || !course.admin.userId
+      ? "#"
+      : `/dashboard/admins/${course.admin.userId}/courses/${course.id}/tutors/${tutor.id}`
+  }
+
                       className={cn(
                         "block p-4 bg-white rounded-lg border hover:shadow-md transition-all",
                         isLocked && "opacity-60 cursor-not-allowed"
@@ -180,9 +190,14 @@ export function CourseNavigation({
                   const isLocked = !canAccess;
 
                   return (
-                    <Link
-                      key={coursework.id}
-                      href={isLocked ? "#" : `/courses/${course.id}/courseworks/${coursework.id}`}
+<Link
+  key={coursework.id}
+  href={
+    isLocked || !course.admin.userId
+      ? "#"
+      : `/dashboard/admins/${course.admin.userId}/courses/${course.id}/courseworks/${coursework.id}`
+  }
+
                       className={cn(
                         "block p-4 bg-white rounded-lg border hover:shadow-md transition-all",
                         isLocked && "opacity-60 cursor-not-allowed"
@@ -220,7 +235,12 @@ export function CourseNavigation({
                   return (
                     <Link
                       key={assignment.id}
-                      href={isLocked ? "#" : `/courses/${course.id}/tutors/${assignment.tutorId}/assignments/${assignment.id}`}
+                   href={
+  isLocked || !course.admin.userId
+    ? "#"
+    : `/dashboard/admins/${course.admin.userId}/courses/${course.id}/tutors/${assignment.tutorId}/assignments/${assignment.id}`
+}
+
                       className={cn(
                         "block p-4 bg-white rounded-lg border hover:shadow-md transition-all",
                         isLocked && "opacity-60 cursor-not-allowed"

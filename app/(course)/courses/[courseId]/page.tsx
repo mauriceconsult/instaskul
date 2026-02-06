@@ -26,6 +26,7 @@ const CourseIdPage = async ({
     include: {
       admin: {
         select: {
+          id: true,
           title: true,
           userId: true,
         },
@@ -49,9 +50,10 @@ const CourseIdPage = async ({
     },
   });
 
-  if (!course) {
-    return redirect("/dashboard/search");
-  }
+if (!course || !course.admin) {
+  return redirect("/dashboard/search");
+}
+
 
   // Check if user is enrolled
   const tuition = await prisma.tuition.findUnique({
@@ -73,19 +75,24 @@ const CourseIdPage = async ({
     : 0;
 
   // Transform course to match CourseNavigation expected types
-  const transformedCourse = {
-    id: course.id,
-    title: course.title,
-    description: course.description,
-    imageUrl: course.imageUrl,
-    amount: course.amount,
-    admin: course.admin || { title: "Unknown" },
-    tutors: course.tutors,
-    courseworks: course.courseworks.map(cw => ({
-      ...cw,
-      position: cw.position ?? 0,
-    })),
-  };
+const transformedCourse = {
+  id: course.id,
+  title: course.title,
+  description: course.description,
+  imageUrl: course.imageUrl,
+  amount: course.amount,
+  tutors: course.tutors,
+  courseworks: course.courseworks.map(cw => ({
+    ...cw,
+    position: cw.position ?? 0,
+  })),
+  admin: {
+    id: course.admin?.id,
+    title: course.admin?.title,
+    userId: course.admin?.userId,
+  },
+};
+
 
   return (
     <div className="min-h-screen bg-slate-50">
