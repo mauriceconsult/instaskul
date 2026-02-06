@@ -2,8 +2,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { CourseNavigation } from "@/components/course-navigation";
-import { CourseOverview } from "@/components/course-overview";
+import Link from "next/link";
 
 const CourseIdPage = async ({
   params,
@@ -26,7 +25,6 @@ const CourseIdPage = async ({
     include: {
       admin: {
         select: {
-          id: true,
           title: true,
           userId: true,
         },
@@ -34,26 +32,17 @@ const CourseIdPage = async ({
       tutors: {
         where: { isPublished: true },
         orderBy: { position: "asc" },
-        include: {
-          assignments: {
-            where: { isPublished: true },
-          },
-          userProgress: {
-            where: { userId },
-          },
+        select: {
+          id: true,
+          isFree: true,
         },
-      },
-      courseworks: {
-        where: { isPublished: true },
-        orderBy: { position: "asc" },
       },
     },
   });
 
-if (!course || !course.admin) {
-  return redirect("/dashboard/search");
-}
-
+  if (!course) {
+    return redirect("/dashboard/search");
+  }
 
   // Check if user is enrolled
   const tuition = await prisma.tuition.findUnique({
@@ -65,55 +54,56 @@ if (!course || !course.admin) {
   const isEnrolled = tuition?.isPaid || false;
   const isCreator = course.admin?.userId === userId;
 
-  // Calculate course progress
-  const totalTutorials = course.tutors.length;
-  const completedTutorials = course.tutors.filter(
-    (tutor) => tutor.userProgress.length > 0 && tutor.userProgress[0].isCompleted
-  ).length;
-  const progressPercentage = totalTutorials > 0 
-    ? Math.round((completedTutorials / totalTutorials) * 100) 
-    : 0;
+  // ✅ AUTO-NAVIGATE: Redirect to first tutorial if available
+  if (course.tutors.length > 0) {
+    const firstTutorial = course.tutors[0];
+    
+    // Always redirect to first tutorial
+    // The tutorial page will handle showing lock/enroll button if needed
+    return redirect(`/courses/${courseId}/tutors/${firstTutorial.id}`);
+  }
 
-  // Transform course to match CourseNavigation expected types
-const transformedCourse = {
-  id: course.id,
-  title: course.title,
-  description: course.description,
-  imageUrl: course.imageUrl,
-  amount: course.amount,
-  tutors: course.tutors,
-  courseworks: course.courseworks.map(cw => ({
-    ...cw,
-    position: cw.position ?? 0,
-  })),
-  admin: {
-    id: course.admin?.id,
-    title: course.admin?.title,
-    userId: course.admin?.userId,
-  },
-};
-
-
+  // If no tutorials, show fallback page
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Course Navigation */}
-      <CourseNavigation 
-        course={transformedCourse}
-        isEnrolled={isEnrolled}
-        isCreator={isCreator}
-      />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center max-w-md mx-auto p-8 bg-white rounded-xl shadow-sm border">
+        <div className="mb-6">
+          <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="h-8 w-8 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">
+            {course.title}
+          </h1>
+          <p className="text-slate-600">
+            By {course.admin?.title || "Instructor"}
+          </p>
+        </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <CourseOverview
-          course={transformedCourse}
-          isEnrolled={isEnrolled}
-          isCreator={isCreator}
-          progressPercentage={progressPercentage}
-          totalTutorials={totalTutorials}
-          completedTutorials={completedTutorials}
-        />
-      </main>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-yellow-800">
+            ⚠️ No tutorials available yet. The course creator is still preparing content.
+          </p>
+        </div>
+
+        <Link
+          href="/dashboard/search"
+          className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Browse Other Courses
+        </Link>
+      </div>
     </div>
   );
 };

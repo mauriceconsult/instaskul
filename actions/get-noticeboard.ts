@@ -1,55 +1,78 @@
 import { prisma } from "@/lib/db";
-import { Attachment, Noticeboard } from "@prisma/client";
+import { Attachment, Noticeboard, Admin } from "@prisma/client";
 
 interface GetNoticeboardProps {
   userId: string;
   adminId: string;
   noticeboardId: string;
 }
+
 export const getNoticeboard = async ({
   userId,
   adminId,
   noticeboardId,
-}: GetNoticeboardProps) => {
+}: GetNoticeboardProps): Promise<{
+  noticeboard: Noticeboard | null;
+  admin: Admin | null;
+  attachments: Attachment[];
+  nextNoticeboard: Noticeboard | null;
+}> => {
   try {
-    const admin = await prisma.admin.findUnique({
+    const admin = await prisma.admin.findFirst({
       where: {
-        isPublished: true,
         id: adminId,
+        isPublished: true,
       },
     });
-    const noticeboard = await prisma.noticeboard.findUnique({
+
+    if (!admin) {
+      return {
+        noticeboard: null,
+        admin: null,
+        attachments: [],
+        nextNoticeboard: null,
+      };
+    }
+
+    const noticeboard = await prisma.noticeboard.findFirst({
       where: {
         id: noticeboardId,
+        adminId,
         isPublished: true,
       },
     });
-    if (!adminId || !noticeboard) {
-      throw new Error("Admin ID or Noticeboard not found");
+
+    if (!noticeboard) {
+      return {
+        noticeboard: null,
+        admin,
+        attachments: [],
+        nextNoticeboard: null,
+      };
     }
-    let attachments: Attachment[] = [];
-    let nextNoticeboard: Noticeboard | null = null;
-    if (userId) {
-      attachments = await prisma.attachment.findMany({
-        where: {
-          adminId: adminId,
+
+    const attachments = await prisma.attachment.findMany({
+      where: {
+        noticeboardId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    const nextNoticeboard = await prisma.noticeboard.findFirst({
+      where: {
+        adminId,
+        isPublished: true,
+        position: {
+          gt: noticeboard.position ?? 0,
         },
-      });
-    }
-    if (noticeboard.userId || userId) {
-      nextNoticeboard = await prisma.noticeboard.findFirst({
-        where: {
-          adminId: adminId,
-          isPublished: true,
-          position: {
-            gt: noticeboard?.position ?? 0,
-          },
-        },
-        orderBy: {
-          position: "asc",
-        },
-      });
-    }
+      },
+      orderBy: {
+        position: "asc",
+      },
+    });
+
     return {
       noticeboard,
       admin,
@@ -57,7 +80,7 @@ export const getNoticeboard = async ({
       nextNoticeboard,
     };
   } catch (error) {
-    console.log("[GET_NOTICEBOARD_ERROR]", error);
+    console.error("[GET_NOTICEBOARD_ERROR]", error);
     return {
       noticeboard: null,
       admin: null,

@@ -12,11 +12,12 @@ interface CourseOverviewProps {
     imageUrl: string | null;
     amount: string | number | null;
     admin: {
-      id: string;
       title: string;
-    };
-    tutors: any[];
-    courseworks: any[];
+    } | null;
+    tutors: Array<{
+      assignments?: Array<any>;
+    }>;
+    courseworks: Array<any>;
   };
   isEnrolled: boolean;
   isCreator: boolean;
@@ -60,7 +61,7 @@ export function CourseOverview({
             {course.title}
           </h1>
           <p className="text-slate-600 mb-4">
-            By <span className="font-semibold">{course.admin.title}</span>
+            By <span className="font-semibold">{course.admin?.title || "Instructor"}</span>
           </p>
 
           {course.description && (
@@ -213,13 +214,13 @@ export function CourseOverview({
             <h3 className="font-bold text-lg mb-4">Creator Actions</h3>
             <div className="space-y-2">
               <Link
-                href={`/dashboard/admins/${course.admin.id}/courses/${course.id}`}
+                href={`/admin/courses/${course.id}`}
                 className="block w-full py-2 bg-slate-100 text-slate-700 text-center rounded-lg font-medium hover:bg-slate-200 transition-colors"
               >
                 Edit Course
               </Link>
               <Link
-                href={`/dashboard/admins/${course.admin.id}/analytics`}
+                href={`/admin/courses/${course.id}/analytics`}
                 className="block w-full py-2 bg-slate-100 text-slate-700 text-center rounded-lg font-medium hover:bg-slate-200 transition-colors"
               >
                 View Analytics

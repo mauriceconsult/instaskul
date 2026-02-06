@@ -1,47 +1,60 @@
+// actions/get-coursework.ts
 import { prisma } from "@/lib/db";
-import { Coursework, Attachment, Course } from "@prisma/client";
-
+import { Coursework, Attachment, Course, UserProgress } from "@prisma/client";
 
 export type CourseworkWithRelations = Coursework & {
   course: Course | null;
   attachments: Attachment[];
-  getCourseworkProgress?: number;
+  userProgress?: UserProgress | null;
+  courseworkProgress?: number;
 };
 
-export type GetCourseworksParams = {
+interface GetCourseworkParams {
   userId: string;
-  title?: string;
-  courseId?: string;
-};
+  courseId: string;
+  courseworkId: string;
+}
 
-export const getCourseworks = async ({
+export async function getCoursework({
   userId,
-  title,
   courseId,
-}: GetCourseworksParams): Promise<CourseworkWithRelations[]> => {
+  courseworkId,
+}: GetCourseworkParams): Promise<CourseworkWithRelations> {
   try {
-    const courseworks = await prisma.coursework.findMany({
+    const coursework = await prisma.coursework.findUnique({
       where: {
-        isPublished: true,
-        title: title
-          ? { contains: title, mode: "insensitive" }
-          : undefined,
+        id: courseworkId,
         courseId,
+        course: {
+          isPublished: true,
+        },
       },
       include: {
         course: true,
         attachments: {
           orderBy: { createdAt: "desc" },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
+        userProgress: {
+          where: { userId },
+          take: 1,
+        },
       },
     });
 
-    return courseworks;
+    if (!coursework) {
+      throw new Error("Coursework not found or not accessible");
+    }
+
+    // Calculate simple progress (0–100) based on completion
+    const progress = coursework.userProgress?.[0]?.isCompleted ? 100 : 0;
+
+    return {
+      ...coursework,
+      userProgress: coursework.userProgress?.[0] ?? null,
+      courseworkProgress: progress,
+    };
   } catch (error) {
-    console.error("[GET_COURSEWORKS]", error);
-    return [];
+    console.error("[GET_COURSEWORK]", error);
+    throw error; // Let page handle redirect
   }
-};
+}
