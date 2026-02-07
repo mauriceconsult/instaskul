@@ -48,7 +48,7 @@ export default async function CourseAnalyticsPage({
   });
 
   const isEnrolled = tuition?.isPaid || false;
-  const isCreator = course.admin.userId === userId;
+  const isCreator = course.admin !== null && course.admin.userId === userId;
   const canAccess = isEnrolled || isCreator;
 
   if (!canAccess) {
@@ -77,12 +77,12 @@ export default async function CourseAnalyticsPage({
     prisma.userProgress.findMany({
       where: {
         userId,
-        tutor: {
+        tutors: {
           courseId,
         },
       },
       include: {
-        tutor: {
+        tutors: {
           select: {
             id: true,
             title: true,
@@ -156,7 +156,7 @@ export default async function CourseAnalyticsPage({
       course={{
         id: course.id,
         title: course.title,
-        instructorName: course.admin.title,
+        instructorName: course.admin?.title || "",
       }}
       stats={{
         totalTutorials,
@@ -166,7 +166,7 @@ export default async function CourseAnalyticsPage({
         daysEnrolled,
       }}
       recentProgress={recentProgress.map((p) => ({
-        tutorTitle: p.tutor.title,
+        tutorTitle: p.tutors?.title || "",
         isCompleted: p.isCompleted,
         updatedAt: p.updatedAt,
       }))}
