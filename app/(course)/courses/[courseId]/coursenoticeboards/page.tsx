@@ -50,7 +50,7 @@ export default async function CourseNoticeboardsPage({
   });
 
   const isEnrolled = tuition?.isPaid || false;
-  const isCreator = course.admin.userId === userId;
+  const isCreator = course.admin !== null && course.admin.userId === userId;
   const canAccess = isEnrolled || isCreator;
 
   // Fetch course-specific noticeboards
