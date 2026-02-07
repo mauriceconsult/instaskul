@@ -84,7 +84,7 @@ export default async function AnalyticsPage({
   // Calculate stats
   const totalEnrollments = enrollments.length;
   const totalRevenue = revenue.reduce(
-    (sum, tuition) => sum + (Number(tuition.course.amount) || 0),
+    (sum, tuition) => sum + (Number(tuition.course?.amount) || 0),
     0
   );
 
@@ -117,7 +117,14 @@ export default async function AnalyticsPage({
       }}
       courseStats={courseStats}
       chartData={chartData}
-      recentEnrollments={enrollments.slice(0, 10)}
+      recentEnrollments={enrollments
+        .filter((e) => e.course !== null)
+        .map((e) => ({
+          id: e.id,
+          createdAt: e.createdAt,
+          course: e.course!,
+        }))
+        .slice(0, 10)}
       adminTitle={admin.title}
     />
   );
