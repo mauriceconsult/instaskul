@@ -21,12 +21,12 @@ export const CourseSidebarRoutes = ({ courseId }: CourseSidebarRoutesProps) => {
     {
       icon: LayoutDashboard,
       label: "Courses",
-      href: `/courses/${courseId}/courses`,
+      href: `/courses/${courseId}/courseworks`,
     }, 
     {
       icon: Bell,
-      label: "Noticeboards",
-      href: `/courses/${courseId}/noticeboards`,
+      label: "CourseNoticeboards",
+      href: `/courses/${courseId}/coursenoticeboards`,
     },   
     {
       icon: BarChart,

@@ -11,7 +11,7 @@ import { File, CheckCircle } from "lucide-react";
 export default async function CourseworkIdPage({
   params,
 }: {
-  params: Promise<{ courseId: string; courseworkId: string }>;
+  params: { courseId: string; courseworkId: string };
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
@@ -73,10 +73,16 @@ export default async function CourseworkIdPage({
 
         <Separator className="my-8" />
 
-        {/* Description */}
-        <div className="prose prose-slate max-w-none mb-10">
-          <Preview value={coursework.description || "No description provided."} />
-        </div>
+<h1 className="text-3xl font-bold">{coursework.title}</h1>
+
+{/* FULL DESCRIPTION */}
+{coursework.description && (
+  <div className="prose max-w-none">
+    <Preview value={coursework.description} />
+  </div>
+)}
+
+
 
         {/* Attachments / Resources */}
         {!!attachments.length && (

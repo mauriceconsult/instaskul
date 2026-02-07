@@ -21,25 +21,27 @@ export async function getCoursework({
   courseworkId,
 }: GetCourseworkParams): Promise<CourseworkWithRelations> {
   try {
-    const coursework = await prisma.coursework.findUnique({
-      where: {
-        id: courseworkId,
-        courseId,
-        course: {
-          isPublished: true,
-        },
-      },
-      include: {
-        course: true,
-        attachments: {
-          orderBy: { createdAt: "desc" },
-        },
-        userProgress: {
-          where: { userId },
-          take: 1,
-        },
-      },
-    });
+const coursework = await prisma.coursework.findFirst({
+  where: {
+    id: courseworkId,
+    courseId,
+    isPublished: true,
+    course: {
+      isPublished: true,
+    },
+  },
+  include: {
+    course: true,
+    attachments: {
+      orderBy: { createdAt: "desc" },
+    },
+    userProgress: {
+      where: { userId },
+      take: 1,
+    },
+  },
+});
+
 
     if (!coursework) {
       throw new Error("Coursework not found or not accessible");

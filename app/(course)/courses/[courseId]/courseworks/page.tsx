@@ -17,6 +17,13 @@ const CourseworksPage = async ({
       courseId: params.courseId,
       isPublished: true,
     },
+    include: {
+      userProgress: {
+        where: {
+          userId: userId,
+        },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -24,17 +31,26 @@ const CourseworksPage = async ({
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">Courseworks</h1>
 
-      {courseworks.map((cw) => (
-        <Link
-          key={cw.id}
-          href={`/courses/${params.courseId}/courseworks/${cw.id}`}
-          className="block p-4 border rounded-lg hover:bg-slate-50"
-        >
-          <p className="font-medium">{cw.title}</p>
-        </Link>
-      ))}
+{courseworks.map((cw) => (
+  <Link
+    key={cw.id}
+    href={`/courses/${params.courseId}/courseworks/${cw.id}/attempt`}
+    className="block p-4 border rounded-lg hover:bg-slate-50"
+  >
+    <p className="font-medium">{cw.title}</p>
+
+    <p className="text-sm text-slate-600 line-clamp-2">
+      {cw.description}
+    </p>
+
+    <span className="text-xs text-slate-500">
+      {cw.userProgress?.[0]?.isCompleted ? "Submitted" : "Not submitted"}
+    </span>
+  </Link>
+))}
+
     </div>
   );
-};
+}
 
 export default CourseworksPage;
