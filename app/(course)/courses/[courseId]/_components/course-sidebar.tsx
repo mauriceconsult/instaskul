@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Course, Tutor, Coursework } from "@prisma/client";
-import { CheckCircle, Lock, LayoutDashboard, Video, Bell, ClipboardList } from "lucide-react";
+import { CheckCircle, Lock, LayoutDashboard, Video, Bell, ClipboardList, BarChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { CourseSidebarItem } from "./course-sidebar-item";
@@ -43,13 +43,18 @@ export const CourseSidebar = ({
     },
     { 
       icon: Bell, 
-      label: "Course notices", 
+      label: "Course Notices", 
       href: `/courses/${course.id}/coursenoticeboards` 
     },
     { 
       icon: ClipboardList, 
       label: "Courseworks", 
       href: `/courses/${course.id}/courseworks` 
+    },
+    { 
+      icon: BarChart, 
+      label: "Analytics", 
+      href: `/courses/${course.id}/analytics` 
     },
   ];
 
@@ -60,19 +65,6 @@ export const CourseSidebar = ({
       {/* Course Header with Progress */}
       <div className="p-6 flex flex-col border-b space-y-4">
         <h1 className="text-lg font-bold line-clamp-2">{course.title}</h1>
-        {/**check tuition */}
-        <div className="flex flex-col w-full">
-          {course.tutors.map((tutor) => (
-            <CourseSidebarItem
-              key={tutor.id}
-              id={tutor.id}
-              label={tutor.title}
-              isCompleted={!!tutor.userProgress?.[0]?.isCompleted}
-              courseId={course.id}
-              isLocked={!tutor.isFree && !isEnrolled}
-            />
-          ))}
-        </div>
         
         {/* Tutorial Progress */}
         <div className="space-y-2">
