@@ -61,7 +61,8 @@ export default async function BlogPostPage({
 
   if (!post) notFound();
 
-  const postUrl = `https://instaskul.com/blog/${post.slug}`;
+ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+const postUrl = `${baseUrl}/blog/${post.slug}`;
   const readingTime = Math.ceil(post.content.split(" ").length / 200); // ~200 words per minute
 
   // Format date

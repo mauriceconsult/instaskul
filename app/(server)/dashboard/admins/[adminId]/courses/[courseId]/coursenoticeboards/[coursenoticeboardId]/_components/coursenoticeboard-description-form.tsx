@@ -16,8 +16,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
 import { CourseNoticeboard } from '@prisma/client';
+import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
+
 
 interface CourseNoticeboardDescriptionFormProps {
   initialData: CourseNoticeboard;
@@ -94,10 +95,11 @@ export const CourseNoticeboardDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g., 'New tutorials available...'"
-                      {...field}
+                                   <DescriptionEditorWrapper
+                      initialValue={field.value}
+                      fieldName="description"
+                      placeholder="Enter your announcement here..."
+                      maxCharacters={5000}
                     />
                   </FormControl>
                   <FormMessage />

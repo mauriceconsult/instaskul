@@ -16,8 +16,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
 import { Coursework } from '@prisma/client';
+import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
+
 
 interface CourseworkDescriptionFormProps {
   initialData: Coursework;
@@ -94,11 +95,12 @@ export const CourseworkDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g., 'Provide an action plan that ...'"
-                      {...field}
-                    />
+                                                 <DescriptionEditorWrapper
+                                     initialValue={initialData?.description || ""}
+                                     fieldName="description"
+                                     placeholder="Describe the coursework..."
+                                     maxCharacters={5000}
+                                   />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

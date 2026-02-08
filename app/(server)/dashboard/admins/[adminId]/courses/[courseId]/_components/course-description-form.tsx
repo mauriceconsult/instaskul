@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Course } from '@prisma/client';
+import { TiptapDescriptionEditor } from "@/components/tiptap-description-editor";
 
 interface CourseDescriptionFormProps {
   initialData: Course;
@@ -92,11 +93,12 @@ export const CourseDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g., 'This course will expose you to...'"
-                      {...field}
-                    />
+                                <TiptapDescriptionEditor
+                   value={field.value}
+                   onChange={field.onChange}
+                   placeholder="Enter course description..."
+                   maxCharacters={5000}
+                 />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

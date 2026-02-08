@@ -16,8 +16,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
 import { Tutor } from '@prisma/client';
+import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
+
 
 interface TutorDescriptionFormProps {
   initialData: Tutor;
@@ -94,11 +95,12 @@ export const TutorDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g., 'This tutorial demonstrates...'"
-                      {...field}
-                    />
+                                                 <DescriptionEditorWrapper
+                                     initialValue={initialData?.description || ""}
+                                     fieldName="description"
+                                     placeholder="Describe the tutorial..."
+                                     maxCharacters={5000}
+                                   />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

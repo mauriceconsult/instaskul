@@ -16,8 +16,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
 import { Admin } from '@prisma/client';
+import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
+// import { TiptapDescriptionEditor } from "@/components/tiptap-description-editor";
 
 interface AdminDescriptionFormProps {
   initialData: Admin;
@@ -90,11 +91,12 @@ export const AdminDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g., 'We specialize in providing top-notch staff development services.'"
-                      {...field}
-                    />
+               <DescriptionEditorWrapper
+  initialValue={initialData?.description || ""}
+  fieldName="description"
+  placeholder="Describe the admin..."
+  maxCharacters={5000}
+/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

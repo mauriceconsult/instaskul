@@ -16,8 +16,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
 import { Assignment } from '@prisma/client';
+import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
+
 
 interface AssignmentDescriptionFormProps {
   initialData: Assignment;
@@ -96,10 +97,11 @@ export const AssignmentDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g., 'Explain the tutorial's main theme...'"
-                      {...field}
+                                   <DescriptionEditorWrapper
+                      initialValue={field.value}
+                      fieldName="description"
+                      placeholder="Enter assignment description..."
+                      maxCharacters={5000}
                     />
                   </FormControl>
                   <FormMessage />
