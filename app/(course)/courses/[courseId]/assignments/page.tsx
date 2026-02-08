@@ -48,7 +48,7 @@ export default async function AllAssignmentsPage({
   });
 
   const isEnrolled = tuition?.isPaid || false;
-  const isCreator = course.admin.userId === userId;
+  const isCreator = course.admin?.userId === userId;
   const canAccess = isEnrolled || isCreator;
 
   // Fetch all assignments from all tutorials in this course
