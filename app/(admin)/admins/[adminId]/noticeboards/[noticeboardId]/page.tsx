@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
+import { NoticeboardComments } from "@/components/noticeboard-comments";
 
 const NoticeboardIdPage = async ({
   params,
@@ -28,6 +29,9 @@ const NoticeboardIdPage = async ({
   }
 
   const { noticeboard, attachments } = noticeboardData;
+  const comments = await fetch(
+  `${process.env.NEXT_PUBLIC_APP_URL}/api/noticeboards/${noticeboardId}/comments`
+).then(res => res.json());
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -63,9 +67,16 @@ const NoticeboardIdPage = async ({
                 </a>
               ))}
             </div>
-          </div>
+          </div>      
         </>
       )}
+      <div className="mt-12">
+        <NoticeboardComments
+          noticeboardId={noticeboardId}
+          initialComments={comments}
+          type="noticeboard"
+        />
+      </div>
     </div>
   );
 };

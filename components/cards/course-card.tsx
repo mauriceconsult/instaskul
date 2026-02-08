@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
+import { HtmlContent } from "../html-content";
 
 interface CourseCardProps {
   id: string;
@@ -84,11 +85,12 @@ export const CourseCard = ({
             {tutorialsLength} tutorial{tutorialsLength !== 1 ? "s" : ""}
           </p>
 
-          {description && (
-            <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed flex-1">
-              {description}
-            </p>
-          )}
+        {description && (
+  <HtmlContent 
+    content={description}
+    className="text-sm text-slate-600 mb-4 line-clamp-2"
+  />
+)}
 
           {/* Progress Bar - Only show if progress exists and is greater than 0 */}
           {progress != null && progress > 0 && (

@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User, Bell } from "lucide-react";
+import { NoticeboardComments } from "@/components/noticeboard-comments";
 
 interface CourseNoticeboardDetailPageProps {
   params: Promise<{ courseId: string; noticeboardId: string }>;
@@ -41,6 +42,10 @@ export default async function CourseNoticeboardDetailPage({
   if (!course) {
     notFound();
   }
+
+  const comments = await fetch(
+  `${process.env.NEXT_PUBLIC_APP_URL}/api/coursenoticeboards/${noticeboardId}/comments`
+).then(res => res.json());
 
   // Check enrollment
   const tuition = await prisma.tuition.findUnique({
@@ -147,6 +152,13 @@ export default async function CourseNoticeboardDetailPage({
             </div>
           </div>
         </article>
+        <div className="mt-12">
+  <NoticeboardComments
+    noticeboardId={noticeboardId}
+    initialComments={comments}
+    type="coursenoticeboard"
+  />
+</div>
       </main>
     </div>
   );

@@ -2,10 +2,10 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CourseCard } from "@/components/cards/course-card";
-import { Preview } from "@/components/preview";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Megaphone } from "lucide-react";
+import { HtmlContent } from "@/components/html-content";
 
 interface AdminIdPageProps {
   params: Promise<{ adminId: string }>;
@@ -69,9 +69,12 @@ const AdminIdPage = async ({ params }: AdminIdPageProps) => {
                   {admin.school.name}
                 </p>
               )}
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <Preview value={admin.description || "Welcome to our learning platform."} />
-              </div>
+{admin.description && (
+  <HtmlContent 
+    content={admin.description}
+    className="text-slate-600 mb-4 leading-relaxed"
+  />
+)}
 
               <div className="flex flex-wrap gap-4 mt-8">
                 <div className="flex items-center gap-3 bg-blue-50 px-6 py-4 rounded-lg">
