@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Course, Tutor, Coursework } from "@prisma/client";
-import { CheckCircle, Lock, LayoutDashboard, Video, Bell, ClipboardList, BarChart } from "lucide-react";
+import { CheckCircle, Lock, LayoutDashboard, Video, Bell, ClipboardList, BarChart, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
-import { CourseSidebarItem } from "./course-sidebar-item";
 
 interface CourseSidebarProps {
   course: Course & {
@@ -42,14 +41,19 @@ export const CourseSidebar = ({
       href: `/courses/${course.id}/tutors` 
     },
     { 
-      icon: Bell, 
-      label: "Course Notices", 
-      href: `/courses/${course.id}/coursenoticeboards` 
+      icon: CheckSquare, 
+      label: "All Assignments", 
+      href: `/courses/${course.id}/assignments` 
     },
     { 
       icon: ClipboardList, 
       label: "Courseworks", 
       href: `/courses/${course.id}/courseworks` 
+    },
+    { 
+      icon: Bell, 
+      label: "Course Notices", 
+      href: `/courses/${course.id}/coursenoticeboards` 
     },
     { 
       icon: BarChart, 
