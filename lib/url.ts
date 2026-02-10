@@ -1,90 +1,118 @@
 // lib/url.ts
+
 /**
  * Get the base URL for the application
- * Uses environment variable with fallback
+ * Works in development, preview, and production
  */
 export function getBaseUrl(): string {
-  // Check if we're on the server or client
-  if (typeof window !== 'undefined') {
-    // Client-side: use window.location.origin or env variable
-    return process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
+  // 1. Check for explicitly set environment variable
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
   }
-  
-  // Server-side: use env variable or default
-  return process.env.NEXT_PUBLIC_BASE_URL || 'https://instaskul.com'
+
+  // 2. Check for Vercel deployment
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  }
+
+  // 3. Check if we're in production (custom domain)
+  if (process.env.NODE_ENV === 'production') {
+    // Replace with your actual production domain
+    return 'https://instaskul.com';
+  }
+
+  // 4. Fallback to localhost for development
+  return 'http://localhost:3000';
 }
 
 /**
- * Get absolute URL for a path
- * @param path - Path to append to base URL (e.g., '/blog/my-post')
+ * Generate a beta join URL
+ *
+ * Examples:
+ * getBetaJoinUrl()
+ * getBetaJoinUrl('INVITE-CODE')
+ * getBetaJoinUrl(undefined, 'REF123')
+ */
+export function getBetaJoinUrl(
+  code?: string,
+  referralCode?: string
+): string {
+  const path = '/beta/join'
+  const params = new URLSearchParams()
+
+  if (code) params.set('code', code)
+  if (referralCode) params.set('ref', referralCode)
+
+  const query = params.toString()
+  return buildUrl(query ? `${path}?${query}` : path)
+}
+
+
+/**
+ * Build a full URL from a path
+ */
+export function buildUrl(path: string): string {
+  const base = getBaseUrl();
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${cleanPath}`;
+}
+
+/**
+ * Convert a relative path to an absolute URL
+ *
+ * Example:
+ * getAbsoluteUrl('/dashboard')
+ * → https://instaskul.com/dashboard
  */
 export function getAbsoluteUrl(path: string): string {
-  const baseUrl = getBaseUrl()
-  // Ensure path starts with /
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  return `${baseUrl}${normalizedPath}`
+  return buildUrl(path)
 }
 
+
 /**
- * Get URL with UTM parameters for tracking
- * @param path - Path to the page
- * @param source - UTM source (e.g., 'twitter', 'facebook')
- * @param medium - UTM medium (default: 'social')
- * @param campaign - UTM campaign name
+ * Generate a full blog post URL
+ * Supports optional UTM / tracking parameters
+ *
+ * Example:
+ * https://instaskul.com/blog/my-post
+ * https://instaskul.com/blog/my-post?utm_source=twitter&utm_campaign=blog_share
  */
-export function getTrackedUrl(
-  path: string,
-  source: string,
-  medium: string = 'social',
-  campaign?: string
+export function getBlogPostUrl(
+  slug: string,
+  params?: {
+    source?: string
+    campaign?: string
+    medium?: string
+  }
 ): string {
-  const url = getAbsoluteUrl(path)
-  const params = new URLSearchParams({
-    utm_source: source,
-    utm_medium: medium,
-  })
-  
-  if (campaign) {
-    params.set('utm_campaign', campaign)
+  const path = `/blog/${encodeURIComponent(slug)}`
+
+  if (!params) {
+    return buildUrl(path)
   }
-  
-  return `${url}?${params.toString()}`
+
+  const searchParams = new URLSearchParams()
+
+  if (params.source) searchParams.set('utm_source', params.source)
+  if (params.campaign) searchParams.set('utm_campaign', params.campaign)
+  if (params.medium) searchParams.set('utm_medium', params.medium)
+
+  const query = searchParams.toString()
+
+  return buildUrl(query ? `${path}?${query}` : path)
 }
 
-/**
- * Get beta join URL with optional invite code
- * @param code - Optional invite code
- * @param ref - Optional referral code
- */
-export function getBetaJoinUrl(code?: string, ref?: string): string {
-  const path = '/beta/join'
-  const url = getAbsoluteUrl(path)
-  
-  if (!code && !ref) {
-    return url
-  }
-  
-  const params = new URLSearchParams()
-  if (code) params.set('code', code)
-  if (ref) params.set('ref', ref)
-  
-  return `${url}?${params.toString()}`
-}
 
 /**
- * Get blog post URL
- * @param slug - Blog post slug
- * @param tracked - Whether to add tracking parameters
+ * Get the current URL from headers (use in Server Components)
  */
-export function getBlogPostUrl(slug: string, tracked?: {
-  source: string
-  campaign?: string
-}): string {
-  const path = `/blog/${slug}`
+export function getUrlFromHeaders(headers: Headers): string {
+  const host = headers.get('host');
+  const protocol = headers.get('x-forwarded-proto') || 'http';
   
-  if (tracked) {
-    return getTrackedUrl(path, tracked.source, 'social', tracked.campaign)
+  if (host) {
+    return `${protocol}://${host}`;
   }
   
-  return getAbsoluteUrl(path)
+  return getBaseUrl();
 }

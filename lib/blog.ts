@@ -4,7 +4,7 @@ import path from 'path'
 import matter from 'gray-matter'
 import { remark } from 'remark'
 import html from 'remark-html'
-import { getAbsoluteUrl, getBlogPostUrl } from './url' // ADD THIS
+import { getBlogPostUrl } from './url' // ADD THIS
 
 const postsDirectory = path.join(process.cwd(), 'content/blog')
 

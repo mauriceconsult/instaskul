@@ -21,7 +21,7 @@ export default function ReferralCard({
 }: ReferralCardProps) {
   const [copied, setCopied] = useState(false)
   
-  const referralUrl = getBetaJoinUrl(undefined, referralCode) // CHANGED
+  const referralUrl = getBetaJoinUrl(referralCode)
 
   const copyToClipboard = async (text: string) => {
     try {
