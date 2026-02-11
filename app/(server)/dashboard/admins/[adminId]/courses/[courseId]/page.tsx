@@ -114,6 +114,7 @@ const CourseIdPage = async ({
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={DollarSign} />
                 <h2 className="text-2xl">Sell your course</h2>
+                <p className="text-xs">This feature will be activated in a few days. Continue working on your course setup.</p>
               </div>
               <CourseAmountForm initialData={course} courseId={courseId} adminId={adminId} />
             </div>
