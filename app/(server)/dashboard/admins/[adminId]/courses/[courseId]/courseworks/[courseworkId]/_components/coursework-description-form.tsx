@@ -78,22 +78,22 @@ export const CourseworkDescriptionForm = ({
         </Button>
       </div>
       
-      {!isEditing && (
-        <div
-          className={cn(
-            "text-sm mt-2 prose prose-slate max-w-none",
-            !initialData.description && "text-slate-500 italic"
-          )}
-        >
-          {initialData.description ? (
-            // Render HTML properly
-            <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
-          ) : (
-            // Placeholder text
-            "Briefly describe the coursework."
-          )}
-        </div>
-      )}
+  {!isEditing && (
+          <div
+            className={cn(
+              "text-sm mt-2 prose prose-slate max-w-none",
+              !initialData.description && "text-slate-500 italic"
+            )}
+          >
+            {initialData.description ? (
+              // Render HTML properly
+              <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
+            ) : (
+              // Placeholder text
+              "Briefly describe the coursework."
+            )}
+          </div>
+        )}
       
       {isEditing && (
         <Form {...form}>

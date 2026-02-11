@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
+import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
 import { 
   Bold, 
@@ -47,6 +48,11 @@ export function TiptapDescriptionEditor({
       TextAlign.configure({
         types: ["paragraph"],
       }),
+        Placeholder.configure({
+    placeholder,
+    emptyEditorClass:
+      "before:content-[attr(data-placeholder)] before:absolute before:top-2 before:left-3 before:text-slate-400 before:pointer-events-none",
+  }),
       CharacterCount.configure({
         limit: maxCharacters,
       }),
@@ -67,10 +73,14 @@ export function TiptapDescriptionEditor({
   });
 
   React.useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value);
-    }
-  }, [value, editor]);
+  if (!editor) return;
+
+  const current = editor.getHTML();
+  if (value !== current) {
+    editor.commands.setContent(value || "");
+  }
+}, [value, editor]);
+
 
   const percentage = editor 
     ? Math.round((editor.storage.characterCount.characters() / maxCharacters) * 100)
@@ -209,12 +219,7 @@ export function TiptapDescriptionEditor({
 
       {/* Editor Content */}
       <div className="relative">
-        <EditorContent editor={editor} />
-        {editor.isEmpty && (
-          <p className="absolute top-2 left-3 text-slate-400 pointer-events-none">
-            {placeholder}
-          </p>
-        )}
+        <EditorContent editor={editor} />     
       </div>
 
       {/* Character Count Footer */}
