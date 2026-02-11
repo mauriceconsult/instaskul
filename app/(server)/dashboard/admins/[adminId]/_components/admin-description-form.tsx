@@ -18,12 +18,12 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Admin } from '@prisma/client';
 import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
-// import { TiptapDescriptionEditor } from "@/components/tiptap-description-editor";
 
 interface AdminDescriptionFormProps {
   initialData: Admin;
   adminId: string;
 }
+
 const formSchema = z.object({
   description: z.string().min(1, {
     message: "Admin description is required.",
@@ -37,13 +37,16 @@ export const AdminDescriptionForm = ({
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
   const router = useRouter();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: initialData?.description || "",
     },
   });
+  
   const { isSubmitting, isValid } = form.formState;
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/admins/${adminId}/descriptions`, values);
@@ -54,6 +57,7 @@ export const AdminDescriptionForm = ({
       toast.error("Something went wrong.");
     }
   };
+  
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
@@ -69,16 +73,22 @@ export const AdminDescriptionForm = ({
           )}
         </Button>
       </div>
+      
       {!isEditing && (
-        <p
+        <div
           className={cn(
-            "text-sm mt-2",
+            "text-sm mt-2 prose prose-slate max-w-none",
             !initialData.description && "text-slate-500 italic"
           )}
         >
-          {initialData.description || "Briefly describe the admin."}
-        </p>
+          {initialData.description ? (
+            <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
+          ) : (
+            "Briefly describe the admin."
+          )}
+        </div>
       )}
+      
       {isEditing && (
         <Form {...form}>
           <form
@@ -91,12 +101,13 @@ export const AdminDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-               <DescriptionEditorWrapper
-  initialValue={initialData?.description || ""}
-  fieldName="description"
-  placeholder="Describe the admin..."
-  maxCharacters={5000}
-/>
+                    {/* Use controlled mode with React Hook Form */}
+                    <DescriptionEditorWrapper
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Describe the admin..."
+                      maxCharacters={5000}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
