@@ -17,8 +17,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Coursework } from '@prisma/client';
-import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
-
+import { TiptapDescriptionEditor } from "@/components/tiptap-description-editor-core";
 
 interface CourseworkDescriptionFormProps {
   initialData: Coursework;
@@ -26,6 +25,7 @@ interface CourseworkDescriptionFormProps {
   courseId: string;
   courseworkId: string;
 }
+
 const formSchema = z.object({
   description: z.string().min(1, {
     message: "Coursework description is required.",
@@ -41,13 +41,16 @@ export const CourseworkDescriptionForm = ({
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
   const router = useRouter();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: initialData?.description || "",
     },
   });
+  
   const { isSubmitting, isValid } = form.formState;
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/admins/${adminId}/courses/${courseId}/courseworks/${courseworkId}/descriptions`, values);
@@ -58,31 +61,40 @@ export const CourseworkDescriptionForm = ({
       toast.error("Something went wrong.");
     }
   };
+  
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Coursework description
+        Coursework description*
         <Button onClick={toggleEdit} variant="ghost">
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit description
+              Edit coursework description
             </>
           )}
         </Button>
       </div>
+      
       {!isEditing && (
-        <p
+        <div
           className={cn(
-            "text-sm mt-2",
+            "text-sm mt-2 prose prose-slate max-w-none",
             !initialData.description && "text-slate-500 italic"
           )}
         >
-          {initialData.description || "Briefly describe the course."}
-        </p>
+          {initialData.description ? (
+            // Render HTML properly
+            <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
+          ) : (
+            // Placeholder text
+            "Briefly describe the coursework."
+          )}
+        </div>
       )}
+      
       {isEditing && (
         <Form {...form}>
           <form
@@ -95,12 +107,12 @@ export const CourseworkDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                                                 <DescriptionEditorWrapper
-                                     initialValue={initialData?.description || ""}
-                                     fieldName="description"
-                                     placeholder="Describe the coursework..."
-                                     maxCharacters={5000}
-                                   />
+                    <TiptapDescriptionEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Enter coursework description..."
+                      maxCharacters={5000}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

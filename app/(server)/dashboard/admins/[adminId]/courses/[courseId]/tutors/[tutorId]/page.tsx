@@ -18,19 +18,20 @@ import { TutorObjectiveForm } from "./_components/tutor-objective-form";
 const TutorIdPage = async ({
   params,
 }: {
-  params: Promise<{ adminId: string; courseId: string; tutorId: string }>;
+  params: { adminId: string; courseId: string; tutorId: string };
 }) => {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const { adminId, courseId, tutorId } = await params;
+  const { adminId, courseId, tutorId } = params;
 
-  const tutor = await prisma.tutor.findUnique({
-    where: {
-      id: tutorId,
-      courseId,
-      course: { adminId },
-    },
+  const tutor = await prisma.tutor.findFirst({
+  where: {
+    id: tutorId,
+    courseId,
+    course: { adminId },
+  },
+
     include: {
       attachments: { orderBy: { createdAt: "desc" } },
       assignments: { orderBy: { position: "asc" } },
@@ -148,9 +149,9 @@ const TutorIdPage = async ({
               </div>
              <TutorAccessForm
                 initialData={tutor}
-                adminId={(await params).adminId}
-                courseId={(await params).courseId}
-                tutorId={(await params).tutorId}
+                adminId={params.adminId}
+                courseId={params.courseId}
+                tutorId={params.tutorId}
               />
             </div>
             <div>

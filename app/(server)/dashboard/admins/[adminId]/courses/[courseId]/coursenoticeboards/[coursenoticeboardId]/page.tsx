@@ -14,15 +14,15 @@ import { CourseNoticeboardAttachmentsForm } from "./_components/coursenoticeboar
 const CourseNoticeboardIdPage = async ({
   params,
 }: {
-  params: Promise<{ adminId: string; courseId: string; coursenoticeboardId: string }>;
+  params: { adminId: string; courseId: string; coursenoticeboardId: string };
 }) => {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const { adminId, courseId, coursenoticeboardId } = await params;
+  const { adminId, courseId, coursenoticeboardId } = params;
 
   // Strict ownership check: courseNoticeboard must belong to this course & admin
-  const courseNoticeboard = await prisma.courseNoticeboard.findUnique({
+  const courseNoticeboard = await prisma.courseNoticeboard.findFirst({
     where: {
       id: coursenoticeboardId,
       courseId,

@@ -14,14 +14,14 @@ import { CourseworkAttachmentsForm } from "./_components/coursework-attachments-
 const CourseworkIdPage = async ({
   params,
 }: {
-  params: Promise<{ adminId: string; courseId: string; courseworkId: string }>;
+  params: { adminId: string; courseId: string; courseworkId: string };
 }) => {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const { adminId, courseId, courseworkId } = await params;
+  const { adminId, courseId, courseworkId } = params;
 
-  const coursework = await prisma.coursework.findUnique({
+  const coursework = await prisma.coursework.findFirst({
     where: {
       id: courseworkId,
       courseId,
