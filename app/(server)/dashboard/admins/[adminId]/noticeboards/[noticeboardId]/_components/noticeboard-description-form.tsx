@@ -19,12 +19,12 @@ import { cn } from "@/lib/utils";
 import { Noticeboard } from '@prisma/client';
 import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
 
-
 interface NoticeboardDescriptionFormProps {
   initialData: Noticeboard;
   adminId: string;
   noticeboardId: string;
 }
+
 const formSchema = z.object({
   description: z.string().min(1, {
     message: "Noticeboard description is required.",
@@ -39,13 +39,16 @@ export const NoticeboardDescriptionForm = ({
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
   const router = useRouter();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: initialData?.description || "",
     },
   });
+  
   const { isSubmitting, isValid } = form.formState;
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/admins/${adminId}/noticeboards/${noticeboardId}/descriptions`, values);
@@ -56,6 +59,7 @@ export const NoticeboardDescriptionForm = ({
       toast.error("Something went wrong.");
     }
   };
+  
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
@@ -66,21 +70,27 @@ export const NoticeboardDescriptionForm = ({
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit noticeboard description
+              Edit description
             </>
           )}
         </Button>
       </div>
+      
       {!isEditing && (
-        <p
+        <div
           className={cn(
-            "text-sm mt-2",
+            "text-sm mt-2 prose prose-slate max-w-none",
             !initialData.description && "text-slate-500 italic"
           )}
         >
-          {initialData.description || "No notices yet"}
-        </p>
+          {initialData.description ? (
+            <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
+          ) : (
+            "Briefly describe the noticeboard."
+          )}
+        </div>
       )}
+      
       {isEditing && (
         <Form {...form}>
           <form
@@ -93,12 +103,13 @@ export const NoticeboardDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                                                 <DescriptionEditorWrapper
-                                     initialValue={initialData?.description || ""}
-                                     fieldName="description"
-                                     placeholder="Enter your announcement description..."
-                                     maxCharacters={5000}
-                                   />
+                    {/* Use controlled mode with React Hook Form */}
+                    <DescriptionEditorWrapper
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Noticeboard description..."
+                      maxCharacters={5000}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

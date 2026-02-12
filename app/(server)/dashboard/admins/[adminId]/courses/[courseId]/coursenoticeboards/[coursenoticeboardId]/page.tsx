@@ -8,8 +8,9 @@ import { Banner } from "@/components/banner";
 import { CourseNoticeboardTitleForm } from "./_components/coursenoticeboard-title-form";
 import { CourseNoticeboardActions } from "./_components/coursenoticeboard-actions";
 import { CourseNoticeboardCourseForm } from "./_components/coursenoticeboard-course-form";
-import { CourseNoticeboardDescriptionForm } from "./_components/coursenoticeboard-description-form";
+// import { CourseNoticeboardDescriptionForm } from "./_components/coursenoticeboard-description-form";
 import { CourseNoticeboardAttachmentsForm } from "./_components/coursenoticeboard-attachments-form";
+import { CoursenoticeboardDescriptionForm } from "./_components/coursenoticeboard-description-form";
 
 const CourseNoticeboardIdPage = async ({
   params,
@@ -107,7 +108,7 @@ const CourseNoticeboardIdPage = async ({
                 value: course.id,
               }))}
             />
-            <CourseNoticeboardDescriptionForm initialData={courseNoticeboard} adminId={adminId} courseId={courseId} coursenoticeboardId={coursenoticeboardId} />
+            <CoursenoticeboardDescriptionForm initialData={courseNoticeboard} adminId={adminId} courseId={courseId} coursenoticeboardId={coursenoticeboardId} />
             
           <div className="space-y-8">
             <div>

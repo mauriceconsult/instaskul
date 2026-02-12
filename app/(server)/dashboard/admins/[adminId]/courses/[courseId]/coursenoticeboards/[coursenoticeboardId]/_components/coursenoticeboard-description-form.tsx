@@ -19,70 +19,80 @@ import { cn } from "@/lib/utils";
 import { CourseNoticeboard } from '@prisma/client';
 import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
 
-
-interface CourseNoticeboardDescriptionFormProps {
+interface CoursenoticeboardDescriptionFormProps {
   initialData: CourseNoticeboard;
   adminId: string;
   courseId: string;
   coursenoticeboardId: string;
 }
+
 const formSchema = z.object({
   description: z.string().min(1, {
     message: "Coursenoticeboard description is required.",
   }),
 });
 
-export const CourseNoticeboardDescriptionForm = ({
+export const CoursenoticeboardDescriptionForm = ({
   initialData,
   adminId,
   courseId,
   coursenoticeboardId,
-}: CourseNoticeboardDescriptionFormProps) => {
+}: CoursenoticeboardDescriptionFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
   const router = useRouter();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: initialData?.description || "",
     },
   });
+  
   const { isSubmitting, isValid } = form.formState;
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/admins/${adminId}/courses/${courseId}/coursenoticeboards/${coursenoticeboardId}/descriptions`, values);
-      toast.success("Course noticeboard updated.");
+      toast.success("Coursenoticeboard updated.");
       toggleEdit();
       router.refresh();
     } catch {
       toast.error("Something went wrong.");
     }
   };
+  
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course notice description
+        Course noticeboard description
         <Button onClick={toggleEdit} variant="ghost">
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit description
+              Edit notice description
             </>
           )}
         </Button>
       </div>
+      
       {!isEditing && (
-        <p
+        <div
           className={cn(
-            "text-sm mt-2",
+            "text-sm mt-2 prose prose-slate max-w-none",
             !initialData.description && "text-slate-500 italic"
           )}
         >
-          {initialData.description || "Add course notices here."}
-        </p>
+          {initialData.description ? (
+            <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
+          ) : (
+            "Briefly describe the notice."
+          )}
+        </div>
       )}
+      
       {isEditing && (
         <Form {...form}>
           <form
@@ -95,10 +105,11 @@ export const CourseNoticeboardDescriptionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                                   <DescriptionEditorWrapper
-                      initialValue={field.value}
-                      fieldName="description"
-                      placeholder="Enter your announcement here..."
+                    {/* Use controlled mode with React Hook Form */}
+                    <DescriptionEditorWrapper
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Course noticeboard description..."
                       maxCharacters={5000}
                     />
                   </FormControl>
