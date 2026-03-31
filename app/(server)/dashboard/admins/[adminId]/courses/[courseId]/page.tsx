@@ -16,6 +16,7 @@ import type { Admin } from "@prisma/client";
 import { CourseCourseworksForm } from "./_components/course-courseworks-form";
 import { CourseCourseNoticeboardsForm } from "./_components/course-course-noticeboards-form";
 import { CourseAttachmentsForm } from "./_components/course-attachments-form";
+import { AppLauncher } from "@/components/launcher/AppLauncher";
 
 const CourseIdPage = async ({
   params,
@@ -104,6 +105,7 @@ const CourseIdPage = async ({
                 value: admin.id,
               }))}
             />
+              <AppLauncher app="studio" label="Generate content" courseId={course.id} />
             <CourseDescriptionForm initialData={course} adminId={adminId} courseId={courseId} />
             <CourseImageForm initialData={course} adminId={adminId} courseId={courseId} />
           </div>
