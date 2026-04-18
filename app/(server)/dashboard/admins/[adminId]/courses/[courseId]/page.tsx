@@ -91,10 +91,13 @@ const CourseIdPage = async ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column: Customization */}
           <div className="space-y-8">
-            <div className="flex items-center gap-x-2">
-              <IconBadge icon={LayoutDashboard} />
-              <h2 className="text-2xl">Customize</h2>
-            </div>
+           <div className="flex items-center justify-between mb-8">
+  <div className="flex items-center gap-3">
+    <IconBadge icon={LayoutDashboard} />
+    <h2 className="text-2xl">Customize</h2>
+  </div>
+  <AppLauncher app="studio" label="Generate content" courseId={course.id} />
+</div>
             <CourseTitleForm initialData={{ title: course.title }} adminId={adminId} courseId={courseId} />
             <CourseAdminForm
               initialData={course}
@@ -105,7 +108,6 @@ const CourseIdPage = async ({
                 value: admin.id,
               }))}
             />
-              <AppLauncher app="studio" label="Generate content" courseId={course.id} />
             <CourseDescriptionForm initialData={course} adminId={adminId} courseId={courseId} />
             <CourseImageForm initialData={course} adminId={adminId} courseId={courseId} />
           </div>

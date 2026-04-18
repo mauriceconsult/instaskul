@@ -64,7 +64,7 @@ export default function Footer() {
         {/* Bottom section */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <p className="text-slate-500">
-            © {currentYear} Max18tech Company Ltd. All rights reserved.
+            © {currentYear} Maxnovate Company Ltd. All rights reserved.
           </p>
           
           <div className="flex items-center gap-4">

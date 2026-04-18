@@ -63,7 +63,7 @@ const AdminCreatePage = () => {
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
-                      placeholder="e.g., 'Biology Admin'"
+                      placeholder="e.g., 'Dr John Doe - Computer Science'"
                       {...field}
                     />
                   </FormControl>

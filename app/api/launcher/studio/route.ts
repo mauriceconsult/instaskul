@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
         name: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || email,
         phone: clerkUser.phoneNumbers?.[0]?.phoneNumber,
         avatarUrl: clerkUser.imageUrl,
+        originApp: "instaskul",
       }),
     });
 

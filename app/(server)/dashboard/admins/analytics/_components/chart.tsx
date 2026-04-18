@@ -44,10 +44,12 @@ export const Chart = ({
   const valueFormatter = (value: number | undefined) => 
     value != null ? formatAmount(value, "UGX") : "—";
 
-  const tooltipFormatter = (value: number | undefined): [string, string] => [
-    valueFormatter(value),
-    "Revenue",
-  ];
+const tooltipFormatter = (
+  value: string | number | readonly (string | number)[] | undefined,
+): [string, string] => [
+  typeof value === "number" ? formatAmount(value, "UGX") : "—",
+  "Revenue",
+];
 
   return (
     <div className="w-full" style={{ height }}>
