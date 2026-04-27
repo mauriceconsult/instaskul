@@ -77,7 +77,7 @@ const CourseIdPage = async ({
           <div className="flex flex-col gap-y-2">
             <h1 className="text-3xl font-bold">Course setup</h1>
             <span className="text-sm text-slate-600">
-              Complete all fields {completionText}
+              Required fields* {completionText}
             </span>
           </div>
           <CourseActions
@@ -118,7 +118,7 @@ const CourseIdPage = async ({
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={DollarSign} />
                 <h2 className="text-2xl">Sell your course</h2>
-                <p className="text-xs">This feature will be activated in a few days. Continue working on your course setup.</p>
+                <p className="text-xs">This feature will be activated in due course. Continue working on your course setup.</p>
               </div>
               <CourseAmountForm initialData={course} courseId={courseId} adminId={adminId} />
             </div>

@@ -9,31 +9,35 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { FileUpload } from "@/components/file-upload";
-import { Admin } from "@prisma/client";
 import { StudioAIButton } from "@/components/studio-ai";
+import { Course } from "@prisma/client";
 
-interface AdminImageFormProps {
-  initialData: Admin;
+interface CourseImageFormProps {
+  initialData: Course;
   adminId: string;
+  courseId: string;
 }
 
 const formSchema = z.object({
   imageUrl: z.string().min(1),
 });
 
-export const AdminImageForm = ({
+export const CourseImageForm = ({
   initialData,
   adminId,
-}: AdminImageFormProps) => {
+  courseId,
+}: CourseImageFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
-
   const hasImage = !!initialData.imageUrl;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/admins/${adminId}/images`, values);
-      toast.success("Admin updated.");
+      await axios.patch(
+        `/api/admins/${adminId}/courses/${courseId}/images`,
+        values
+      );
+      toast.success("Course updated.");
       setIsEditing(false);
       router.refresh();
     } catch {
@@ -41,70 +45,61 @@ export const AdminImageForm = ({
     }
   };
 
+  // Build prompt from Course fields — title and description are standard Prisma Course fields
+  const aiPrompt = [
+    "Generate a striking, professional cover image for an online course",
+    initialData.title ? `titled "${initialData.title}"` : null,
+    initialData.description
+      ? `. The course covers: ${initialData.description}`
+      : null,
+    ". Style: modern e-learning platform, clean, engaging, 16:9 format.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Admin cover image*
+        Course cover image*
         <div className="flex items-center gap-2">
-          {/* Studio AI — inline button always visible */}
           <StudioAIButton
             variant="inline"
-            options={{
-              type: "image",
-              prompt: `Generate a professional, high-quality cover image for an educational admin profile${
-                (initialData as { name?: string }).name
-                  ? ` named "${(initialData as { name?: string }).name}"`
-                  : ""
-              }. Style: clean, modern, suitable for an online learning platform.`,
-            }}
+            options={{ type: "image", prompt: aiPrompt }}
           />
-
           <Button onClick={() => setIsEditing((c) => !c)} variant="ghost">
             {isEditing ? (
-              <>
-                <X className="h-4 w-4 mr-2" />
-                Cancel
-              </>
+              <><X className="h-4 w-4 mr-2" />Cancel</>
             ) : !hasImage ? (
-              <>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add image
-              </>
+              <><PlusCircle className="h-4 w-4 mr-2" />Add image</>
             ) : (
-              <>
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit image
-              </>
+              <><Pencil className="h-4 w-4 mr-2" />Edit image</>
             )}
           </Button>
         </div>
       </div>
 
-      {/* Image display */}
-      {!isEditing &&
-        (!hasImage ? (
+      {!isEditing && (
+        !hasImage ? (
           <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md mt-2">
             <ImageIcon className="h-10 w-10 text-slate-500" />
           </div>
         ) : (
           <div className="relative aspect-video mt-2">
             <Image
-              alt="Admin cover"
+              alt="Course cover"
               fill
               className="object-cover rounded-md"
               src={initialData.imageUrl!}
             />
           </div>
-        ))}
+        )
+      )}
 
-      {/* Upload zone */}
       {isEditing && (
         <div className="mt-2">
           <FileUpload
             endpoint="courseImage"
-            onChange={(url) => {
-              if (url) onSubmit({ imageUrl: url });
-            }}
+            onChange={(url) => { if (url) onSubmit({ imageUrl: url }); }}
           />
           <div className="text-xs text-muted-foreground mt-4">
             16:9 aspect ratio recommended
@@ -112,19 +107,11 @@ export const AdminImageForm = ({
         </div>
       )}
 
-      {/* Studio AI block CTA — shown when no image and not editing */}
       {!isEditing && !hasImage && (
         <StudioAIButton
           variant="block"
           className="mt-3"
-          options={{
-            type: "image",
-            prompt: `Generate a professional, high-quality cover image for an educational admin profile${
-              (initialData as { name?: string }).name
-                ? ` named "${(initialData as { name?: string }).name}"`
-                : ""
-            }. Style: clean, modern, suitable for an online learning platform.`,
-          }}
+          options={{ type: "image", prompt: aiPrompt }}
         />
       )}
     </div>

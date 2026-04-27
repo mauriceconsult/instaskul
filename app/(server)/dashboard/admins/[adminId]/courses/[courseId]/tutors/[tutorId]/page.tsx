@@ -83,7 +83,7 @@ const TutorIdPage = async ({
           <div className="flex flex-col gap-y-2">
             <h1 className="text-3xl font-bold">Tutorial setup</h1>
             <span className="text-sm text-slate-600">
-              Complete all fields {completionText}
+              Required fields* {completionText}
             </span>
           </div>
           <TutorActions

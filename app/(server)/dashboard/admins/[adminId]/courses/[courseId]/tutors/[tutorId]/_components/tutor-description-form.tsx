@@ -1,4 +1,5 @@
 "use client";
+
 import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +17,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Tutor } from '@prisma/client';
+import { Tutor } from "@prisma/client";
 import { TiptapDescriptionEditor } from "@/components/tiptap-description-editor-core";
+import { StudioAIButton } from "@/components/studio-ai";
 
 interface TutorDescriptionFormProps {
   initialData: Tutor;
@@ -39,68 +41,87 @@ export const TutorDescriptionForm = ({
   tutorId,
 }: TutorDescriptionFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const toggleEdit = () => setIsEditing((current) => !current);
   const router = useRouter();
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: initialData?.description || "",
     },
   });
-  
+
   const { isSubmitting, isValid } = form.formState;
-  
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/admins/${adminId}/courses/${courseId}/tutors/${tutorId}/descriptions`, values);
+      await axios.patch(
+        `/api/admins/${adminId}/courses/${courseId}/tutors/${tutorId}/descriptions`,
+        values
+      );
       toast.success("Tutorial updated.");
-      toggleEdit();
+      setIsEditing(false);
       router.refresh();
     } catch {
       toast.error("Something went wrong.");
     }
   };
-  
+
+  const aiPrompt = [
+    "Write a clear, engaging tutorial description",
+    initialData.title ? `for a lesson titled "${initialData.title}"` : null,
+    (initialData as { description?: string | null }).description
+      ? `. Context: ${(initialData as { description?: string | null }).description}`
+      : null,
+    ". Style: concise, informative, educational. Tell students what they will learn",
+    "and any prerequisites. 2-3 sentences.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
         Tutorial description*
-        <Button onClick={toggleEdit} variant="ghost">
-          {isEditing ? (
-            <>Cancel</>
-          ) : (
-            <>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit tutorial description
-            </>
-          )}
-        </Button>
-      </div>
-      
-  {!isEditing && (
-          <div
-            className={cn(
-              "text-sm mt-2 prose prose-slate max-w-none",
-              !initialData.description && "text-slate-500 italic"
-            )}
-          >
-            {initialData.description ? (
-              // Render HTML properly
-              <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
+        <div className="flex items-center gap-2">
+          <StudioAIButton
+            variant="inline"
+            options={{
+              type: "description",
+              prompt: aiPrompt,
+              onResult: (value) => {
+                form.setValue("description", value, { shouldValidate: true });
+                setIsEditing(true);
+              },
+            }}
+          />
+          <Button onClick={() => setIsEditing((c) => !c)} variant="ghost">
+            {isEditing ? (
+              <>Cancel</>
             ) : (
-              // Placeholder text
-              "Briefly describe the tutorial."
+              <><Pencil className="h-4 w-4 mr-2" />Edit tutorial description</>
             )}
-          </div>
-        )}
-      
+          </Button>
+        </div>
+      </div>
+
+      {!isEditing && (
+        <div
+          className={cn(
+            "text-sm mt-2 prose prose-slate max-w-none",
+            !initialData.description && "text-slate-500 italic"
+          )}
+        >
+          {initialData.description ? (
+            <div dangerouslySetInnerHTML={{ __html: initialData.description }} />
+          ) : (
+            "Briefly describe the tutorial."
+          )}
+        </div>
+      )}
+
       {isEditing && (
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 mt-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
             <FormField
               control={form.control}
               name="description"

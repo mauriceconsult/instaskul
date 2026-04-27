@@ -67,6 +67,7 @@ export default function DocsPage() {
           <li><strong>Blog Platform:</strong> Share educational articles and insights with rich text editing</li>
           <li><strong>Enhanced Payment Flow:</strong> Real-time payment status tracking and confirmations</li>
           <li><strong>Improved Content Creation:</strong> Advanced rich text editor with multimedia support</li>
+          <li><strong>AI-Powered Content Generation:</strong> Course creators can now generate course content, voices, and tutorials directly from the course page using the Generate Content button, powered by Studio AI</li>
         </ul>
 
         <h3 className="text-xl font-medium text-slate-800 mb-2">
@@ -161,6 +162,17 @@ export default function DocsPage() {
             <strong>Set Your Course Price:</strong> Fill in the course amount and select your preferred
             currency (UGX, KES, USD, EUR, or GBP). This will be used for checkout.
           </li>
+          <li>
+  <strong>Generate Content with AI:</strong> Use the <em>Generate Content</em> button on the course 
+  page to launch Studio, InstaSkul's AI workspace. From there you can generate course outlines, 
+  tutorial scripts, and AI voices to accelerate your content creation.
+</li>
+<li>
+  <strong>Responsible AI Use:</strong> AI-generated content is a starting point, not a finished 
+  product. You are responsible for reviewing, editing, and verifying all generated material before 
+  publishing. Ensure accuracy, originality, and alignment with your course objectives. InstaSkul 
+  is not liable for the quality or accuracy of AI-generated content.
+</li>
           <li>
             <strong>Payment Methods:</strong> Kenyan courses (KES) support M-Pesa payments.
             Ugandan courses (UGX) support Mobile Money. Other currencies use standard payment processing.
@@ -290,6 +302,8 @@ export default function DocsPage() {
           <li>Test tutorials for accessibility on mobile and web.</li>
           <li>Use landscape mode to capture images and videos for better viewing experience.</li>
           <li>Choose the appropriate currency for your target audience's location.</li>
+          <li>Review all AI-generated content carefully before publishing — treat it as a first draft that requires your professional judgment.</li>
+<li>Use AI generation to accelerate structure and scripting, but ensure your voice and expertise shape the final material.</li>
           <li>Regularly update blog posts to keep your audience engaged.</li>
           <li>Use high-quality cover images that are relevant to your content.</li>
         </ul>
@@ -427,6 +441,11 @@ export default function DocsPage() {
             InstaSkul is not liable for user-generated content violations.
           </li>
           <li>
+  <strong>AI-Generated Content:</strong> Admins using the Generate Content feature are solely 
+  responsible for reviewing and validating AI output before publishing. Content must meet 
+  InstaSkul's quality standards and comply with copyright and accuracy requirements.
+</li>
+          <li>
             <strong>Learners:</strong> Must use content for personal learning only. Sharing login
             credentials or course materials is prohibited.
           </li>
@@ -530,9 +549,9 @@ export default function DocsPage() {
         </div>
 
         <div className="border-t pt-6 mt-12">
-          <p className="text-sm text-slate-500 text-center">
-            Last updated: January 2025 | Version 2.0
-          </p>
+        <p className="text-sm text-slate-500 text-center">
+  Last updated: {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })} | Version 2.1
+</p>
           <p className="text-sm text-slate-500 text-center mt-2">
             © 2025 InstaSkul. All rights reserved. | <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>
           </p>

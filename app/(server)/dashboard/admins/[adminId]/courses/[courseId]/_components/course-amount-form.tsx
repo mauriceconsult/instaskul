@@ -34,22 +34,23 @@ interface CourseAmountFormProps {
   courseId: string;
 }
 
-// Supported currencies
-const CURRENCIES = [
-  { code: "UGX", name: "Ugandan Shilling", symbol: "UGX" },
-  { code: "KES", name: "Kenyan Shilling", symbol: "KES" },
-  { code: "USD", name: "US Dollar", symbol: "$" },
-  { code: "EUR", name: "Euro", symbol: "€" },
-  { code: "GBP", name: "British Pound", symbol: "£" },
+type Currency = {
+  code: string;
+  name: string;
+  symbol: string;
+  available: boolean;
+};
+
+type CurrencyCode = typeof CURRENCIES[number]["code"];
+
+const CURRENCIES: Currency[] = [
+  { code: "UGX", name: "Ugandan Shilling", symbol: "UGX", available: true  },
+  { code: "KES", name: "Kenyan Shilling",  symbol: "KES", available: false },
+  { code: "USD", name: "US Dollar",        symbol: "$",   available: false },
+  { code: "EUR", name: "Euro",             symbol: "€",   available: false },
+  { code: "GBP", name: "British Pound",    symbol: "£",   available: false },
 ];
 
-const formSchema = z.object({
-  amount: z.string()
-    .min(1, "Amount is required")
-    .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number")
-    .refine((val) => parseFloat(val) > 0, "Course amount must be greater than 0"),
-  currency: z.string().min(1, "Currency is required"),
-});
 
 export const CourseAmountForm = ({
   initialData,
@@ -64,8 +65,8 @@ export const CourseAmountForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: initialData.amount || "",
-      currency: initialData.currency || "UGX",
+      amount:   initialData.amount   || "",
+      currency: (initialData.currency as CurrencyCode) || "UGX",
     },
   });
 
@@ -82,9 +83,11 @@ export const CourseAmountForm = ({
     }
   };
 
-  const selectedCurrency = CURRENCIES.find(c => c.code === (initialData.currency || "UGX"));
-  const formattedAmount = initialData.amount 
-    ? `${selectedCurrency?.symbol || selectedCurrency?.code || ""} ${initialData.amount}` 
+  const selectedCurrency = CURRENCIES.find(
+    (c) => c.code === (initialData.currency || "UGX")
+  );
+  const formattedAmount = initialData.amount
+    ? `${selectedCurrency?.symbol ?? selectedCurrency?.code ?? ""} ${initialData.amount}`
     : "No amount set";
 
   return (
@@ -92,9 +95,7 @@ export const CourseAmountForm = ({
       <div className="font-medium flex items-center justify-between">
         Course amount*
         <Button onClick={toggleEdit} variant="ghost">
-          {isEditing ? (
-            <>Cancel</>
-          ) : (
+          {isEditing ? "Cancel" : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
               Edit amount
@@ -131,8 +132,20 @@ export const CourseAmountForm = ({
                     </FormControl>
                     <SelectContent>
                       {CURRENCIES.map((currency) => (
-                        <SelectItem key={currency.code} value={currency.code}>
-                          {currency.name} ({currency.symbol})
+                        <SelectItem
+                          key={currency.code}
+                          value={currency.code}
+                          disabled={!currency.available}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="flex items-center justify-between w-full gap-2">
+                            <span>{currency.name} ({currency.symbol})</span>
+                            {!currency.available && (
+                              <span className="text-[11px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded">
+                                coming soon
+                              </span>
+                            )}
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -160,6 +173,7 @@ export const CourseAmountForm = ({
                 </FormItem>
               )}
             />
+
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 Save
@@ -171,3 +185,12 @@ export const CourseAmountForm = ({
     </div>
   );
 };
+
+const formSchema = z.object({
+  amount: z
+    .string()
+    .min(1, "Amount is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number")
+    .refine((val) => parseFloat(val) > 0, "Course amount must be greater than 0"),
+  currency: z.string().min(1, "Currency is required"),
+});

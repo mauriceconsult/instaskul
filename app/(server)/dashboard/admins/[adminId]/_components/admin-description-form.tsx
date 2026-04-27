@@ -1,4 +1,5 @@
 "use client";
+
 import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +17,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Admin } from '@prisma/client';
+import { Admin } from "@prisma/client";
 import { DescriptionEditorWrapper } from "@/components/description-editor-wrapper";
+import { StudioAIButton } from "@/components/studio-ai";
 
 interface AdminDescriptionFormProps {
   initialData: Admin;
@@ -35,45 +37,64 @@ export const AdminDescriptionForm = ({
   adminId,
 }: AdminDescriptionFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const toggleEdit = () => setIsEditing((current) => !current);
   const router = useRouter();
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: initialData?.description || "",
     },
   });
-  
+
   const { isSubmitting, isValid } = form.formState;
-  
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/admins/${adminId}/descriptions`, values);
       toast.success("Admin updated.");
-      toggleEdit();
+      setIsEditing(false);
       router.refresh();
     } catch {
       toast.error("Something went wrong.");
     }
   };
-  
+
+  const aiPrompt = [
+    "Write a professional admin profile description",
+    (initialData as { name?: string }).name
+      ? `for "${(initialData as { name?: string }).name}"`
+      : null,
+    ". Style: clear, authoritative, suitable for an online learning platform. 2-3 sentences.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Admin description
-        <Button onClick={toggleEdit} variant="ghost">
-          {isEditing ? (
-            <>Cancel</>
-          ) : (
-            <>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit description
-            </>
-          )}
-        </Button>
+        Admin description*
+        <div className="flex items-center gap-2">
+          <StudioAIButton
+            variant="inline"
+            options={{
+              type: "description",
+              prompt: aiPrompt,
+              onResult: (value) => {
+                form.setValue("description", value, { shouldValidate: true });
+                setIsEditing(true); // open editor so user can review before saving
+              },
+            }}
+          />
+          <Button onClick={() => setIsEditing((c) => !c)} variant="ghost">
+            {isEditing ? (
+              <>Cancel</>
+            ) : (
+              <><Pencil className="h-4 w-4 mr-2" />Edit description</>
+            )}
+          </Button>
+        </div>
       </div>
-      
+
       {!isEditing && (
         <div
           className={cn(
@@ -88,20 +109,16 @@ export const AdminDescriptionForm = ({
           )}
         </div>
       )}
-      
+
       {isEditing && (
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 mt-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    {/* Use controlled mode with React Hook Form */}
                     <DescriptionEditorWrapper
                       value={field.value}
                       onChange={field.onChange}
