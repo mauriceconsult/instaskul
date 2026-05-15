@@ -82,7 +82,10 @@ export async function POST(req: NextRequest) {
 
     // Build redirect URL — pass courseId as context if provided
     const params = new URLSearchParams({ token });
-    if (courseId) params.set("courseId", courseId);
+if (courseId) {
+  params.set("courseId", courseId);
+  params.set("type", "course");       // ← tells Studio to open /generate
+}
 
     const url = `${STUDIO_URL}/auth/cross?${params.toString()}`;
 
