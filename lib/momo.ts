@@ -2,6 +2,29 @@ import "dotenv/config";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
+interface RequestToPayPayload {
+  amount: string;
+  currency: string;
+  externalId: string;
+  payer: {
+    partyIdType: "MSISDN";
+    partyId: string;
+  };
+  payerMessage: string;
+  payeeNote: string;
+}
+interface TransferPayload {
+  amount: string;
+  currency: string;
+  externalId: string;
+  payee: {
+    partyIdType: "MSISDN";
+    partyId: string;
+  };
+  payerMessage: string;
+  payeeNote: string;
+}
+
 const momo = {
   // === COLLECTIONS ===
   collections: {
@@ -28,7 +51,7 @@ const momo = {
       return response.data.access_token;
     },
 
-    async requestToPay(payload: any) {
+    async requestToPay(payload: RequestToPayPayload) {
       const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY } = process.env;
       const accessToken = await this.getAccessToken();
       const referenceId = uuidv4();
@@ -95,7 +118,7 @@ const momo = {
       return response.data.access_token;
     },
   
-    async transfer(payload: any) {
+    async transfer(payload: TransferPayload) {
       const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY_DISBURSEMENTS } = process.env;
       const accessToken = await this.getAccessToken();
       const referenceId = uuidv4();
