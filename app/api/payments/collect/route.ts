@@ -10,6 +10,7 @@ import type { PaymentNetwork } from '@/lib/types/payment.types'
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth()
+    
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -43,6 +44,21 @@ export async function POST(req: NextRequest) {
     const reference = `COL-${Date.now()}-${userId.slice(0, 8)}`
 
     // Create Tuition record
+    const alreadyEnrolled = await prisma.enrollment.findUnique({
+  where: { userId_courseId: { userId, courseId } },
+});
+if (alreadyEnrolled) {
+  return NextResponse.json({ error: 'Already enrolled' }, { status: 409 });
+}
+    const pendingTuition = await prisma.tuition.findFirst({
+  where: { userId, courseId, momoStatus: { in: ['PENDING', 'PROCESSING'] } },
+});
+if (pendingTuition) {
+  return NextResponse.json(
+    { reference: pendingTuition.momoReferenceId, status: 'PROCESSING' },
+    { status: 200 } // return existing, don't create a new one
+  );
+}
     const tuition = await prisma.tuition.create({
       data: {
         userId,

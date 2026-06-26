@@ -7,7 +7,7 @@ const payload = {
   amount: "1000",
   currency: "EUR", 
   externalId: "123456",
-  payer: { partyIdType: "MSISDN", partyId: "256777123457" }, // New test MSISDN
+  payer: { partyIdType: "MSISDN" as const, partyId: "256777123457" }, // New test MSISDN
   payerMessage: "Payment for Instaskul",
   payeeNote: "Thank you",
 };

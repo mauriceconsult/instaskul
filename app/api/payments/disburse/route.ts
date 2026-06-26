@@ -6,6 +6,7 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { paymentService } from '@/lib/payments/payment-service'
 import type { PaymentNetwork } from '@/lib/types/payment.types'
+import { payrollService } from '@/lib/payroll'
 
 export async function POST(req: NextRequest) {
   try {
@@ -65,11 +66,27 @@ export async function POST(req: NextRequest) {
 
     // Calculate fees
     const grossAmountNum = typeof amount === 'string' ? parseFloat(amount) : amount
-    const platformFeeNum = grossAmountNum * 0.15 // 15% platform fee
-    const transactionFeeNum = grossAmountNum * 0.02 // 2% transaction fee
-    const netPayoutNum = grossAmountNum - platformFeeNum - transactionFeeNum
+ const { grossAmount, platformFee, transactionFee, netPayout } =
+  payrollService.calculatePayroll(grossAmountNum);
 
     // Create Payroll record
+    if (!tuition.isPaid || tuition.momoStatus !== 'SUCCESSFUL') {
+  return NextResponse.json(
+    { error: 'Cannot disburse: tuition payment not confirmed' },
+    { status: 400 }
+  );
+}
+
+// Also guard against double disbursement
+const existingPayroll = await prisma.payroll.findFirst({
+  where: { tuitionId, momoStatus: { in: ['PENDING', 'PROCESSING', 'SUCCESSFUL'] } },
+});
+if (existingPayroll) {
+  return NextResponse.json(
+    { error: 'Disbursement already exists for this tuition' },
+    { status: 409 }
+  );
+}
     const payroll = await prisma.payroll.create({
       data: {
         tuitionId,
@@ -77,10 +94,10 @@ export async function POST(req: NextRequest) {
         courseId: tuition.courseId,
         adminId: userId,
         instructorId,
-        grossAmount: grossAmountNum.toString(),
-        platformFee: platformFeeNum.toString(),
-        transactionFee: transactionFeeNum.toString(),
-        netPayout: netPayoutNum.toString(),
+        grossAmount,
+        platformFee,
+        transactionFee,
+        netPayout,
         currency: currency || 'UGX',
         momoPhoneNumber: phoneNumber,
         momoNetwork: network,
@@ -91,7 +108,7 @@ export async function POST(req: NextRequest) {
 
     // Initiate disbursement
     const result = await paymentService.initiateDisbursement(
-      netPayoutNum,
+      parseFloat(netPayout),
       currency || 'UGX',
       phoneNumber,
       network as PaymentNetwork,
@@ -117,13 +134,10 @@ export async function POST(req: NextRequest) {
       status: result.status,
       message: result.message,
       conversationId: result.conversationId,
-      netPayout: netPayoutNum,
+      netPayout: parseFloat(netPayout),
     })
-  } catch (error: any) {
-    console.error('[PAYMENT_DISBURSE]', error)
-    return NextResponse.json(
-      { error: error.message || 'Disbursement failed' },
-      { status: 500 }
-    )
-  }
+ } catch (error: unknown) {
+  const message = error instanceof Error ? error.message : 'Payment failed';
+  return NextResponse.json({ error: message }, { status: 500 });
+}
 }

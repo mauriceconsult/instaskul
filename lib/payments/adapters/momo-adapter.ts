@@ -19,7 +19,7 @@ export class MobileMoneyAdapter extends PaymentAdapter {
   constructor() {
     super()
     this.apiKey = process.env.MOMO_API_KEY || ''
-    this.apiSecret = process.env.MOMO_SECRET || ''
+    this.apiSecret = process.env.MOMOUSER_SECRET || ''
     this.baseUrl = process.env.MOMO_BASE_URL || 'https://api.momo.ug'
   }
 

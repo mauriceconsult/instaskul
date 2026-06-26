@@ -2,6 +2,18 @@ import { config } from "dotenv";
 config({ path: "./.env.local" });
 import { momo } from "./lib/momo";
 
+interface TransferPayload {
+  amount: string;
+  currency: string;
+  externalId: string;
+  payee: {
+    partyIdType: "MSISDN";
+    partyId: string;
+  };
+  payerMessage: string;
+  payeeNote: string;
+}
+
 const TEST_CASE = process.argv[2] || "TC02-01";
 const scenarios = {
   "TC02-01": {
@@ -39,7 +51,7 @@ if (!scenario) {
 }
 
 
-const payload = {
+const payload: TransferPayload = {
   amount: scenario.amount,
   currency: scenario.currency,
   externalId: `${TEST_CASE}_${Date.now()}`,

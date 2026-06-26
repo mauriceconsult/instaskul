@@ -38,7 +38,7 @@ class PayrollService {
     }
 
     const grossAmount = amount;
-    const platformFee = Math.round(grossAmount * 0.10); // 10%
+    const platformFee = Math.round(grossAmount * 0.15); // 15%
     const transactionFee = Math.round(grossAmount * 0.02); // 2%
     const netPayout = grossAmount - platformFee - transactionFee;
 
@@ -84,14 +84,14 @@ class PayrollService {
     userId,
     courseId,
     adminId,
-    instructorId, // ADD THIS PARAMETER
+    instructorId, 
     tuitionAmount,
   }: {
     tuitionId: string;
     userId: string;
     courseId: string;
     adminId: string;
-    instructorId: string; // ADD THIS TYPE
+    instructorId: string; 
     tuitionAmount: number | string;
   }) {
     const calculation = this.calculatePayroll(tuitionAmount);
@@ -102,7 +102,7 @@ class PayrollService {
         userId,
         courseId,
         adminId,
-        instructorId, // ADD THIS FIELD
+        instructorId, 
         grossAmount: calculation.grossAmount,
         platformFee: calculation.platformFee,
         transactionFee: calculation.transactionFee,
