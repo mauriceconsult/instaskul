@@ -5,25 +5,37 @@ import { momo } from "./lib/momo";
 
 const payload = {
   amount: "1000",
-  currency: "EUR", // Confirmed for sandbox
+  currency: "EUR", 
   externalId: "123456",
-  payer: { partyIdType: "MSISDN", partyId: "256777123456" }, // New test MSISDN
+  payer: { partyIdType: "MSISDN", partyId: "256777123457" }, // New test MSISDN
   payerMessage: "Payment for Instaskul",
   payeeNote: "Thank you",
 };
 
 async function testMoMo() {
   try {
-    const referenceId = await momo.collections.requestToPay(payload);
+    console.log("=== REQUEST TO PAY TEST ===");
+
+    const referenceId = await momo.collections.requestToPay(payload);  
+
     console.log("Reference ID:", referenceId);
-    const status = await momo.collections.checkTransactionStatus(referenceId);
-    console.log("Transaction Status:", status);
+
+    await new Promise((r) => setTimeout(r, 5000));
+
+    const status =
+      await momo.collections.checkTransactionStatus(referenceId);
+
+  //   const status =
+  // await momo.collections.checkTransactionStatus(
+  //   "4ed3540b-d494-4ab3-a0df-bd29346c8f6a"
+  // );
+
+    console.log(
+      JSON.stringify(status, null, 2)
+    );
+
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Test failed:", error.message);
-    } else {
-      console.error("Test failed:", error);
-    }
+    console.error(error);
   }
 }
 

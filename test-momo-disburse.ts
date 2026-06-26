@@ -1,39 +1,127 @@
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: "./.env.local" });
 import { momo } from "./lib/momo";
 
-const payload = {
+const TEST_CASE = process.argv[2] || "TC02-01";
+const scenarios = {
+  "TC02-01": {
+    amount: "100",
+    currency: "EUR",
+    msisdn: "256774290781",
+  },
+
+  "TC02-03": {
+    amount: "100",
+    currency: "EUR",
+    msisdn: "999999999999",
+  },
+  "TC02-04": {
+  amount: "999999999",
+  currency: "EUR",
+  msisdn: "256774290781",
+  },
+"TC02-05": {
   amount: "100",
   currency: "EUR",
-  externalId: `test_${Date.now()}`,
-  payee: {
-    partyIdType: "MSISDN" as const,
-    partyId: "256777123456",
+  msisdn: "999999999999",
   },
+"TC02-06": {
+  amount: "999999999999",
+  currency: "EUR",
+  msisdn: "256774290781",
+},
+};
+const scenario =
+  scenarios[TEST_CASE as keyof typeof scenarios];
+
+if (!scenario) {
+  throw new Error(`Unknown test case: ${TEST_CASE}`);
+}
+
+
+const payload = {
+  amount: scenario.amount,
+  currency: scenario.currency,
+  externalId: `${TEST_CASE}_${Date.now()}`,
+payee: {
+  partyIdType: "MSISDN",
+  partyId: scenario.msisdn,
+},
   payerMessage: "Instaskul Payroll Test",
-  payeeNote: "Thank you for teaching!",
+  payeeNote: "Disbursement SIT Test",
 };
 
 (async () => {
-  console.log("=== SELF-SERVICE DISBURSEMENT TEST STARTED ===");
-
   try {
-    console.log("Sending disbursement...");
-    const transactionId = await momo.disbursements.transfer(payload);
+    console.log(`=== ${TEST_CASE} ===`);
+    const descriptions: Record<keyof typeof scenarios, string> = {
+      "TC02-01": "VALID DISBURSEMENT",
+      "TC02-03": "INVALID PAYEE",
+      "TC02-04": "INVALID AMOUNT",
+      "TC02-05": "INVALID AMOUNT & PAYEE",
+      "TC02-06": "EXCESSIVE AMOUNT",
+    };
+    
+    console.log(
+      `=== ${TEST_CASE} ${descriptions[TEST_CASE as keyof typeof descriptions]} ===`
+    );
+
+    const transactionId =
+      await momo.disbursements.transfer(payload);
+
     console.log("Transaction ID:", transactionId);
 
-    console.log("Waiting 8 seconds for processing...");
-    await new Promise((resolve) => setTimeout(resolve, 8000));
+    await new Promise((r) => setTimeout(r, 15000));
 
-    const status = await momo.disbursements.getTransactionStatus(transactionId);
-    console.log("Final Status:", status);
+    // const status =
+    //   await momo.disbursements.getTransactionStatus(transactionId);
 
-    if (status.status === "SUCCESSFUL") {
-      console.log("DISBURSEMENT SUCCESSFUL — MONEY SENT!");
-    } else {
-      console.log("Status:", status.status);
+    let status;
+
+for (let i = 0; i < 6; i++) {
+  await new Promise((r) => setTimeout(r, 5000));
+
+  try {
+    status =
+      await momo.disbursements.getTransactionStatus(transactionId);
+
+    if (
+      status.status === "SUCCESSFUL" ||
+      status.status === "FAILED"
+    ) {
+      break;
     }
+  } catch {}
+}
+  console.log(
+  JSON.stringify(
+    {
+      tc: TEST_CASE,
+      referenceId: transactionId,
+      result: status,
+    },
+    null,
+    2
+  )
+);
+
+    console.log(JSON.stringify(status, null, 2));
+
   } catch (error: any) {
-    console.error("DISBURSEMENT FAILED");
-    console.error(error?.response?.data || error.message || error);
-  }
+  console.error("=== ERROR ===");
+
+  console.error(
+    JSON.stringify(
+      {
+        status: error?.response?.status,
+        data: error?.response?.data,
+        message: error?.message,
+      },
+      null,
+      2
+    )
+  );
+}
 })();
+
+
