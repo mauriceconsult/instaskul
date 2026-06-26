@@ -1,6 +1,6 @@
 import { MoMoWebhookPayload } from "@/lib/payments/momo";
 
-const STUDIO_URL = process.env.STUDIO_API_URL!;
+const STUDIO_URL = process.env.STUDIO_URL!;
 
 export async function handleStudio(
   payload: MoMoWebhookPayload

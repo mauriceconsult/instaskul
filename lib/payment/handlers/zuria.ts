@@ -5,7 +5,7 @@ const PLATFORM_API_KEY = process.env.PLATFORM_API_KEY!;
 
 export async function handleZuria(payload: MoMoWebhookPayload) {
   const res = await fetch(
-    `${ZURIA_URL}/api/webhooks/momo`,
+    `${ZURIA_URL}/api/webhook/momo`,
     {
       method: "POST",
       headers: {

@@ -1,12 +1,12 @@
 import { MoMoWebhookPayload } from "@/lib/payments/momo";
 
-const DUKABODA_URL = process.env.DUKABODA_API_URL!;
+const DUKABODA_URL = process.env.ZURIA_API_URL!;
 
 export async function handleDukaboda(
   payload: MoMoWebhookPayload
 ) {
   await fetch(
-    `${DUKABODA_URL}/api/webhooks/momo`,
+    `${DUKABODA_URL}/api/webhook/momo`,
     {
       method: "POST",
       headers: {
