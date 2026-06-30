@@ -1,0 +1,95 @@
+[
+  {
+    "testCase": "TC04",
+    "scenario": "Normal Request To Pay",
+    "timestamp": "2026-06-29T10:12:54.893Z",
+    "request": {
+      "referenceId": "de4ab2de-4c27-4d73-bf43-4c98296826b6",
+      "amount": "1000",
+      "currency": "EUR",
+      "msisdn": "256777123457"
+    },
+    "outcome": "PASS",
+    "response": {
+      "financialTransactionId": "887347640",
+      "externalId": "123456",
+      "amount": "1000",
+      "currency": "EUR",
+      "payer": {
+        "partyIdType": "MSISDN",
+        "partyId": "256777123457"
+      },
+      "payerMessage": "Payment for Instaskul",
+      "payeeNote": "Thank you",
+      "status": "SUCCESSFUL"
+    }
+  },
+  {
+    "testCase": "TC03",
+    "scenario": "Duplicate Reference (First Request)",
+    "timestamp": "2026-06-29T10:12:56.893Z",
+    "request": {
+      "referenceId": "60afd9e3-1eb9-48a2-9755-33cd5b5ac6b5",
+      "amount": "1000",
+      "currency": "EUR",
+      "msisdn": "256777123457"
+    },
+    "outcome": "PASS",
+    "response": {
+      "financialTransactionId": "829385366",
+      "externalId": "123456",
+      "amount": "1000",
+      "currency": "EUR",
+      "payer": {
+        "partyIdType": "MSISDN",
+        "partyId": "256777123457"
+      },
+      "payerMessage": "Payment for Instaskul",
+      "payeeNote": "Thank you",
+      "status": "SUCCESSFUL"
+    }
+  },
+  {
+    "testCase": "TC03",
+    "scenario": "Duplicate Reference (Second Request)",
+    "timestamp": "2026-06-29T10:12:58.227Z",
+    "request": {
+      "referenceId": "60afd9e3-1eb9-48a2-9755-33cd5b5ac6b5",
+      "amount": "1000",
+      "currency": "EUR",
+      "msisdn": "256777123457"
+    },
+    "outcome": "PASS",
+    "httpStatus": 409,
+    "response": {
+      "message": "Duplicated reference id. Creation of resource failed.",
+      "code": "RESOURCE_ALREADY_EXIST"
+    }
+  },
+  {
+    "testCase": "TC02",
+    "scenario": "Approval Timeout",
+    "timestamp": "2026-06-29T10:12:58.895Z",
+    "request": {
+      "referenceId": "cb80967d-f1d4-4636-be45-324380f835e2",
+      "amount": "1000",
+      "currency": "EUR",
+      "msisdn": "256777123457"
+    },
+    "outcome": "BLOCKED",
+    "response": {
+      "financialTransactionId": "542101266",
+      "externalId": "123456",
+      "amount": "1000",
+      "currency": "EUR",
+      "payer": {
+        "partyIdType": "MSISDN",
+        "partyId": "256777123457"
+      },
+      "payerMessage": "Payment for Instaskul",
+      "payeeNote": "Thank you",
+      "status": "SUCCESSFUL"
+    },
+    "notes": "Sandbox approved payment instead of simulating approval timeout."
+  }
+]

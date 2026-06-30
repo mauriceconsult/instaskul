@@ -51,17 +51,19 @@ const momo = {
       return response.data.access_token;
     },
 
-    async requestToPay(payload: RequestToPayPayload) {
+    async requestToPay(payload: RequestToPayPayload,
+      referenceId?: string
+    ) {
       const { MOMO_TARGET_ENVIRONMENT, MOMO_PRIMARY_KEY } = process.env;
       const accessToken = await this.getAccessToken();
-      const referenceId = uuidv4();
+    const ref = referenceId ?? uuidv4();
 
       await axios.post(
         `${MOMO_TARGET_ENVIRONMENT}/collection/v1_0/requesttopay`,
         payload,
         {
           headers: {
-            "X-Reference-Id": referenceId,
+            "X-Reference-Id": ref,
             "X-Target-Environment": "sandbox",
             "Ocp-Apim-Subscription-Key": MOMO_PRIMARY_KEY,
             "Content-Type": "application/json",
@@ -70,7 +72,7 @@ const momo = {
         }
       );
 
-      return referenceId;
+      return ref;
     },
 
     async checkTransactionStatus(referenceId: string) {

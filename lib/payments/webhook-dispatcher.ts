@@ -9,21 +9,20 @@ export async function dispatchMoMoWebhook(
 ) {
   const ref = payload.referenceId;
 
-  if (ref.startsWith("COL-")) {
-    return handleInstaskul(payload);
-  }
-
-  if (ref.startsWith("PAY-")) {
-    return handleInstaskul(payload);
-  }
+if (
+  ref.startsWith("COL-") ||
+  ref.startsWith("PAY-")
+) {
+  return handleInstaskul(payload);
+}
 
   if (ref.startsWith("ORD-")) {
     return handleZuria(payload);
   }
 
-  if (ref.startsWith("DEL-")) {
-    return handleDukaboda(payload);
-  }
+  // if (ref.startsWith("DEL-")) {
+  //   return handleDukaboda(payload);
+  // }
 
   if (
     ref.startsWith("SUB-") ||
