@@ -16,13 +16,13 @@ if (
   return handleInstaskul(payload);
 }
 
-  if (ref.startsWith("ORD-")) {
-    return handleZuria(payload);
-  }
+if (ref.startsWith("ORD-") || ref.startsWith("DLV-")) {
+  return handleZuria(payload);  
+}
 
-  // if (ref.startsWith("DEL-")) {
-  //   return handleDukaboda(payload);
-  // }
+  if (ref.startsWith("DEL-")) {
+    return handleDukaboda(payload);
+  }
 
   if (
     ref.startsWith("SUB-") ||

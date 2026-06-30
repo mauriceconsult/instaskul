@@ -1,5 +1,4 @@
 // lib/payments/payment-service.ts
-
 import { PaymentAdapter } from './adapters/base-adapter'
 import { MobileMoneyAdapter } from './adapters/momo-adapter'
 import { MPesaMockAdapter } from './adapters/mpesa-mock-adapter'
@@ -10,7 +9,7 @@ import type {
   PaymentResponse, 
   PaymentVerification,
   PaymentNetwork,
-  PaymentType,
+  // PaymentType,
 } from '@/lib/types/payment.types'
 
 export class PaymentService {
