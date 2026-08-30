@@ -1,5 +1,3 @@
-// lib/payments/adapters/momo-adapter.ts
-
 import { PaymentAdapter } from './base-adapter'
 import type {
   PaymentRequest,

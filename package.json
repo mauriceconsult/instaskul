@@ -101,6 +101,7 @@
     "color-parse": "^2.0.2",
     "cookie": "^0.7.0",
     "date-fns": "^4.1.0",
+    "docx": "^9.7.1",
     "es-toolkit": "^1.39.5",
     "fs-extra": "^11.3.2",
     "fuzzysort": "^3.1.0",

@@ -1,5 +1,3 @@
-// lib/payment/get-payment-options.ts
-
 import { prisma } from "../db";
 
 export async function getPaymentOptions(userId: string) {

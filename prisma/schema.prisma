@@ -95,11 +95,15 @@ model Content {
   id          String   @id @default(uuid())
   courseId    String
   userId      String
+  description String?
+  isPublished Boolean  @default(false)
   isCompleted Boolean  @default(false)
   title       String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   course      Course   @relation(fields: [courseId], references: [id])
+  
+  @@index([courseId])
 }
 
 model CourseNoticeboard {
@@ -159,34 +163,6 @@ model Admin {
   @@index([schoolId])
 }
 
-model Course {
-  id                 String              @id @default(uuid())
-  title              String
-  userId             String?
-  description        String?
-  imageUrl           String?
-  amount             String              @default("0")
-  currency    String?  @default("UGX") @db.Text // Added this field
-  position           Int?
-  isPublished        Boolean             @default(false)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  publishDate        DateTime?
-  adminId            String?
-  attachments        Attachment[]
-  contents           Content[]
-  admin              Admin?              @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  courseNoticeboards CourseNoticeboard[]
-  courseworks        Coursework[]
-  enrollments        Enrollment[]
-  tuitions           Tuition[]
-  tutors             Tutor[]
-  userProgress       UserProgress[]
-  payrolls           Payroll[]
-  mpesaTransactions MPesaTransaction[]
-
-  @@index([adminId])
-}
 
 model Enrollment {
   id        String   @id @default(uuid())
@@ -646,3 +622,84 @@ model MPesaTransaction {
   @@index([courseId])
   @@index([checkoutRequestId])
 }
+
+model Journal {
+  id          String             @id @default(uuid())
+  courseId    String             @unique
+  course      Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  context     String             // thesis/topic set by the course creator
+  style       String             @default("APA")   // APA | MLA | Chicago
+  minWords    Int                @default(3000)
+  maxWords    Int                @default(8000)
+  article     JournalArticle?    // one article per journal — not a list
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  isPublished Boolean        @default(false)
+  // no @@index — @unique on courseId creates it
+}
+
+// Renamed from JournalSubmission → JournalArticle for clarity
+// One per Journal, updated on each regeneration
+model JournalArticle {
+  id          String    @id @default(uuid())
+  journalId   String    @unique              // ← @unique enables upsert by journalId
+  journal     Journal   @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  generatedBy String                         // adminId / course creator userId
+  contextUsed String                         // journal.context snapshot for audit
+
+  // Content
+  articleUrl  String?                        // Cloudinary / UploadThing .docx URL
+  wordCount   Int?
+
+  // Publication workflow: draft → submitted → approved | rejected → published
+  status      String    @default("draft")
+
+  // Public visibility — used by the marketing/publicity layer
+  isPublic    Boolean   @default(false)
+  slug        String?   @unique              // e.g. "social-media-agenda-setting-uganda"
+  publishedAt DateTime?
+  excerpt     String?                        // 2–3 sentence preview for course listing cards
+
+  // Review
+  feedback    String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([isPublic])
+}
+
+// Course — change journals Journal[] to journal Journal?
+model Course {
+  id                 String              @id @default(uuid())
+  title              String
+  userId             String?
+  description        String?
+  imageUrl           String?
+  amount             String              @default("0")
+  currency           String?             @default("UGX") @db.Text
+  position           Int?
+  isPublished        Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  publishDate        DateTime?
+  adminId            String?
+  attachments        Attachment[]
+  contents           Content[]
+  admin              Admin?              @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  courseNoticeboards CourseNoticeboard[]
+  courseworks        Coursework[]
+  enrollments        Enrollment[]
+  tuitions           Tuition[]
+  tutors             Tutor[]
+  userProgress       UserProgress[]
+  payrolls           Payroll[]
+  mpesaTransactions  MPesaTransaction[]
+  journal            Journal?            // ← singular, one per course
+
+  @@index([adminId])
+}
+

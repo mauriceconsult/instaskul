@@ -1,24 +1,33 @@
 import { handleDukaboda } from "../payment/handlers/dukaboda";
 import { handleInstaskul } from "../payment/handlers/instaskul";
+import { handleMaxintel } from "../payment/handlers/maxintel";
 import { handleStudio } from "../payment/handlers/studio";
 import { handleZuria } from "../payment/handlers/zuria";
+
 import type { MoMoWebhookPayload } from "./momo";
 
 export async function dispatchMoMoWebhook(
-  payload: MoMoWebhookPayload
+  payload: MoMoWebhookPayload,
 ) {
   const ref = payload.referenceId;
 
-if (
-  ref.startsWith("COL-") ||
-  ref.startsWith("PAY-")
-) {
-  return handleInstaskul(payload);
-}
+  if (
+    ref.startsWith("COL-") ||
+    ref.startsWith("PAY-")
+  ) {
+    return handleInstaskul(payload);
+  }
 
-if (ref.startsWith("ORD-") || ref.startsWith("DLV-")) {
-  return handleZuria(payload);  
-}
+  if (ref.startsWith("MAX-")) {
+    return handleMaxintel(payload);
+  }
+
+  if (
+    ref.startsWith("ORD-") ||
+    ref.startsWith("DLV-")
+  ) {
+    return handleZuria(payload);
+  }
 
   if (ref.startsWith("DEL-")) {
     return handleDukaboda(payload);
@@ -32,6 +41,5 @@ if (ref.startsWith("ORD-") || ref.startsWith("DLV-")) {
   }
 
   console.warn("Unknown MoMo reference:", ref);
-
   return;
 }

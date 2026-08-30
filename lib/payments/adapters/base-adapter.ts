@@ -1,5 +1,3 @@
-// lib/payments/adapters/base-adapter.ts
-
 import type { 
   PaymentRequest, 
   PaymentResponse, 
