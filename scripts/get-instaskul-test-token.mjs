@@ -29,12 +29,6 @@ const server = createServer(async (req, res) => {
   res.end("Done — check your terminal.");
   server.close();
 
-  const tokenData = await tokenRes.json();
-
-console.log("Token response:", tokenData);
-console.log("Access token exists:", Boolean(tokenData.access_token));
-console.log("ID token exists:", Boolean(tokenData.id_token));
-
   const tokenRes = await fetch(TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -46,6 +40,10 @@ console.log("ID token exists:", Boolean(tokenData.id_token));
       code_verifier: codeVerifier,
     }),
   });
-  console.log(await tokenRes.json());
+  const tokenData = await tokenRes.json();
+
+  console.log("Token response:", tokenData);
+  console.log("Access token exists:", Boolean(tokenData.access_token));
+  console.log("ID token exists:", Boolean(tokenData.id_token));
 });
 server.listen(PORT, () => exec(`start "" "${authUrl}"`));
