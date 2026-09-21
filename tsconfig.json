@@ -38,7 +38,7 @@
     ".next/types/app/**/*.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-, "scripts/generate-beta-codes.js", "scripts/test-invitation.mjs"  ],
+, "scripts/generate-beta-codes.js", "scripts/test-invitation.mjs", "scripts/get-instaskul-test-token.mjs"  ],
   "exclude": [
     "node_modules"
   ]

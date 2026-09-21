@@ -19,6 +19,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/beta/redeem",
   "/beta/join",
   "/blog(.*)",
+  "/api/platform(.*)",
 ]);
 
 const isAdminRoute = createRouteMatcher([
