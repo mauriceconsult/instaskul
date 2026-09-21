@@ -3,13 +3,11 @@ import { createServer } from "node:http";
 import { exec } from "node:child_process";
 import { URL } from "node:url";
 
-const AUTHORIZE_URL = "https://fine-louse-2656.clerk.accounts.dev/oauth/authorize";
-const TOKEN_URL = "https://fine-louse-2656.clerk.accounts.dev/oauth/token";
-const CLIENT_ID = "4mo5xiRFM7l2Km9L";
-// const CLIENT_SECRET = "jPaIzzokvdkfkXN4JWpqnF308wphyPbe";
+const AUTHORIZE_URL = "https://clerk.instaskul.com/oauth/authorize";
+const TOKEN_URL = "https://clerk.instaskul.com/oauth/token";
+const CLIENT_ID = "tJ5mwy8zvp7yGFFS";
 const PORT = 4321;
 const REDIRECT_URI = `http://127.0.0.1:${PORT}/callback`;
-// const REDIRECT_URI = "http://127.0.0.1:4321/callback";
 
 function b64url(b) { return b.toString("base64").replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
 const codeVerifier = b64url(randomBytes(32));
@@ -30,6 +28,12 @@ const server = createServer(async (req, res) => {
   const code = url.searchParams.get("code");
   res.end("Done — check your terminal.");
   server.close();
+
+  const tokenData = await tokenRes.json();
+
+console.log("Token response:", tokenData);
+console.log("Access token exists:", Boolean(tokenData.access_token));
+console.log("ID token exists:", Boolean(tokenData.id_token));
 
   const tokenRes = await fetch(TOKEN_URL, {
     method: "POST",

@@ -27,10 +27,34 @@ export async function POST(req: Request) {
     verificationOptions.authorizedParties = allowedOrigins;
   }
 
-  const { data, errors } = await verifyToken(token, verificationOptions);
+  /**const verificationOptions: Parameters<typeof verifyToken>[1] = {
+  secretKey,
+}; */
+
+  let data: unknown;
+  let errors: unknown;
+
+  try {
+    const verification = await verifyToken(token, verificationOptions);
+    data = verification.data;
+    errors = verification.errors;
+  } catch (error) {
+    console.error("[PLATFORM_NOTICEBOARD_AUTH] Verification threw:", error);
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
+
+  if (errors) {
+    console.error("[PLATFORM_NOTICEBOARD_AUTH] Token verification failed:", errors);
+  }
+
   const claims = data as ClerkTokenClaims | null;
 
-  if (errors || !claims || typeof claims.sub !== "string" || !claims.sub.trim()) {
+  if (
+    errors ||
+    !claims ||
+    typeof claims.sub !== "string" ||
+    !claims.sub.trim()
+  ) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
