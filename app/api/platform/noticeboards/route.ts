@@ -1,69 +1,45 @@
-// app/api/platform/noticeboards/route.ts
-import { verifyToken } from "@clerk/backend";
+import { createClerkClient } from "@clerk/backend";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-type ClerkTokenClaims = { sub?: string };
+if (!process.env.CLERK_SECRET_KEY) {
+  throw new Error("CLERK_SECRET_KEY is not configured");
+}
 
-const parseAllowedOrigins = () =>
-  (process.env.ALLOWED_ORIGINS ?? "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export async function POST(req: Request) {
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const secretKey = process.env.CLERK_SECRET_KEY;
-  if (!secretKey) {
-    console.error("[PLATFORM_NOTICEBOARD_AUTH] CLERK_SECRET_KEY is not configured");
-    return NextResponse.json({ error: "Server auth misconfigured" }, { status: 500 });
-  }
-
-  const allowedOrigins = parseAllowedOrigins();
-  const verificationOptions: Parameters<typeof verifyToken>[1] = { secretKey };
-  if (allowedOrigins.length > 0) {
-    verificationOptions.authorizedParties = allowedOrigins;
-  }
-
-  /**const verificationOptions: Parameters<typeof verifyToken>[1] = {
-  secretKey,
-}; */
-
-  let data: unknown;
-  let errors: unknown;
-
-  try {
-    const verification = await verifyToken(token, verificationOptions);
-    data = verification.data;
-    errors = verification.errors;
-  } catch (error) {
-    console.error("[PLATFORM_NOTICEBOARD_AUTH] Verification threw:", error);
+  const { isAuthenticated, toAuth } = await clerkClient.authenticateRequest(req, {
+    acceptsToken: "oauth_token", // confirm array vs string against installed types
+  });
+  if (!isAuthenticated) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  if (errors) {
-    console.error("[PLATFORM_NOTICEBOARD_AUTH] Token verification failed:", errors);
+  const { userId } = toAuth(); // confirm this field name against installed types
+  if (!userId) {
+    return NextResponse.json({ error: "User ID missing from token" }, { status: 401 });
   }
 
-  const claims = data as ClerkTokenClaims | null;
-
-  if (
-    errors ||
-    !claims ||
-    typeof claims.sub !== "string" ||
-    !claims.sub.trim()
-  ) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-  }
-
-  const userId = claims.sub;
   const admin = await prisma.admin.findFirst({ where: { userId } });
-  if (!admin) return NextResponse.json({ error: "No admin account for this user" }, { status: 404 });
+  if (!admin) {
+    return NextResponse.json({ error: "No admin account for this user" }, { status: 404 });
+  }
 
-  const { title } = await req.json();
-  if (!title?.trim()) return NextResponse.json({ error: "title is required" }, { status: 400 });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Request body must be valid JSON" }, { status: 400 });
+  }
+
+  const title =
+    typeof body === "object" && body !== null && "title" in body && typeof body.title === "string"
+      ? body.title.trim()
+      : "";
+  if (!title) {
+    return NextResponse.json({ error: "title is required" }, { status: 400 });
+  }
 
   const lastNoticeboard = await prisma.noticeboard.findFirst({
     where: { adminId: admin.id },
@@ -72,7 +48,12 @@ export async function POST(req: Request) {
   });
 
   const noticeboard = await prisma.noticeboard.create({
-    data: { title: title.trim(), adminId: admin.id, userId, position: (lastNoticeboard?.position ?? 0) + 1 },
+    data: {
+      title,
+      adminId: admin.id,
+      userId,
+      position: (lastNoticeboard?.position ?? 0) + 1,
+    },
   });
 
   return NextResponse.json(noticeboard);
