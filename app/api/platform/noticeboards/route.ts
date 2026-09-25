@@ -1,30 +1,28 @@
-import { createClerkClient } from "@clerk/backend";
+import { requirePlatformUser } from "@/lib/platform-auth";
+import { getAdminForUser } from "@/lib/platform-ownership";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-if (!process.env.CLERK_SECRET_KEY) {
-  throw new Error("CLERK_SECRET_KEY is not configured");
+export async function GET(req: Request) {
+  const userId = await requirePlatformUser(req);
+  if (!userId) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+
+  const admin = await getAdminForUser(userId);
+  if (!admin) return NextResponse.json({ error: "No admin account for this user" }, { status: 404 });
+
+  const noticeboards = await prisma.noticeboard.findMany({
+    where: { adminId: admin.id },
+    orderBy: { position: "asc" },
+  });
+  return NextResponse.json(noticeboards);
 }
 
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-
 export async function POST(req: Request) {
-  const { isAuthenticated, toAuth } = await clerkClient.authenticateRequest(req, {
-    acceptsToken: "oauth_token", // confirm array vs string against installed types
-  });
-  if (!isAuthenticated) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-  }
+  const userId = await requirePlatformUser(req);
+  if (!userId) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-  const { userId } = toAuth(); // confirm this field name against installed types
-  if (!userId) {
-    return NextResponse.json({ error: "User ID missing from token" }, { status: 401 });
-  }
-
-  const admin = await prisma.admin.findFirst({ where: { userId } });
-  if (!admin) {
-    return NextResponse.json({ error: "No admin account for this user" }, { status: 404 });
-  }
+  const admin = await getAdminForUser(userId);
+  if (!admin) return NextResponse.json({ error: "No admin account for this user" }, { status: 404 });
 
   let body: unknown;
   try {
@@ -37,9 +35,7 @@ export async function POST(req: Request) {
     typeof body === "object" && body !== null && "title" in body && typeof body.title === "string"
       ? body.title.trim()
       : "";
-  if (!title) {
-    return NextResponse.json({ error: "title is required" }, { status: 400 });
-  }
+  if (!title) return NextResponse.json({ error: "title is required" }, { status: 400 });
 
   const lastNoticeboard = await prisma.noticeboard.findFirst({
     where: { adminId: admin.id },
