@@ -33,16 +33,11 @@ if (!scenario) {
     );
     
 
-    // const result =
-    //   await momo.disbursements.validateAccountHolder(
-    //     scenario.type,
-    //     scenario.id
-    //   );
-const result =
-  await momo.disbursements.accountValidation.validateAccount(
-    scenario.id,
-    scenario.type.toLowerCase()
-  );
+    const result =
+      await momo.disbursements.validateAccountHolder(
+        scenario.type,
+        scenario.id
+      );
     console.log(
       JSON.stringify(
         {

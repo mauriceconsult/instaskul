@@ -223,12 +223,12 @@ class PayrollService {
     }
 
     try {
-      const status = await momo.disbursements.getTransactionStatus(
-        payroll.momoReferenceId
-      );
+      // const status = await momo.disbursements.getTransactionStatus(
+      //   payroll.momoReferenceId
+      const status = await momo.disbursements.getTransactionStatus(payroll.momoReferenceId);
 
       // Cast to PayrollStatus for type safety
-      const momoStatus = status.status as PayrollStatus;
+      const momoStatus = (status as { status: PayrollStatus }).status;
 
       const updated = await prisma.payroll.update({
         where: { id: payrollId },

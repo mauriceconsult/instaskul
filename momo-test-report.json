@@ -1,95 +1,90 @@
 [
   {
-    "testCase": "TC04",
-    "scenario": "Normal Request To Pay",
-    "timestamp": "2026-06-29T10:12:54.893Z",
-    "request": {
-      "referenceId": "de4ab2de-4c27-4d73-bf43-4c98296826b6",
-      "amount": "1000",
-      "currency": "EUR",
-      "msisdn": "256777123457"
-    },
+    "testCase": "TC02-05",
+    "method": "POST",
+    "scenario": "Incomplete request information",
+    "timestamp": "2026-10-25T06:54:21.659Z",
+    "durationMs": 2276,
+    "httpStatus": 400,
+    "referenceId": "cfccaada-ed58-44d8-98fe-b6d68dbdebe7",
+    "response": "",
     "outcome": "PASS",
-    "response": {
-      "financialTransactionId": "887347640",
-      "externalId": "123456",
-      "amount": "1000",
-      "currency": "EUR",
-      "payer": {
-        "partyIdType": "MSISDN",
-        "partyId": "256777123457"
-      },
-      "payerMessage": "Payment for Instaskul",
-      "payeeNote": "Thank you",
-      "status": "SUCCESSFUL"
-    }
+    "notes": "Completed in 2274 ms"
   },
   {
-    "testCase": "TC03",
-    "scenario": "Duplicate Reference (First Request)",
-    "timestamp": "2026-06-29T10:12:56.893Z",
-    "request": {
-      "referenceId": "60afd9e3-1eb9-48a2-9755-33cd5b5ac6b5",
-      "amount": "1000",
-      "currency": "EUR",
-      "msisdn": "256777123457"
-    },
-    "outcome": "PASS",
-    "response": {
-      "financialTransactionId": "829385366",
-      "externalId": "123456",
-      "amount": "1000",
-      "currency": "EUR",
-      "payer": {
-        "partyIdType": "MSISDN",
-        "partyId": "256777123457"
-      },
-      "payerMessage": "Payment for Instaskul",
-      "payeeNote": "Thank you",
-      "status": "SUCCESSFUL"
-    }
+    "testCase": "TC02-07",
+    "method": "POST",
+    "scenario": "Invalid B-Party MSISDN",
+    "timestamp": "2026-10-25T06:54:23.134Z",
+    "durationMs": 1423,
+    "httpStatus": 202,
+    "referenceId": "af2535c1-d97b-4616-9d66-a0fd9605298c",
+    "transactionStatus": "SUCCESSFUL",
+    "response": "",
+    "outcome": "FAIL",
+    "notes": "Expected HTTP 400 or 404 or 422; received 202. Completed in 708 ms Asynchronous transaction status: SUCCESSFUL."
   },
   {
-    "testCase": "TC03",
-    "scenario": "Duplicate Reference (Second Request)",
-    "timestamp": "2026-06-29T10:12:58.227Z",
-    "request": {
-      "referenceId": "60afd9e3-1eb9-48a2-9755-33cd5b5ac6b5",
-      "amount": "1000",
-      "currency": "EUR",
-      "msisdn": "256777123457"
+    "testCase": "TC02-09",
+    "method": "POST",
+    "scenario": "Invalid subscription key",
+    "timestamp": "2026-10-25T06:54:23.818Z",
+    "durationMs": 632,
+    "httpStatus": 401,
+    "referenceId": "a109d8d3-b64d-465e-8cad-78a6d5f2dd59",
+    "response": {
+      "statusCode": 401,
+      "message": "Access denied due to invalid subscription key. Make sure to provide a valid key for an active subscription."
     },
     "outcome": "PASS",
-    "httpStatus": 409,
-    "response": {
-      "message": "Duplicated reference id. Creation of resource failed.",
-      "code": "RESOURCE_ALREADY_EXIST"
-    }
+    "notes": "Completed in 632 ms"
   },
   {
-    "testCase": "TC02",
-    "scenario": "Approval Timeout",
-    "timestamp": "2026-06-29T10:12:58.895Z",
-    "request": {
-      "referenceId": "cb80967d-f1d4-4636-be45-324380f835e2",
-      "amount": "1000",
-      "currency": "EUR",
-      "msisdn": "256777123457"
-    },
-    "outcome": "BLOCKED",
-    "response": {
-      "financialTransactionId": "542101266",
-      "externalId": "123456",
-      "amount": "1000",
-      "currency": "EUR",
-      "payer": {
-        "partyIdType": "MSISDN",
-        "partyId": "256777123457"
-      },
-      "payerMessage": "Payment for Instaskul",
-      "payeeNote": "Thank you",
-      "status": "SUCCESSFUL"
-    },
-    "notes": "Sandbox approved payment instead of simulating approval timeout."
+    "testCase": "TC02-10",
+    "method": "POST",
+    "scenario": "Invalid target environment",
+    "timestamp": "2026-10-25T06:54:24.519Z",
+    "durationMs": 689,
+    "httpStatus": 400,
+    "referenceId": "f41aa802-137b-4301-8c2a-c46e6a3caef1",
+    "response": "",
+    "outcome": "PASS",
+    "notes": "Completed in 689 ms"
+  },
+  {
+    "testCase": "TC02-11",
+    "method": "POST",
+    "scenario": "Invalid OAuth bearer token",
+    "timestamp": "2026-10-25T06:54:24.864Z",
+    "durationMs": 343,
+    "httpStatus": 401,
+    "referenceId": "f2a09fbf-e659-4e1b-962b-9fdb499ce062",
+    "response": "",
+    "outcome": "PASS",
+    "notes": "Completed in 343 ms"
+  },
+  {
+    "testCase": "TC02-15",
+    "method": "GET",
+    "scenario": "Invalid target environment",
+    "timestamp": "2026-10-25T06:54:25.577Z",
+    "durationMs": 709,
+    "httpStatus": 400,
+    "referenceId": "af2535c1-d97b-4616-9d66-a0fd9605298c",
+    "response": "",
+    "outcome": "PASS",
+    "notes": "Completed in 709 ms"
+  },
+  {
+    "testCase": "TC02-16",
+    "method": "GET",
+    "scenario": "Invalid OAuth bearer token",
+    "timestamp": "2026-10-25T06:54:25.920Z",
+    "durationMs": 341,
+    "httpStatus": 401,
+    "referenceId": "af2535c1-d97b-4616-9d66-a0fd9605298c",
+    "response": "",
+    "outcome": "PASS",
+    "notes": "Completed in 341 ms"
   }
 ]

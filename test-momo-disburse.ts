@@ -98,8 +98,10 @@ for (let i = 0; i < 6; i++) {
       await momo.disbursements.getTransactionStatus(transactionId);
 
     if (
-      status.status === "SUCCESSFUL" ||
-      status.status === "FAILED"
+      typeof status === "object" &&
+      status !== null &&
+      "status" in status &&
+      (status.status === "SUCCESSFUL" || status.status === "FAILED")
     ) {
       break;
     }
