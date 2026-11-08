@@ -1,8 +1,6 @@
 import { PaymentAdapter } from './adapters/base-adapter'
 import { MobileMoneyAdapter } from './adapters/momo-adapter'
-import { MPesaMockAdapter } from './adapters/mpesa-mock-adapter'
-// Import real adapter when ready
-// import { MPesaAdapter } from './adapters/mpesa-adapter'
+import { MPesaDarajaAdapter } from './adapters/mpesa-daraja'
 import type { 
   PaymentRequest, 
   PaymentResponse, 
@@ -18,16 +16,7 @@ export class PaymentService {
     // Register adapters
     this.registerAdapter(new MobileMoneyAdapter())
     
-    // Use mock M-Pesa for now
-    const useMockMPesa = process.env.MPESA_USE_MOCK !== 'false'
-    if (useMockMPesa) {
-      console.log('[PAYMENT_SERVICE] Using Mock M-Pesa adapter')
-      this.registerAdapter(new MPesaMockAdapter())
-    }
-    // When Daraja is ready, replace with:
-    // else {
-    //   this.registerAdapter(new MPesaAdapter())
-    // }
+    this.registerAdapter(new MPesaDarajaAdapter())
   }
 
   private registerAdapter(adapter: PaymentAdapter) {

@@ -41,6 +41,7 @@ const MomoCheckoutPage = async ({
       id: true,
       title: true,
       amount: true,
+      currency: true,
       admin: {
         select: {
           title: true,
@@ -51,6 +52,9 @@ const MomoCheckoutPage = async ({
 
   if (!course) {
     return redirect("/dashboard/search");
+  }
+  if (course.currency !== "UGX") {
+    return redirect(`/courses/${courseId}/checkout`);
   }
 
   return (

@@ -3,9 +3,10 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 import { paymentService } from '@/lib/payments/payment-service'
 import type { PaymentNetwork } from '@/lib/types/payment.types'
+import { initiateCourseMPesaPayment, MPesaCheckoutError } from '@/lib/mpesa/checkout'
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,11 +26,28 @@ export async function POST(req: NextRequest) {
     } = await req.json()
 
     // Validation
-    if (!courseId || !amount || !currency || !phoneNumber || !network) {
+    if (
+      !courseId
+      || !phoneNumber
+      || !network
+      || (network !== 'MPESA' && (!amount || !currency))
+    ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
+    }
+
+    if (network === 'MPESA') {
+      const payment = await initiateCourseMPesaPayment(userId, courseId, phoneNumber)
+      return NextResponse.json({
+        success: true,
+        reference: payment.transactionId,
+        transactionId: payment.transactionId,
+        checkoutRequestId: payment.checkoutRequestId,
+        status: 'PROCESSING',
+        message: payment.message,
+      })
     }
 
     // Check if network is supported
@@ -103,8 +121,11 @@ if (pendingTuition) {
   } catch (error: any) {
     console.error('[PAYMENT_COLLECT]', error)
     return NextResponse.json(
-      { error: error.message || 'Payment initiation failed' },
-      { status: 500 }
+      {
+        error: error.message || 'Payment initiation failed',
+        transactionId: error instanceof MPesaCheckoutError ? error.transactionId : undefined,
+      },
+      { status: error instanceof MPesaCheckoutError ? error.status : 500 }
     )
   }
 }

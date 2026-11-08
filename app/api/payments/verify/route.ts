@@ -2,8 +2,10 @@
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { auth } from '@clerk/nextjs/server'
+import { prisma } from '@/lib/db'
 import { paymentService } from '@/lib/payments/payment-service'
+import { reconcile } from '@/lib/mpesa/settle'
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,6 +18,48 @@ export async function GET(req: NextRequest) {
         { error: 'Reference and network required' },
         { status: 400 }
       )
+    }
+
+    if (network === 'MPESA') {
+      const { userId } = await auth()
+      if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      let transaction = await prisma.mPesaTransaction.findFirst({
+        where: {
+          userId,
+          OR: [{ id: reference }, { checkoutRequestId: reference }],
+        },
+      })
+      if (!transaction) {
+        return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
+      }
+
+      if (transaction.status === 'PENDING' && transaction.checkoutRequestId) {
+        await reconcile(transaction.checkoutRequestId)
+        transaction = await prisma.mPesaTransaction.findFirst({
+          where: { id: transaction.id, userId },
+        })
+        if (!transaction) {
+          return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
+        }
+      }
+
+      const status = transaction.status === 'COMPLETED'
+        ? 'COMPLETED'
+        : transaction.status === 'FAILED'
+          ? 'FAILED'
+          : 'PROCESSING'
+      return NextResponse.json({
+        reference,
+        status,
+        transactionId: transaction.checkoutRequestId ?? transaction.id,
+        receiptNumber: transaction.mpesaReceiptNumber ?? undefined,
+        amount: { value: Number(transaction.amount), currency: transaction.currency },
+        failureReason: transaction.failureReason ?? undefined,
+        completedAt: status === 'COMPLETED' ? transaction.updatedAt : undefined,
+      })
     }
 
     // Verify payment

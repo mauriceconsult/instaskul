@@ -175,10 +175,13 @@ export function MPesaCheckout({
     } catch (error: any) {
       console.error("Payment error:", error);
       
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.response?.data || 
-        "Payment initiation failed. Please try again.";
+      const responseData = error.response?.data;
+      const errorMessage =
+        typeof responseData === "string"
+          ? responseData
+          : responseData?.error ||
+            responseData?.message ||
+            "Payment initiation failed. Please try again.";
       
       toast.error(errorMessage);
       setPaymentStatus("failed");
