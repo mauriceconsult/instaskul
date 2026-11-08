@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { reconcile } from "@/lib/mpesa/settle";
 
 export async function GET(req: Request) {
   try {
@@ -17,15 +18,25 @@ export async function GET(req: Request) {
       return new NextResponse("Transaction ID required", { status: 400 });
     }
 
-    const transaction = await prisma.mPesaTransaction.findUnique({
-      where: {
-        id: transactionId,
-        userId, // Ensure user owns this transaction
-      },
+    let transaction = await prisma.mPesaTransaction.findFirst({
+      where: { id: transactionId, userId },
     });
 
     if (!transaction) {
       return new NextResponse("Transaction not found", { status: 404 });
+    }
+    if (
+      transaction.status === "PENDING"
+      && transaction.checkoutRequestId
+      && Date.now() - transaction.updatedAt.getTime() > 8_000
+    ) {
+      await reconcile(transaction.checkoutRequestId);
+      transaction = await prisma.mPesaTransaction.findFirst({
+        where: { id: transaction.id, userId },
+      });
+      if (!transaction) {
+        return new NextResponse("Transaction not found", { status: 404 });
+      }
     }
 
     return NextResponse.json({

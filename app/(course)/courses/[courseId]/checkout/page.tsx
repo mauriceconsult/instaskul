@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { formatAmount } from "@/lib/format";
-import { ArrowLeft, Smartphone, CreditCard } from "lucide-react";
+import { getCheckoutPaymentProviders } from "@/lib/payment/providers";
+import { ArrowLeft, ArrowRight, Smartphone } from "lucide-react";
 import Link from "next/link";
 
 export default async function CheckoutPage({
@@ -38,9 +39,8 @@ export default async function CheckoutPage({
     select: {
       id: true,
       title: true,
-      description: true,
-      imageUrl: true,
       amount: true,
+      currency: true,
       admin: {
         select: { title: true },
       },
@@ -51,8 +51,7 @@ export default async function CheckoutPage({
     redirect("/dashboard/search");
   }
 
-  // Safely convert amount (DB likely stores as string)
-  const courseAmount = Number(course.amount) || 0;
+  const providers = getCheckoutPaymentProviders(course.currency ?? "UGX");
 
   return (
     <div className="min-h-screen bg-slate-50 py-12">
@@ -90,7 +89,7 @@ export default async function CheckoutPage({
                 <div className="text-right whitespace-nowrap">
                   <span className="text-sm text-slate-600 block mb-1">Total Amount</span>
                   <span className="text-3xl md:text-4xl font-bold text-emerald-600">
-                    {formatAmount(courseAmount)}
+                    {formatAmount(course.amount, course.currency ?? "UGX")}
                   </span>
                 </div>
               </div>
@@ -103,89 +102,39 @@ export default async function CheckoutPage({
               Select Payment Method
             </h2>
 
-            {/* MTN MoMo - Active */}
-            <Link
-              href={`/courses/${courseId}/checkout/momo`}
-              className="block border-2 rounded-xl p-6 hover:border-yellow-500 hover:bg-yellow-50/40 transition-all duration-200 group"
-            >
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                  <div className="h-16 w-16 bg-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <Smartphone className="h-8 w-8 text-slate-900" />
+            {providers.length > 0 ? providers.map((provider) => (
+              <Link
+                key={provider.id}
+                href={`/courses/${courseId}/checkout/${provider.checkoutPath}`}
+                className="group flex items-center justify-between gap-4 rounded-xl border-2 p-5 transition-colors hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+              >
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+                    <Smartphone className="h-7 w-7 text-slate-700" aria-hidden="true" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg group-hover:text-yellow-700 transition-colors">
-                      MTN Mobile Money
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-lg text-slate-900">
+                      {provider.name}
                     </h3>
-                    <p className="text-sm text-slate-600 mt-1">
-                      Fast & secure payment with your MTN MoMo number
+                    <p className="mt-1 text-sm text-slate-600">
+                      {provider.description}
+                    </p>
+                    <p className="mt-1 text-xs font-medium text-slate-500">
+                      {provider.country} · {provider.currency}
                     </p>
                   </div>
                 </div>
-
-                <div className="text-yellow-600 text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  →
-                </div>
+                <ArrowRight
+                  className="h-5 w-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-slate-700"
+                  aria-hidden="true"
+                />
+              </Link>
+            )) : (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                No payment provider is currently available for courses priced in{" "}
+                {course.currency ?? "this currency"}. Please contact support.
               </div>
-            </Link>
-
-            {/* M-Pesa - Coming Soon */}
-            <div className="border-2 border-dashed rounded-xl p-6 bg-green-50/30 opacity-70">
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                  <div className="h-16 w-16 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg 
-                      className="h-8 w-8 text-green-700" 
-                      fill="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-500 text-lg">M-Pesa (Kenya)</h3>
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                        Coming Soon
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-500 mt-1">
-                      Pay securely with Safaricom M-Pesa
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Airtel Money - Coming Soon */}
-            <div className="border-2 border-dashed rounded-xl p-6 bg-slate-50/50 opacity-70">
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                  <div className="h-16 w-16 bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <CreditCard className="h-8 w-8 text-slate-500" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-500 text-lg">Airtel Money</h3>
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">
-                        Coming Soon
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-500 mt-1">
-                      Pay with your Airtel Money account
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Info banner */}
-          <div className="mx-6 md:mx-10 mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <span className="font-semibold">💡 Currently Available:</span> MTN Mobile Money for Uganda. 
-              M-Pesa (Kenya) and Airtel Money coming soon!
-            </p>
+            )}
           </div>
 
           {/* Footer note */}

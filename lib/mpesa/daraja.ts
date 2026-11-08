@@ -1,212 +1,126 @@
-// lib/mpesa/daraja.ts
+import { DARAJA_BASE, mpesaConfig } from "./config";
 
-interface DarajaAuthResponse {
-  access_token: string;
-  expires_in: string;
+let cached: { token: string; exp: number } | null = null;
+
+export class DarajaResponseError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DarajaResponseError";
+  }
 }
 
-interface STKPushRequest {
-  BusinessShortCode: string;
-  Password: string;
-  Timestamp: string;
-  TransactionType: string;
-  Amount: string;
-  PartyA: string;
-  PartyB: string;
-  PhoneNumber: string;
-  CallBackURL: string;
-  AccountReference: string;
-  TransactionDesc: string;
-}
+export async function getAccessToken(): Promise<string> {
+  if (cached && cached.exp > Date.now() + 30_000) return cached.token;
 
-interface STKPushResponse {
-  MerchantRequestID: string;
-  CheckoutRequestID: string;
-  ResponseCode: string;
-  ResponseDescription: string;
-  CustomerMessage: string;
-}
+  const { consumerKey, consumerSecret } = mpesaConfig();
+  const basic = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+  const response = await fetch(
+    `${DARAJA_BASE}/oauth/v1/generate?grant_type=client_credentials`,
+    { headers: { Authorization: `Basic ${basic}` } },
+  );
+  if (!response.ok) throw new Error(`Daraja auth failed: ${response.status}`);
 
-interface STKQueryRequest {
-  BusinessShortCode: string;
-  Password: string;
-  Timestamp: string;
-  CheckoutRequestID: string;
-}
-
-/**
- * Get OAuth access token from Daraja API
- */
-export async function getDarajaAccessToken(): Promise<string> {
-  const consumerKey = process.env.MPESA_CONSUMER_KEY;
-  const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
-  const environment = process.env.MPESA_ENVIRONMENT || "sandbox";
-
-  if (!consumerKey || !consumerSecret) {
-    throw new Error("M-Pesa credentials not configured");
+  const body: unknown = await response.json();
+  if (!body || typeof body !== "object") {
+    throw new Error("Daraja auth returned an invalid response");
+  }
+  const data = body as { access_token?: unknown; expires_in?: unknown };
+  if (typeof data.access_token !== "string" || !data.access_token) {
+    throw new Error("Daraja auth response is missing an access token");
+  }
+  const expiresIn = Number(data.expires_in);
+  if (!Number.isFinite(expiresIn) || expiresIn <= 0) {
+    throw new Error("Daraja auth response has an invalid token expiry");
   }
 
-  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
-  const url =
-    environment === "production"
-      ? "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-      : "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Basic ${auth}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to get Daraja access token");
-  }
-
-  const data: DarajaAuthResponse = await response.json();
-  return data.access_token;
+  cached = { token: data.access_token, exp: Date.now() + expiresIn * 1000 };
+  return cached.token;
 }
 
-/**
- * Generate password for STK Push
- */
-export function generatePassword(shortCode: string, passkey: string, timestamp: string): string {
-  const data = shortCode + passkey + timestamp;
-  return Buffer.from(data).toString("base64");
+export const timestamp = () => new Date().toISOString().replace(/\D/g, "").slice(0, 14);
+
+export function normalizeKePhone(raw: string): string | null {
+  const match = raw.replace(/[\s-]/g, "").match(/^(?:\+?254|0)?([71]\d{8})$/);
+  return match ? `254${match[1]}` : null;
 }
 
-/**
- * Generate timestamp in the format YYYYMMDDHHmmss
- */
-export function generateTimestamp(): string {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-
-  return `${year}${month}${day}${hours}${minutes}${seconds}`;
-}
-
-/**
- * Format phone number to 254XXXXXXXXX format
- */
-export function formatPhoneNumber(phone: string): string {
-  // Remove any spaces, dashes, or plus signs
-  let cleaned = phone.replace(/[\s\-\+]/g, "");
-
-  // If it starts with 0, replace with 254
-  if (cleaned.startsWith("0")) {
-    cleaned = "254" + cleaned.slice(1);
-  }
-
-  // If it doesn't start with 254, add it
-  if (!cleaned.startsWith("254")) {
-    cleaned = "254" + cleaned;
-  }
-
-  return cleaned;
-}
-
-/**
- * Initiate STK Push (Lipa na M-Pesa Online)
- */
-export async function initiateSTKPush(params: {
-  phoneNumber: string;
-  amount: number;
-  accountReference: string;
-  transactionDesc: string;
-}): Promise<STKPushResponse> {
-  const accessToken = await getDarajaAccessToken();
-  const environment = process.env.MPESA_ENVIRONMENT || "sandbox";
-  const shortCode = process.env.MPESA_SHORTCODE!;
-  const passkey = process.env.MPESA_PASSKEY!;
-  const callbackUrl = process.env.MPESA_CALLBACK_URL!;
-
-  if (!shortCode || !passkey || !callbackUrl) {
-    throw new Error("M-Pesa configuration incomplete");
-  }
-
-  const timestamp = generateTimestamp();
-  const password = generatePassword(shortCode, passkey, timestamp);
-  const formattedPhone = formatPhoneNumber(params.phoneNumber);
-
-  const url =
-    environment === "production"
-      ? "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-      : "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
-
-  const requestBody: STKPushRequest = {
-    BusinessShortCode: shortCode,
-    Password: password,
-    Timestamp: timestamp,
-    TransactionType: "CustomerPayBillOnline",
-    Amount: Math.round(params.amount).toString(),
-    PartyA: formattedPhone,
-    PartyB: shortCode,
-    PhoneNumber: formattedPhone,
-    CallBackURL: callbackUrl,
-    AccountReference: params.accountReference,
-    TransactionDesc: params.transactionDesc,
-  };
-
-  const response = await fetch(url, {
+async function post(path: string, body: unknown): Promise<Record<string, unknown>> {
+  const response = await fetch(`${DARAJA_BASE}${path}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: "Bearer " + await getAccessToken(),
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(requestBody),
+    body: JSON.stringify(body),
   });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`STK Push failed: ${error}`);
+  const result: unknown = await response.json().catch(() => ({}));
+  if (!result || typeof result !== "object") {
+    throw new Error(`Daraja returned an invalid response (${response.status})`);
   }
-
-  const data: STKPushResponse = await response.json();
+  const data = result as Record<string, unknown>;
+  if (!response.ok) {
+    throw new Error(
+      String(data.errorMessage ?? data.ResponseDescription ?? `Daraja request failed (${response.status})`),
+    );
+  }
   return data;
 }
 
-/**
- * Query STK Push transaction status
- */
-export async function querySTKPushStatus(checkoutRequestId: string): Promise<any> {
-  const accessToken = await getDarajaAccessToken();
-  const environment = process.env.MPESA_ENVIRONMENT || "sandbox";
-  const shortCode = process.env.MPESA_SHORTCODE!;
-  const passkey = process.env.MPESA_PASSKEY!;
-
-  const timestamp = generateTimestamp();
-  const password = generatePassword(shortCode, passkey, timestamp);
-
-  const url =
-    environment === "production"
-      ? "https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query"
-      : "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query";
-
-  const requestBody: STKQueryRequest = {
+export async function stkPush(p: {
+  phone: string;
+  amount: number;
+  callbackUrl: string;
+  reference: string;
+  description: string;
+}): Promise<{ checkoutRequestId: string; merchantRequestId: string }> {
+  const { shortCode, passkey } = mpesaConfig();
+  const ts = timestamp();
+  const data = await post("/mpesa/stkpush/v1/processrequest", {
     BusinessShortCode: shortCode,
-    Password: password,
-    Timestamp: timestamp,
-    CheckoutRequestID: checkoutRequestId,
-  };
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
+    Password: Buffer.from(`${shortCode}${passkey}${ts}`).toString("base64"),
+    Timestamp: ts,
+    TransactionType: process.env.MPESA_TXN_TYPE ?? "CustomerPayBillOnline",
+    Amount: p.amount,
+    PartyA: p.phone,
+    PartyB: process.env.MPESA_PARTY_B ?? shortCode,
+    PhoneNumber: p.phone,
+    CallBackURL: p.callbackUrl,
+    AccountReference: p.reference.slice(0, 12),
+    TransactionDesc: p.description.slice(0, 13),
   });
+  if (String(data.ResponseCode) !== "0") {
+    throw new DarajaResponseError(
+      String(data.errorMessage ?? data.ResponseDescription ?? "Daraja rejected the STK Push"),
+    );
+  }
+  if (typeof data.CheckoutRequestID !== "string" || typeof data.MerchantRequestID !== "string") {
+    throw new Error("Daraja STK Push response is missing request identifiers");
+  }
+  return {
+    checkoutRequestId: data.CheckoutRequestID,
+    merchantRequestId: data.MerchantRequestID,
+  };
+}
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`STK Query failed: ${error}`);
+export async function stkQuery(checkoutRequestId: string) {
+  const { shortCode, passkey } = mpesaConfig();
+  const ts = timestamp();
+  const data = await post("/mpesa/stkpushquery/v1/query", {
+    BusinessShortCode: shortCode,
+    Password: Buffer.from(`${shortCode}${passkey}${ts}`).toString("base64"),
+    Timestamp: ts,
+    CheckoutRequestID: checkoutRequestId,
+  });
+  if (data.ResultCode === undefined) {
+    if (String(data.ResponseCode) === "0") return { state: "PENDING" as const };
+    throw new Error(String(data.errorMessage ?? data.ResponseDescription ?? "Daraja status query failed"));
   }
 
-  return await response.json();
+  const resultCode = Number(data.ResultCode);
+  if (!Number.isFinite(resultCode)) {
+    throw new Error("Daraja status query returned an invalid result code");
+  }
+  return resultCode === 0
+    ? { state: "PAID" as const }
+    : { state: "FAILED" as const, code: resultCode, reason: String(data.ResultDesc ?? "") };
 }

@@ -40,6 +40,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (network === 'MPESA') {
+      return NextResponse.json(
+        { error: 'Safaricom M-Pesa tutor payouts are not enabled' },
+        { status: 400 }
+      )
+    }
+
     // Check if network is supported
     if (!paymentService.isNetworkSupported(network)) {
       return NextResponse.json(
